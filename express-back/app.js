@@ -8,6 +8,7 @@ const sampleRouter = require("./routes/sample");
 const authRouter = require("./routes/auth");
 const categoryRouter = require("./routes/category");
 const photoRoutes = require('./routes/photo')
+const postRoutes = require('./routes/postpage')
 
 const db = require("./db");
 
@@ -24,6 +25,7 @@ app.use("/sample", sampleRouter);
 app.use("/auth", authRouter);
 app.use("/category", categoryRouter);
 app.use('/photo', photoRoutes);
+app.use('/post', postRoutes);
 
 
 async function startServer() {

@@ -44,3 +44,82 @@
     color: #888;
     padding: 0 4px;
 }
+
+/* .grid-stats {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    font-size: 13px;
+    color: #555;
+} */
+
+/* .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+} */
+
+/* 전체 카드를 감싸는 컨테이너 */
+.photo-card-wrapper {
+    position: relative;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden; /* 이미지 밖으로 삐져나오는 것 방지 */
+    aspect-ratio: 1/1; /* 사진을 정사각형으로 통일하고 싶다면 추가 */
+}
+
+/* 이미지 스타일 */
+.photo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 꽉 차도록 */
+    transition: transform 0.3s ease;
+}
+
+/* 오버레이 (평소엔 투명, 호버 시 나타남) */
+.stats-overlay {
+    position: absolute;
+    bottom: 0;           /* 하단에 붙이기 */
+    left: 0;
+    width: 100%;
+    height: 60px;        /* 하단 영역 높이 고정 */
+    
+    /* 하단에 그라데이션을 주어 아이콘 가독성 확보 */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    
+    /* 가로 정렬 및 하단 배치 */
+    display: flex;
+    justify-content: center; /* 가로 중앙 정렬 */
+    align-items: flex-end;   /* 하단 정렬 */
+    padding-bottom: 15px;    /* 하단에서 살짝 띄우기 */
+    gap: 15px;               /* 아이콘 사이 간격 */
+    
+    color: white;
+    font-size: 14px;
+}
+
+/* 마우스 올렸을 때 효과 */
+.photo-card-wrapper:hover .stats-overlay {
+    opacity: 1;
+}
+
+.photo-card-wrapper:hover .photo-image {
+    transform: scale(1.05); /* 사진이 살짝 확대되는 효과 */
+}
+
+/* 아이콘 개별 스타일 */
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* 텍스트 대신 사용할 아이콘 크기 제어 */
+.grid-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

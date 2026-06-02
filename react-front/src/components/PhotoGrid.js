@@ -16,34 +16,73 @@ function PhotoGrid({ photos }) {
             {photos.map((photo) => (
                 <div 
                     key={photo.PHOTO_ID} 
-                    className="grid-photo-card"
-                    // 💡 3. 카드를 클릭하면 해당 사진의 ID를 달고 상세 페이지로 이동!
+                    className="photo-card-wrapper"
                     onClick={() => navigate(`/photo/${photo.PHOTO_ID}`)}
-                    style={{ cursor: 'pointer' }} // 마우스를 올렸을 때 클릭 가능한 손가락 모양으로 변경
                 >
-                    <div className="grid-photo-placeholder">
-                        <img 
-                            /* 💡 팁: 그리드 목록에서는 IMAGE_URL(원본)보다 THUMB_URL(썸네일)을 쓰시면 
-                               네트워크 렉을 기적처럼 더 줄일 수 있습니다! */
-                            src={photo.IMAGE_URL} 
-                            alt={photo.TITLE || 'Picsial 사진'} 
-                            
-                            /* 🔥 네트워크 렉 방지 핵심: 화면에 보일 때만 이미지를 로딩함 */
-                            loading="lazy" 
-                            decoding="async"
-                        />
-                    </div>
+                    {/* 1. 이미지: THUMB_URL을 사용하여 성능 최적화 */}
+                    <img 
+                        src={photo.THUMB_URL || photo.IMAGE_URL} 
+                        alt={photo.TITLE || 'Picsial 사진'} 
+                        className="photo-image"
+                        loading="lazy" 
+                        decoding="async"
+                    />
                     
-                    {/* 하단 정보 영역 (스크린샷 참고) */}
-                    <div className="photo-info">
-                        <span>조회 {photo.VIEW_COUNT || 0}</span>
-                        <span>좋아요 {photo.LIKE_COUNT || 0}</span>
-                        <span>스크랩 {photo.SCRAP_COUNT || 0}</span>
-                        <span>댓글 {photo.COMMENT_COUNT || 0}</span>
+                    {/* 2. 마우스 올렸을 때 나타날 정보 오버레이 */}
+                    {/* <div className="stats-overlay">
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </span>
+                            {photo.VIEW_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">♡</span>
+                            {photo.LIKE_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            </span>
+                            {photo.SCRAP_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </span>
+                            {photo.COMMENT_COUNT || 0}
+                        </div>
+                    </div> */}
+                    
+                    <div className="stats-overlay">
+                        {/* 여기를 감싸는 별도 div가 없어도 overlay가 직접 row로 배치되게 설정할 겁니다 */}
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </span>
+                            {photo.VIEW_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">♡</span>
+                            {photo.LIKE_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                            </span>
+                            {photo.SCRAP_COUNT || 0}
+                        </div>
+                        <div className="stat-item">
+                            <span className="grid-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            </span>
+                            {photo.COMMENT_COUNT || 0}
+                        </div>
                     </div>
                 </div>
             ))}
         </div>
+
     );
 }
 

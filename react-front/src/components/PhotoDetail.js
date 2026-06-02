@@ -55,6 +55,7 @@ function PhotoDetail() {
     const [likeCount, setLikeCount] = useState(0); 
     const [isScrapped, setIsScrapped] = useState(false);
     const [scrapCount, setScrapCount] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
 
     const fetchPhotoDetail = async () => {
         try {
@@ -153,7 +154,10 @@ function PhotoDetail() {
                 <div className="detail-content-wrapper">
                     
                     <div className="detail-left">
-                        <img src={photo.IMAGE_URL} alt={photo.TITLE} className="main-photo" />
+                        <img
+                            src={photo.IMAGE_URL} alt={photo.TITLE} className="main-photo" 
+                            onClick={() => setIsModalOpen(true)}
+                        />
                     </div>
 
                     <div className="detail-right">
@@ -246,7 +250,11 @@ function PhotoDetail() {
                                     </div>
                                     <div className="exif-item exif-item-shutter">
                                         <span className="exif-label">셔터스피드</span>
-                                        <span className="exif-value">{photo.SHUTTER_SPEED ? `${photo.SHUTTER_SPEED}s` : '-'}</span>
+                                        <span className="exif-value">
+                                            {photo.SHUTTER_SPEED 
+                                                ? `${parseFloat(photo.SHUTTER_SPEED).toFixed(3)}s` 
+                                                : '-'}
+                                        </span>
                                     </div>
                                     <div className="exif-item exif-item-iso">
                                         <span className="exif-label">ISO</span>
@@ -265,6 +273,14 @@ function PhotoDetail() {
                     </div>
                 </div>
             </main>
+            
+            {/* 💡 라이트박스 모달 렌더링 */}
+            {isModalOpen && (
+                <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+                    <img src={photo.IMAGE_URL} alt="원본" className="modal-image" />
+                </div>
+            )}
+
         </div>
     );
 }

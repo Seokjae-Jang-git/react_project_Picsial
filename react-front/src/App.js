@@ -8,6 +8,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp'; 
 import PhotoPage from './components/PhotoPage'; 
 import PhotoDetail from './components/PhotoDetail';
+import PostPage from './components/PostPage';
 
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/photo" element={<PhotoPage />} />
           <Route path="/photo/:id" element={<PhotoDetail />} />
+          <Route path="/photo" element={<PostPage />} />
         </Routes>
       </Box>
     </Box>
