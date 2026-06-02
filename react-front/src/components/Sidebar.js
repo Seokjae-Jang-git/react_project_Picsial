@@ -1,11 +1,39 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './css/Sidebar.css';
 
-function Sidebar({ currentFilter, setCurrentFilter, currentSort, setCurrentSort, isSidebarOpen, setIsSidebarOpen }) {
-    // 기획안의 카테고리 리스트
-    const categories = ['동물', '식물', '인물', '풍경', '도시', '건물', '야경', '스포츠', '웨딩'];
+function Sidebar({ 
+    currentFilter, 
+    setCurrentFilter, 
+    currentSort, 
+    setCurrentSort, 
+    isSidebarOpen, 
+    setIsSidebarOpen 
+}) {
+    // 💡 1. DB에서 가져올 카테고리 데이터를 담을 상태 (초기값은 빈 배열)
+    const [categories, setCategories] = useState([]);
     
-    // 기획안의 정렬 옵션
+    // 💡 2. 컴포넌트 마운트 시 백엔드 API 호출
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch('http://localhost:3010/category');
+                if (!response.ok) {
+                    throw new Error(`HTTP 에러! 상태코드: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (data.success) {
+                    setCategories(data.categories);
+                }
+            } catch (error) {
+                console.error("카테고리 데이터를 가져오는 중 오류가 발생했습니다:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []); 
+
+    // 기획안의 정렬 옵션 (이 부분은 하드코딩 유지)
     const sortOptions = [
         { label: '조회수 순', value: 'views' },
         { label: '좋아요 순', value: 'likes' },
@@ -25,19 +53,32 @@ function Sidebar({ currentFilter, setCurrentFilter, currentSort, setCurrentSort,
                 </button>
             </div>
 
-            {/* 사이드바가 열려있을 때만 아래 필터/정렬 메뉴들을 렌더링함 */}
+            {/* 메뉴 영역 렌더링 */}
             {isSidebarOpen && (
                 <>
                     {/* 카테고리 영역 */}
                     <div className="category-grid">
+                        
+                        {/* 💡 '전체보기' 버튼 추가 (필터 해제 역할, 빈 값을 넘겨줍니다) */}
+                        <button 
+                            className={`filter-item ${currentFilter === '' ? 'active' : ''}`}
+                            onClick={() => setCurrentFilter('')}
+                        >
+                            <span className="radio-circle"></span>
+                            전체
+                        </button>
+
+                        {/* 💡 DB에서 가져온 데이터 뿌리기 */}
                         {categories.map((cat) => (
                             <button 
-                                key={cat} 
-                                className={`filter-item ${currentFilter === cat ? 'active' : ''}`}
-                                onClick={() => setCurrentFilter(cat)}
+                                key={cat.CATEGORY_ID} 
+                                /* active 조건: 선택된 filter 값(숫자)과 현재 카테고리 ID가 같으면 활성화 */
+                                className={`filter-item ${currentFilter === String(cat.CATEGORY_ID) || currentFilter === cat.CATEGORY_ID ? 'active' : ''}`}
+                                /* 백엔드 필터링을 위해 CATEGORY_NAME이 아닌 CATEGORY_ID를 넘겨줌 */
+                                onClick={() => setCurrentFilter(cat.CATEGORY_ID)}
                             >
                                 <span className="radio-circle"></span>
-                                {cat}
+                                {cat.CATEGORY_NAME}
                             </button>
                         ))}
                     </div>

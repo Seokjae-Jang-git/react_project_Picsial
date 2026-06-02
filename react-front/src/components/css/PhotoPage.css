@@ -20,6 +20,8 @@
     overflow-y: auto;
     height: 100%;
     transition: all 0.3s ease; 
+    /* transition: none;  */
+    
     
     /* 🔥 [핵심 수정] 필터가 펼쳐졌을 때 (기본 상태):
        우측 가상 패딩을 0으로 만들어, 사이드바를 제외한 나머지 하얀색 영역 전체를 

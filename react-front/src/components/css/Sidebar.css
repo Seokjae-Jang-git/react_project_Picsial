@@ -13,6 +13,7 @@
     flex-direction: column;
     gap: 20px;
     transition: width 0.3s ease, min-width 0.3s ease, padding 0.3s ease;
+    transition: none;
     overflow-x: hidden;
 }
 
@@ -116,57 +117,47 @@
 .radio-circle {
     width: 16px;
     height: 16px;
-    border: 2px solid #ced4da;
+    border: 2px solid var(--border-color, #ced4da);
     border-radius: 50%;
     background-color: #fff;
     box-sizing: border-box;
-    display: inline-block;
-    position: relative; /* 🔥 중요: ::after 점을 정중앙에 올리기 위한 기준점 */
+    
+    /* 🔥 해결책 1: absolute 대신 Flexbox를 써서 1px의 오차도 없는 완벽한 정중앙 정렬 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
     flex-shrink: 0;
     transition: all 0.15s ease;
+}
+
+/* 🔥 해결책 2: 활성화 전에도 가상 요소(점)를 미리 만들어두되, 크기를 0으로 숨겨둠 */
+.radio-circle::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color, #007bff); /* 색상이 없으면 파란색 기본값 적용 */
+    border-radius: 50%;
+    transform: scale(0); /* 평소엔 크기가 0이라 안 보임 */
+    transition: transform 0.15s ease-out; /* 생길 때와 사라질 때 모두 부드럽게 트랜지션 적용 */
 }
 
 /* 활성화(Active) 상태 스타일 */
 .filter-item.active {
     background-color: transparent;
     border-color: transparent;
-    color: var(--primary-color);
+    color: var(--primary-color, #007bff);
     font-weight: 600;
 }
 
 /* 활성화 시 외곽 원 색상 변경 */
 .filter-item.active .radio-circle {
-    border-color: var(--primary-color);
+    border-color: var(--primary-color, #007bff);
 }
 
-/* 🔥 [핵심 해결책] active 클래스가 붙으면 CSS가 알아서 내부에 점을 강제로 그려줌 */
+/* 🔥 활성화 시 내부에 숨겨둔 점을 원래 크기(scale(1))로 부드럽게 키움 */
 .filter-item.active .radio-circle::after {
-    content: ''; /* 가상 요소 활성화 필수 선언 */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1); /* 정중앙 배치 */
-    width: 8px;
-    height: 8px;
-    background-color: var(--primary-color); /* 테마 색상으로 점 채우기 */
-    border-radius: 50%;
-    animation: radioScale 0.15s ease-out; /* 클릭 시 톡 커지는 애니메이션 */
+    transform: scale(1);
 }
 
-/* 애니메이션 효과 효과 유지 */
-@keyframes radioScale {
-    from {
-        transform: translate(-50%, -50%) scale(0);
-    }
-    to {
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-/* 구별선 */
-.sidebar-divider {
-    border: none;
-    border-top: 1px solid var(--border-color);
-    margin: 10px 0;
-    width: 100%;
-}
+/* (기존에 있던 @keyframes radioScale 부분은 이제 필요 없으니 완전히 삭제!) */

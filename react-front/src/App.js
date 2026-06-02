@@ -7,6 +7,7 @@ import Menu from './components/Menu';
 import Login from './components/Login'; 
 import SignUp from './components/SignUp'; 
 import PhotoPage from './components/PhotoPage'; 
+import PhotoDetail from './components/PhotoDetail';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/photo" element={<PhotoPage />} />
+          <Route path="/photo/:id" element={<PhotoDetail />} />
         </Routes>
       </Box>
     </Box>
