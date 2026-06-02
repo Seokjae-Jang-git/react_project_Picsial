@@ -1,0 +1,253 @@
+.main-page-container {
+    width: 100%;
+    height: 100vh; /* 🔥 화면 높이를 브라우저 창에 정확히 100% 맞춤 */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* 🔥 페이지 전체의 겉 스크롤바는 숨김 */
+}
+
+.main-page-body {
+    display: flex;
+    flex-grow: 1;    /* 헤더를 제외한 나머지 높이를 전부 차지 */
+    overflow: hidden; /* 전체 스크롤이 생기지 않도록 가둠 */
+    width: 100%;
+}
+
+.main-body {
+    flex-grow: 1;      /* 사이드바를 제외한 나머지 가로폭을 전부 차지 */
+    height: 100%;      /* 부모(.main-page-body) 높이를 100% 꽉 채움 */
+    overflow-y: auto;  /* Content가 많아지면 이제 페이지 전체가 아니라 이 영역만 스크롤됨! */
+    
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    padding: 30px;     /* 상단 패딩을 좌우 균형에 맞게 padding으로 통일 */
+    box-sizing: border-box;
+    
+    /* 필요시 PhotoPage처럼 사이드바 여닫힘 밸런스를 맞추고 싶다면 
+       여기에 padding-right 값을 조절해 주시면 됩니다. */
+}
+
+/* 섹션 타이틀 라인 */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.more-btn {
+    border: none;
+    background: none;
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.more-btn:hover {
+    color: var(--primary-color);
+}
+
+/* 사진 5열 그리드 */
+.photo-grid {
+    display: grid;
+    /* 🔥 변경: 5열에서 6열로 늘려 사진을 더 작고 많이 배치합니다. */
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px; /* 카드가 작아지므로 간격도 살짝 줄임 */
+}
+
+.photo-card {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.photo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.photo-placeholder {
+    aspect-ratio: 1 / 1; /* 인스타그램 스타일의 1:1 비율 정방형 */
+    background-color: #e9ecef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px;
+    color: #adb5bd;
+    font-weight: 600;
+}
+
+.card-info {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-likes {
+    font-size: 12px;
+    color: var(--secondary-color); /* 하트와 텍스트 강조 */
+    font-weight: 600;
+}
+
+/* 세로형 피드형 게시물 그리드 */
+.post-vertical-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+}
+
+.vertical-post-card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 14px; /* 살짝 슬림하게 라운딩 조절 */
+    padding: 14px; /* 카드 내부 여백을 20px -> 14px로 축소하여 콘텐츠 압축 */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* 피드 상단 */
+.post-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.post-author {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.post-time {
+    font-size: 11px;
+    color: #adb5bd;
+}
+
+/* 피드 본문 텍스트 */
+.post-card-content {
+    margin-bottom: 10px;
+}
+
+.post-text-box {
+    background-color: var(--gray-bg);
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.post-main-text {
+    margin: 0 0 4px 0;
+    font-size: 13px; /* 14px -> 13px 축소 */
+    line-height: 1.4;
+    color: #495057;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.btn-detail {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 11px; /* 12px -> 11px 축소 */
+    font-weight: 600;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+/* 슬라이드 미디어 영역 */
+.post-card-media {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f1f3f5;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    
+    /* 🔥 중요 변경: 5열로 줄어들면서 가로폭이 좁아졌으므로, 
+       세로 높이가 기존 280px이면 세로로 너무 길쭉해집니다. 
+       균형을 맞추기 위해 높이를 160px~180px 정도로 낮춰줍니다. */
+    height: 170px; 
+    
+    position: relative;
+}
+
+.slide-arrow {
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 26px; /* 화살표 버튼 크기 축소 */
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 2;
+    transition: background 0.2s;
+}
+
+.slide-arrow:hover {
+    background-color: #fff;
+}
+
+.media-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 13px; /* 16px -> 13px 축소 */
+    font-weight: 600;
+    color: #adb5bd;
+    background-color: #e9ecef;
+}
+
+/* 하단 지표 통계 바 */
+.post-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px; /* 12px -> 11px 축소 */
+    color: #6c757d;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+    margin-top: auto;
+}
+
+.post-card-bottom span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}

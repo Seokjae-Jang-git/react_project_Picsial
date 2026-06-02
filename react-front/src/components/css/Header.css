@@ -1,0 +1,158 @@
+.picsial-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 40px;
+    
+    /* 1. 흰색 배경을 확실하게 지정하여 뒤로 지나가는 본문을 가려줍니다 */
+    background-color: #ffffff; 
+    
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    
+    /* 2. z-index 숫자를 높여서 헤더가 항상 본문보다 무조건 화면 맨 위에 오도록 만듭니다 */
+    z-index: 999; 
+    
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* 로고 스타일링 */
+.header-logo {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-color);
+    cursor: pointer;
+    letter-spacing: -0.5px;
+    margin-right: 30px;
+}
+
+.header-logo span {
+    color: var(--primary-color); /* 온점(.)에 포인트 컬러 지정 */
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.header-tab-btn {
+    border: none;
+    background: none;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.header-tab-btn:hover, .header-tab-btn.active {
+    color: var(--primary-color);
+    background-color: #EBF2FF; /* 은은한 블루 배경 */
+}
+
+/* 검색창 */
+.header-center {
+    flex-grow: 1;
+    max-width: 450px;
+    margin: 0 20px;
+}
+
+.search-bar-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--gray-bg);
+    border-radius: 24px;
+    padding: 2px 6px 2px 16px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.search-bar-wrapper:focus-within {
+    border-color: var(--primary-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
+}
+
+.header-search-input {
+    border: none;
+    background: none;
+    width: 100%;
+    padding: 8px 0;
+    font-size: 14px;
+    outline: none;
+    color: var(--text-color);
+}
+
+.header-search-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+/* 우측 유저 영역 */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-user-btn {
+    border: none;
+    background: none;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.header-user-btn:hover {
+    background-color: var(--gray-bg);
+}
+
+/* 업로드 버튼 차별화 */
+.header-user-btn.upload {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* 로그인/로그아웃 버튼 */
+.header-auth-btn {
+    border: none;
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.login-btn {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.login-btn:hover {
+    background-color: #256FFF;
+}
+
+.logout-btn {
+    background-color: var(--gray-bg);
+    color: #6c757d;
+}
+
+.logout-btn:hover {
+    background-color: #e2e6ea;
+}

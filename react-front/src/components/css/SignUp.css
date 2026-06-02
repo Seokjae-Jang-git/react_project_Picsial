@@ -1,0 +1,335 @@
+/* 회원가입 전체 컨테이너 */
+.signup-container {
+    max-width: 450px;
+    margin: 30px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 제목 세팅 */
+.signup-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333333;
+}
+
+/* 개별 폼 그룹 간격 */
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 라벨 스타일 */
+.form-group label {
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #444444;
+}
+
+/* 일반 텍스트, 이메일, 패스워드 입력창 스타일 */
+.form-control {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* 한 줄 소개 텍스트 영역 */
+.form-textarea {
+    padding: 10px;
+    height: 70px;
+    resize: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-textarea:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* 아이디 입력 + 중복확인 버튼 배치 레이아웃 */
+.id-input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.id-input-group .form-control {
+    flex: 1;
+}
+
+/* 중복확인 버튼 스타일 */
+.btn-check-id {
+    padding: 0 15px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.btn-check-id:hover {
+    background-color: #5a6268;
+}
+
+.btn-check-id:disabled {
+    background-color: #d1d1d1;
+    color: #888;              
+    border: 1px solid #ccc;
+    cursor: not-allowed;      
+    opacity: 0.7;
+}
+
+/* 중복확인 결과 안내 메시지 */
+.check-msg {
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.check-msg.success {
+    color: #28a745;
+}
+
+.check-msg.error {
+    color: #dc3545;
+}
+
+/* 라벨과 툴팁 아이콘을 나란히 정렬 */
+.label-with-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+/* 라벨 마진을 제거하여 아이콘과 높이를 일치시킴 */
+.label-with-tooltip label {
+    margin-bottom: 0;
+}
+
+/* 툴팁 전체를 감싸는 기준점 부모 클래스 */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* 동그라미 ! 아이콘 디자인 */
+.tooltip-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background-color: #6c757d;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* 툴팁 말풍선 기본 형태 정의 (평소엔 완전히 숨김 처리) */
+.tooltip-box {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 130%; /* 아이콘 위쪽으로 말풍선 배치 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    background-color: #333333;
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s;
+}
+
+/* 말풍선 아래쪽에 화살표 꼬리 만들기 */
+.tooltip-box::after {
+    content: "";
+    position: absolute;
+    top: 100%; /* 말풍선 바닥면 */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: #333333 transparent transparent transparent;
+}
+
+/* [핵심 기능] 마우스를 툴팁 전체 영역에 올렸을 때 말풍선 나타나게 하기 */
+.tooltip-container:hover .tooltip-box {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* 말풍선 내부 가이드 문구 텍스트 정렬 */
+.tooltip-box strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #ffc107; /* 안내 제목 강조색 (노란색) */
+}
+
+.tooltip-box ul {
+    margin: 0;
+    padding-left: 14px;
+}
+
+.tooltip-box li {
+    margin-bottom: 3px;
+    line-height: 1.4;
+}
+
+.tooltip-box .allowed-symbols {
+    margin-top: 6px;
+    list-style-type: none;
+    padding-left: 0;
+    color: #999999;
+    font-size: 11px;
+    border-top: 1px solid #444444;
+    padding-top: 4px;
+}
+
+/* 관심 카테고리 체크박스 묶음 영역 */
+.category-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+/* 개별 체크박스 라벨 항목 */
+.category-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #495057;
+    user-select: none;
+}
+
+.category-checkbox-label input {
+    cursor: pointer;
+}
+
+/* 최종 가입하기 대형 버튼 */
+.signup-submit-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.signup-submit-btn:hover {
+    background-color: #0069d9;
+}
+
+/* textarea와 카운터를 감싸는 부모 컨테이너 */
+.textarea-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 한 줄 소개 textarea 안쪽 여백 조정 (글자수 표시 영역 확보) */
+.form-textarea {
+    padding: 10px;
+    padding-bottom: 25px; /* 하단 카운터와 겹치지 않게 여백 추가 */
+    height: 70px;
+    resize: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* 글자수 카운터 스타일 */
+.char-counter {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: #888888;
+    background-color: rgba(255, 255, 255, 0.8); /* 뒷글자가 살짝 비치도록 처리 */
+    padding: 0 4px;
+    border-radius: 2px;
+    pointer-events: none; /* 클릭 이벤트 방해 방지 */
+}
+
+/* 최대 글자수에 도달했을 때 강조 효과 (선택사항) */
+.char-counter span {
+    font-weight: 500;
+    color: #333;
+}
+
+/* 1. 부모 컨테이너: 기존 .form-group의 세로 정렬을 무시하고 강제로 가로 나란히 배치 */
+.form-group.checkbox-group {
+    display: flex !important;
+    flex-direction: row !important; /* 무조건 가로(수평) 방향 배치 */
+    justify-content: center !important; /* 가로 기준 가운데 정렬 */
+    align-items: center !important;     /* 세로 기준 가운데 정렬 (높이 맞춤) */
+    margin: 20px 0;
+    padding: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+/* 2. 체크박스: 일반 input의 width: 100% 나 display: block 스타일을 강제로 해제 */
+.form-group.checkbox-group input[type="checkbox"] {
+    width: 18px !important;
+    height: 18px !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important; /* 찌그러짐 방지 */
+    margin: 0 10px 0 0 !important; /* 오른쪽에만 여백을 주어 글자와 간격 띄움 */
+    cursor: pointer;
+}
+
+/* 3. 문장: 일반 label의 block 성질이나 너비 설정을 강제로 해제 */
+.form-group.checkbox-group label {
+    display: inline-block !important;
+    width: auto !important; /* 부모가 허용하는 만큼만 너비 차지 */
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px;
+    color: #495057;
+    cursor: pointer;
+    line-height: 1.4;
+    font-weight: normal;
+    text-align: left;
+}
+
+/* 가입하기 버튼 비활성화 상태 스타일 */
+.signup-submit-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
