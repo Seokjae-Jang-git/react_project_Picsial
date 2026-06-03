@@ -252,7 +252,7 @@ function PhotoDetail() {
                                         <span className="exif-label">셔터스피드</span>
                                         <span className="exif-value">
                                             {photo.SHUTTER_SPEED 
-                                                ? `${parseFloat(photo.SHUTTER_SPEED).toFixed(3)}s` 
+                                                ? `${parseFloat(photo.SHUTTER_SPEED).toFixed(4)}s` 
                                                 : '-'}
                                         </span>
                                     </div>

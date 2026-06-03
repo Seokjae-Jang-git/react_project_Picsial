@@ -115,8 +115,8 @@ router.post('/signup', async (req, res) => {
         if (preferenceCategories && preferenceCategories.length > 0) {
             // 수정된 컬럼명 USER_NO와 시퀀스 ADMIN.PS_USER_PREFERENCE_SEQ.NEXTVAL 적용
             const prefSql = `
-                INSERT INTO PS_USER_PREFERENCE (PREF_ID, USER_NO, CATEGORY_ID) 
-                VALUES (ADMIN.PS_USER_PREFERENCE_SEQ.NEXTVAL, :userNo, :categoryId)
+                INSERT INTO PS_USER_PREF_PHOTO (PREF_ID, USER_NO, CATEGORY_ID) 
+                VALUES (PS_USER_PREF_PHOTO_SEQ.NEXTVAL, :userNo, :categoryId)
             `;
 
             // 프론트엔드에서 넘어온 카테고리 ID 배열을 돌며 다중 매핑 저장

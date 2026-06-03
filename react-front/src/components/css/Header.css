@@ -65,20 +65,26 @@
     margin: 0 20px;
 }
 
+/* 검색창 wrapper 수정 */
 .search-bar-wrapper {
     display: flex;
     align-items: center;
     background-color: var(--gray-bg);
     border-radius: 24px;
     padding: 2px 6px 2px 16px;
-    border: 1px solid transparent;
+    
+    /* 💡 수정된 부분: transparent 대신 은은한 회색 테두리 적용 */
+    border: 1px solid #ced4da; 
+    
     transition: all 0.2s ease;
 }
 
+/* 💡 포커스 되었을 때의 상태도 더 강조해 주면 좋습니다 */
 .search-bar-wrapper:focus-within {
     border-color: var(--primary-color);
     background-color: #fff;
-    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
+    /* 그림자를 조금 더 뚜렷하게 해서 검색창이 '떠오르는' 느낌을 줌 */
+    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
 }
 
 .header-search-input {
@@ -139,13 +145,24 @@
     transition: all 0.2s ease;
 }
 
+/* 로그인 버튼 스타일 강화 */
 .login-btn {
-    background-color: var(--primary-color);
-    color: #fff;
+    background-color: var(--primary-color); /* 테마 컬러 사용 */
+    color: #000000;
+    padding: 8px 24px;                      /* 좌우 패딩을 늘려 버튼을 더 길게 */
+    border-radius: 20px;
+    font-weight: 700;                       /* 더 굵게 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 살짝 그림자를 넣어 '떠 있는' 느낌 */
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .login-btn:hover {
-    background-color: #256FFF;
+    background-color: #256FFF;              /* 호버 시 더 진한 색으로 */
+    color: white;
+    transform: translateY(-1px);            /* 마우스 올리면 살짝 위로 올라가는 효과 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .logout-btn {

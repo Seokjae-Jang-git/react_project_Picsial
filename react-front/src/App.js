@@ -9,6 +9,7 @@ import SignUp from './components/SignUp';
 import PhotoPage from './components/PhotoPage'; 
 import PhotoDetail from './components/PhotoDetail';
 import PostPage from './components/PostPage';
+import Upload from './components/Upload';
 
 
 function App() {
@@ -26,7 +27,8 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/photo" element={<PhotoPage />} />
           <Route path="/photo/:id" element={<PhotoDetail />} />
-          <Route path="/photo" element={<PostPage />} />
+          <Route path="/post" element={<PostPage />} />
+          <Route path="/upload" element={<Upload />} />
         </Routes>
       </Box>
     </Box>

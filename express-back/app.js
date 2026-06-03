@@ -8,7 +8,7 @@ const sampleRouter = require("./routes/sample");
 const authRouter = require("./routes/auth");
 const categoryRouter = require("./routes/category");
 const photoRoutes = require('./routes/photo')
-const postRoutes = require('./routes/postpage')
+const postRoutes = require('./routes/post')
 
 const db = require("./db");
 

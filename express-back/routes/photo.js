@@ -38,88 +38,143 @@ async function uploadToNAS(fileBuffer, thumbBuffer, originalFileName, thumbFileN
     }
 }
 
-const exifr = require('exifr'); // 💡 1. 상단에 추가
-
 // ==========================================
-// [POST] /photo/upload - 사진 등록 API (메타데이터 자동 추출 추가)
+// [POST] /photo/upload-bulk - 다중 사진 업로드 및 데이터 저장 (태그, 카테고리 포함)
 // ==========================================
-router.post('/upload', upload.single('image'), async (req, res) => {
+// 💡 주의: upload.array('files', 20)을 사용하여 최대 20장까지 배열로 받습니다.
+router.post('/upload-bulk', upload.array('files', 20), async (req, res) => {
     let connection;
     try {
-        if (!req.file) return res.status(400).json({ success: false, message: '파일이 없습니다.' });
+        const files = req.files;
+        // 프론트에서 JSON.stringify()로 묶어서 보낸 데이터를 다시 배열 객체로 풉니다.
+        const itemsData = JSON.parse(req.body.itemsData); 
+        const { uploadType, userNo } = req.body;
 
-        // 💡 2. EXIF 메타데이터 추출 (파일 버퍼에서 즉시 추출)
-        let meta = {};
-        try {
-            meta = await exifr.parse(req.file.buffer); 
-        } catch (exifErr) {
-            console.warn("메타데이터 추출 실패 (파일이 사진이 아니거나 정보 없음):", exifErr);
+        if (!files || files.length === 0) {
+            return res.status(400).json({ success: false, message: '파일이 없습니다.' });
         }
-
-        const ext = path.extname(req.file.originalname);
-        const baseName = `${Date.now()}_${Math.round(Math.random() * 1E9)}`;
-        const originalFileName = `${baseName}${ext}`;
-        const thumbFileName = `thumb_${baseName}.webp`;
-
-        const thumbBuffer = await sharp(req.file.buffer)
-            .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
-            .webp({ quality: 80 })
-            .toBuffer();
-
-        const savedFiles = await uploadToNAS(req.file.buffer, thumbBuffer, originalFileName, thumbFileName);
-        const { title, description, categoryId, userNo, location } = req.body; // location은 사용자가 직접 입력한 값
+        if (files.length !== itemsData.length) {
+            return res.status(400).json({ success: false, message: '파일과 데이터의 개수가 일치하지 않습니다.' });
+        }
 
         connection = await db.getConnection();
-        
-        // 💡 3. SQL 수정 (메타데이터 컬럼 추가)
-        const insertPhotoSql = `
-            INSERT INTO PS_PHOTO (
-                PHOTO_ID, USER_NO, TITLE, DESCRIPTION, IMAGE_URL, THUMB_URL,
-                CAMERA_MODEL, LENS, FOCAL_LENGTH, APERTURE, SHUTTER_SPEED, ISO, SHOOT_DATE, LOCATION
-            ) VALUES (
-                PS_PHOTO_SEQ.NEXTVAL, :userNo, :title, :description, :imageName, :thumbName,
-                :model, :lens, :focal, :aperture, :shutter, :iso, :shootDate, :location
-            )
-            RETURNING PHOTO_ID INTO :newPhotoId
-        `;
-        
-        const photoResult = await connection.execute(insertPhotoSql, {
-            userNo: userNo || 1, 
-            title: title || '제목 없음',
-            description: description || '',
-            imageName: savedFiles.originalFileName, 
-            thumbName: savedFiles.thumbFileName, 
-            // 메타데이터 매핑 (값이 없으면 null)
-            model: meta ? meta.Model : null,
-            lens: meta ? meta.LensModel : null,
-            focal: meta && meta.FocalLength ? String(meta.FocalLength) : null,
-            aperture: meta && meta.FNumber ? String(meta.FNumber) : null,
-            shutter: meta && meta.ExposureTime ? String(meta.ExposureTime) : null,
-            iso: meta ? String(meta.ISO) : null,
-            shootDate: meta && meta.DateTimeOriginal ? meta.DateTimeOriginal : null,
-            location: location || null, // 사용자가 입력한 장소
-            newPhotoId: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-        });
+        // 💡 오라클은 기본적으로 Auto-Commit이 false이므로, 모든 작업이 끝나고 commit()을 해야 반영됩니다.
 
-        const generatedPhotoId = photoResult.outBinds.newPhotoId[0];
+        // 각 파일과 데이터를 순회하며 순차적으로 처리합니다.
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const data = itemsData[i];
 
-        if (categoryId) {
-            const insertCategorySql = `
-                INSERT INTO PS_PHOTO_CATEGORY (PHOTO_ID, CATEGORY_ID)
-                VALUES (:photoId, :categoryId)
+            // 1. 이미지 리사이징 및 NAS 업로드 (기존 uploadToNAS 함수 재사용)
+            const ext = path.extname(file.originalname);
+            const baseName = `${Date.now()}_${Math.round(Math.random() * 1E9)}`;
+            const originalFileName = `${baseName}${ext}`;
+            const thumbFileName = `thumb_${baseName}.webp`;
+
+            const thumbBuffer = await sharp(file.buffer)
+                .resize(300, 300, { fit: 'inside', withoutEnlargement: true })
+                .webp({ quality: 80 })
+                .toBuffer();
+
+            // NAS 서버로 파일 전송 (SFTP)
+            await uploadToNAS(file.buffer, thumbBuffer, originalFileName, thumbFileName);
+
+            // 2. PS_PHOTO 테이블에 데이터 INSERT (공개여부 포함)
+            const insertPhotoSql = `
+                INSERT INTO PS_PHOTO (
+                    PHOTO_ID, USER_NO, TITLE, DESCRIPTION, IMAGE_URL, THUMB_URL,
+                    CAMERA_MODEL, LENS, FOCAL_LENGTH, APERTURE, SHUTTER_SPEED, ISO, LOCATION, IS_PUBLIC
+                ) VALUES (
+                    PS_PHOTO_SEQ.NEXTVAL, :userNo, :title, :description, :imageName, :thumbName,
+                    :model, :lens, :focal, :aperture, :shutter, :iso, :location, :isPublic
+                )
+                RETURNING PHOTO_ID INTO :newPhotoId
             `;
-            await connection.execute(insertCategorySql, {
-                photoId: generatedPhotoId,
-                categoryId: Number(categoryId)
+            
+            const photoResult = await connection.execute(insertPhotoSql, {
+                userNo: userNo || 1, 
+                title: data.title || '제목 없음',
+                description: data.description || '',
+                imageName: originalFileName,
+                thumbName: thumbFileName,
+                model: data.meta?.Model || null,
+                lens: data.meta?.LensModel || null,
+                focal: data.meta?.FocalLength ? String(data.meta.FocalLength) : null,
+                aperture: data.meta?.FNumber ? String(data.meta.FNumber) : null,
+                shutter: data.meta?.ExposureTime ? String(data.meta.ExposureTime) : null,
+                iso: data.meta?.ISO ? String(data.meta.ISO) : null,
+                location: data.location || null,
+                isPublic: data.isPublic || 'Y', // 기본값 공개
+                newPhotoId: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
             });
-        }
 
+            // 생성된 사진 ID 가져오기
+            const generatedPhotoId = photoResult.outBinds.newPhotoId[0];
+
+            // 3. 카테고리 저장 (선택한 경우만)
+            if (data.categoryId) {
+                const insertCatSql = `
+                    INSERT INTO PS_PHOTO_CATEMAP (MAPPING_ID, PHOTO_ID, CATEGORY_ID) 
+                    VALUES (PS_PHOTO_CATEMAP_SEQ.NEXTVAL, :photoId, :categoryId)
+                `;
+                await connection.execute(insertCatSql, { 
+                    photoId: generatedPhotoId, 
+                    categoryId: Number(data.categoryId) 
+                });
+            }
+
+            // 4. 태그 저장 및 매핑 (핵심 로직)
+            if (data.tags && data.tags.length > 0) {
+                for (const tagName of data.tags) {
+                    let tagId;
+                    
+                    // 4-1. 태그가 이미 PS_TAG 테이블에 있는지 검사
+                    const checkTagSql = `SELECT TAG_ID FROM PS_TAG_PHOTO WHERE TAG_NAME = :tagName`;
+                    const tagResult = await connection.execute(checkTagSql, { tagName }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+                    if (tagResult.rows.length > 0) {
+                        // 이미 있는 태그면 ID만 가져옴
+                        tagId = tagResult.rows[0].TAG_ID;
+                    } else {
+                        // 4-2. 없는 태그면 새로 INSERT 하고 ID를 반환받음
+                        const insertTagSql = `
+                            INSERT INTO PS_TAG_PHOTO (TAG_ID, TAG_NAME)
+                            VALUES (PS_TAG_PHOTO_SEQ.NEXTVAL, :tagName)
+                            RETURNING TAG_ID INTO :newTagId
+                        `;
+                        const newTagResult = await connection.execute(insertTagSql, {
+                            tagName: tagName,
+                            newTagId: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+                        });
+                        tagId = newTagResult.outBinds.newTagId[0];
+                    }
+
+                    // 4-3. 사진 ID와 태그 ID를 연결하는 매핑 테이블(PS_CONTENT_TAG)에 INSERT
+                    const insertContentTagSql = `
+                        INSERT INTO PS_PHOTO_TAGMAP (MAPPING_ID, TAG_ID, PHOTO_ID)
+                        VALUES (PS_PHOTO_TAGMAP_SEQ.NEXTVAL, :tagId, :photoId)
+                    `;
+                    await connection.execute(insertContentTagSql, { tagId: tagId, photoId: generatedPhotoId });
+                }
+            }
+        } // for 루프 끝 (모든 사진 처리 완료)
+
+        // 5. 💡 모든 작업이 에러 없이 끝났다면 완전 승인 (Commit)
         await connection.commit();
-        res.status(200).json({ success: true, message: '업로드 완료' });
+        res.status(200).json({ success: true, message: '업로드가 완료되었습니다.' });
 
     } catch (error) {
-        console.error("업로드 에러:", error);
-        res.status(500).send('서버 오류');
+        console.error("다중 업로드 에러:", error);
+        // 💡 중간에 하나라도 에러가 나면 롤백하여 DB 쓰레기 데이터 방지
+        if (connection) {
+            try { 
+                await connection.rollback(); 
+                console.log("트랜잭션 롤백 완료");
+            } catch (e) { 
+                console.error("롤백 실패:", e); 
+            }
+        }
+        res.status(500).json({ success: false, message: "서버 처리 중 오류가 발생했습니다." });
     } finally {
         if (connection) {
             try { await connection.close(); } catch (e) { console.error(e); }
@@ -147,8 +202,8 @@ router.get('/', async (req, res) => {
                 NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
                 NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT
             FROM PS_PHOTO P
-            LEFT JOIN PS_PHOTO_CATEGORY PC ON P.PHOTO_ID = PC.PHOTO_ID
-            LEFT JOIN PS_CATEGORY C ON PC.CATEGORY_ID = C.CATEGORY_ID
+            LEFT JOIN PS_PHOTO_CATEMAP PC ON P.PHOTO_ID = PC.PHOTO_ID
+            LEFT JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
             -- 💡 미리 그룹핑해서 개수를 세어두고 한 번만 조인합니다 (속도 대폭 향상)
             LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
             LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
@@ -223,8 +278,8 @@ router.get('/:id', async (req, res) => {
         const photoSql = `
             SELECT P.*, C.CATEGORY_NAME, NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT
             FROM PS_PHOTO P
-            LEFT JOIN PS_PHOTO_CATEGORY PC ON P.PHOTO_ID = PC.PHOTO_ID
-            LEFT JOIN PS_CATEGORY C ON PC.CATEGORY_ID = C.CATEGORY_ID
+            LEFT JOIN PS_PHOTO_CATEMAP PC ON P.PHOTO_ID = PC.PHOTO_ID
+            LEFT JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
             LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
             WHERE P.PHOTO_ID = :id
         `;

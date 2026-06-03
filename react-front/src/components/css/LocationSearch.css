@@ -1,0 +1,87 @@
+.location-search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.location-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.location-input {
+    width: 100%;
+    padding-left: 35px !important; /* 돋보기 아이콘 공간 */
+    padding-right: 35px !important; /* X 버튼 공간 */
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    color: #888;
+    font-size: 14px;
+}
+
+.clear-icon {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #999;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.clear-icon:hover {
+    color: #333;
+}
+
+/* 드롭다운 리스트 스타일 */
+.location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.location-dropdown li {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.location-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.location-dropdown li:hover {
+    background: #f4f6f8;
+}
+
+.place-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.place-address {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
