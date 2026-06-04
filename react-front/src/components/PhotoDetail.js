@@ -43,6 +43,22 @@ function formatShootDate(dateString) {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
 
+// 💡 1. 토큰 해독 함수 추가 (PostDetail.js와 동일)
+const getCurrentUserNo = () => {
+    const token = localStorage.getItem('jwtToken'); 
+    if (!token) return null; 
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload).userNo; 
+    } catch (error) {
+        return null;
+    }
+};
+
 function PhotoDetail() {
     const { id } = useParams(); 
     const navigate = useNavigate();
@@ -57,9 +73,12 @@ function PhotoDetail() {
     const [scrapCount, setScrapCount] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
 
+    const currentUserNo = getCurrentUserNo();
+
     const fetchPhotoDetail = async () => {
         try {
-            const response = await fetch(`http://localhost:3010/photo/${id}`);
+            const queryParam = currentUserNo ? `?userNo=${currentUserNo}` : '';
+            const response = await fetch(`http://localhost:3010/photo/${id}${queryParam}`);
             if (!response.ok) throw new Error('상세 정보 불러오기 실패');
             
             const data = await response.json();
@@ -68,6 +87,10 @@ function PhotoDetail() {
                 setComments(data.comments || []); 
                 setLikeCount(data.photo.LIKE_COUNT || 0);
                 setScrapCount(data.photo.SCRAP_COUNT || 0);
+
+                // 💡 백엔드에서 판별해준 상태를 State에 적용 (새로고침 유지 마법!)
+                setIsLiked(data.photo.IS_LIKED_BY_ME > 0); 
+                setIsScrapped(data.photo.IS_SCRAPPED_BY_ME > 0);
             }
         } catch (error) {
             console.error("사진 상세 조회 에러:", error);
@@ -80,6 +103,8 @@ function PhotoDetail() {
     }, [id]);
 
     const handleLikeToggle = async () => {
+        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; }
+
         const newIsLiked = !isLiked;
         setIsLiked(newIsLiked);
         setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
@@ -87,7 +112,7 @@ function PhotoDetail() {
             await fetch(`http://localhost:3010/photo/${id}/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isLiked: newIsLiked }) 
+                body: JSON.stringify({ isLiked: newIsLiked, userNo: currentUserNo }) // 하드코딩 교체
             });
         } catch (error) {
             setIsLiked(!newIsLiked);
@@ -96,6 +121,8 @@ function PhotoDetail() {
     };
 
     const handleScrapToggle = async () => {
+        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; }
+
         const newIsScrapped = !isScrapped;
         setIsScrapped(newIsScrapped);
         setScrapCount(prev => newIsScrapped ? prev + 1 : prev - 1);
@@ -103,7 +130,7 @@ function PhotoDetail() {
             await fetch(`http://localhost:3010/photo/${id}/scrap`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isScrapped: newIsScrapped, userNo: 1 })
+                body: JSON.stringify({ isScrapped: newIsScrapped, userNo: currentUserNo }) // 하드코딩 교체
             });
         } catch (error) {
             setIsScrapped(!newIsScrapped);
@@ -113,13 +140,14 @@ function PhotoDetail() {
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault(); 
+        if (!currentUserNo) { alert("댓글을 작성하려면 로그인이 필요합니다."); return; }
         if (!commentInput.trim()) return;
 
         try {
             const response = await fetch(`http://localhost:3010/photo/${id}/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: commentInput, userNo: 1 })
+                body: JSON.stringify({ content: commentInput, userNo: currentUserNo }) // 하드코딩 교체
             });
 
             const data = await response.json();

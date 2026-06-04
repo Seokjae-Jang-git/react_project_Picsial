@@ -1,54 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
-import PhotoGrid from '../components/PhotoGrid';
+import Header from '../components/Header'; // 경로에 맞게 수정하세요
+import Sidebar from '../components/Sidebar'; // 경로에 맞게 수정하세요
+import PhotoGrid from '../components/PhotoGrid'; // 경로에 맞게 수정하세요
 import './css/PhotoPage.css';
 
 function PhotoPage() {
-    // 💡 1. 즉각 반응하는 UI용 State (초기값을 sessionStorage에서 가져옴)
-    const [currentFilter, setCurrentFilter] = useState(() => {
-        const savedFilter = sessionStorage.getItem('photoPageFilter');
-        return savedFilter !== null ? savedFilter : '';
+    // 💡 1. 즉각 반응하는 UI용 State (Sidebar.js 및 PostPage.js와 이름 완벽 통일!)
+    const [selectedCategory, setSelectedCategory] = useState(() => {
+        const savedCategory = sessionStorage.getItem('photoPageCategory');
+        return savedCategory !== null ? savedCategory : '';
     }); 
-    const [currentSort, setCurrentSort] = useState(() => {
+    const [sortOption, setSortOption] = useState(() => {
         const savedSort = sessionStorage.getItem('photoPageSort');
-        return savedSort !== null ? savedSort : 'likes';
+        return savedSort !== null ? savedSort : 'latest'; // 기본값을 최신순(latest)으로 맞췄습니다
     });  
     
-    // 💡 2. 0.3초 대기 후 API 호출에 쓰일 '확정된' State 
-    // (이 값도 초기 렌더링 시 스토리지 값을 물고 시작해야 API가 두 번 호출되지 않습니다)
-    const [debouncedFilter, setDebouncedFilter] = useState(currentFilter);
-    const [debouncedSort, setDebouncedSort] = useState(currentSort);
+    // 💡 2. 0.3초 대기 후 API 호출에 쓰일 '확정된' State (디바운싱)
+    const [debouncedCategory, setDebouncedCategory] = useState(selectedCategory);
+    const [debouncedSortOption, setDebouncedSortOption] = useState(sortOption);
 
     const [photos, setPhotos] = useState([]);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    // 💡 [추가된 로직] 필터나 정렬이 바뀔 때마다 sessionStorage에 실시간 백업
+    // 💡 사이드바 열림 상태(isSidebarOpen)는 이제 Sidebar.js가 스스로 관리하므로 부모에서는 과감히 삭제했습니다.
+
+    // [로직] 필터나 정렬이 바뀔 때마다 sessionStorage에 실시간 백업
     useEffect(() => {
-        sessionStorage.setItem('photoPageFilter', currentFilter);
-        sessionStorage.setItem('photoPageSort', currentSort);
-    }, [currentFilter, currentSort]);
+        sessionStorage.setItem('photoPageCategory', selectedCategory);
+        sessionStorage.setItem('photoPageSort', sortOption);
+    }, [selectedCategory, sortOption]);
 
-    // 디바운싱 타이머
-    // 사용자가 버튼 누르기를 멈추고 0.3초가 지나면 debounced 상태를 업데이트합니다.
+    // [로직] 디바운싱 타이머 (0.3초 지연)
     useEffect(() => {
         const timer = setTimeout(() => {
-            setDebouncedFilter(currentFilter);
-            setDebouncedSort(currentSort);
-        }, 300); // 300ms(0.3초) 지연
+            setDebouncedCategory(selectedCategory);
+            setDebouncedSortOption(sortOption);
+        }, 300);
 
-        // 만약 0.3초 안에 다른 버튼을 또 누르면, 이전 타이머를 취소(초기화)합니다.
         return () => clearTimeout(timer);
-    }, [currentFilter, currentSort]);
+    }, [selectedCategory, sortOption]);
 
 
     // 3. 실제 백엔드(DB)에서 데이터를 가져오는 로직
-    // 의존성 배열에 current가 아닌 'debounced' 값을 넣어서, 타이머가 끝났을 때만 실행되게 합니다.
     useEffect(() => {
         const fetchPhotos = async () => {
             try {
                 // 확정된(debounced) 값을 URL 파라미터로 사용
-                const url = `http://localhost:3010/photo?category=${debouncedFilter}&sort=${debouncedSort}`;
+                const url = `http://localhost:3010/photo?category=${debouncedCategory}&sort=${debouncedSortOption}`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -69,24 +66,24 @@ function PhotoPage() {
         };
 
         fetchPhotos();
-        console.log(`📡 서버로 데이터 요청됨 -> 필터: ${debouncedFilter}, 정렬: ${debouncedSort}`);
-    }, [debouncedFilter, debouncedSort]); // debounced 값이 바뀔 때만 재실행
+    }, [debouncedCategory, debouncedSortOption]); // debounced 값이 바뀔 때만 재실행
 
     return (
         <div className="photo-page-container">
             <Header />
 
-            <div className={`photo-page-body ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
-                {/* Sidebar에는 여전히 '즉각 반응하는' current 상태를 넘겨줍니다. 
-                    (버튼 색상은 누르는 즉시 바뀌어야 하니까요!) */}
+            {/* 부모가 억지로 컨트롤하던 sidebar-collapsed 클래스 제거 (CSS Flexbox가 알아서 여백을 채웁니다) */}
+            <div className="photo-page-body">
+                
+                {/* 💡 Sidebar에 통일된 프롭스(Props) 이름으로 깔끔하게 전달! */}
                 <Sidebar 
-                    isSidebarOpen={isSidebarOpen} 
-                    setIsSidebarOpen={setIsSidebarOpen} 
-                    currentFilter={currentFilter}
-                    setCurrentFilter={setCurrentFilter}
-                    currentSort={currentSort}
-                    setCurrentSort={setCurrentSort}
+                    pageType="photo" 
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    sortOption={sortOption}
+                    setSortOption={setSortOption}
                 />
+                
                 <main className="photo-content-area">
                     <PhotoGrid photos={photos} />
                 </main>

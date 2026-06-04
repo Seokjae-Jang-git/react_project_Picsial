@@ -18,7 +18,7 @@ function Upload() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://localhost:3010/category'); // 기존 카테고리 API 활용
+                const response = await fetch('http://localhost:3010/category/photo'); // 기존 카테고리 API 활용
                 const data = await response.json();
                 if (data.success) setCategories(data.categories);
             } catch (error) {

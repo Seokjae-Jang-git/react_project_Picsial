@@ -127,6 +127,13 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vertical-post-card:hover {
+    transform: translateY(-4px); /* 💡 위로 4px 이동 */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); /* 💡 그림자를 더 넓고 부드럽게 */
+    cursor: pointer; /* 마우스 커서를 손가락 모양으로 변경 */
 }
 
 /* 피드 상단 */

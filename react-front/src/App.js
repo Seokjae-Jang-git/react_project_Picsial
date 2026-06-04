@@ -9,6 +9,7 @@ import SignUp from './components/SignUp';
 import PhotoPage from './components/PhotoPage'; 
 import PhotoDetail from './components/PhotoDetail';
 import PostPage from './components/PostPage';
+import PostDetail from './components/PostDetail';
 import Upload from './components/Upload';
 
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/photo" element={<PhotoPage />} />
           <Route path="/photo/:id" element={<PhotoDetail />} />
           <Route path="/post" element={<PostPage />} />
+          <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/upload" element={<Upload />} />
         </Routes>
       </Box>

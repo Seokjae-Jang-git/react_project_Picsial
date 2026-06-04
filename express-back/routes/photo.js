@@ -183,7 +183,7 @@ router.post('/upload-bulk', upload.array('files', 20), async (req, res) => {
 });
 
 // ==========================================
-// [GET] /photo - 사진 전체 목록 조회 (필터 & 정렬 완벽 적용)
+// [GET] /photo - 사진 전체 목록 조회 (중복 버그 완벽 수선 버전)
 // ==========================================
 router.get('/', async (req, res) => {
     let connection;
@@ -193,34 +193,38 @@ router.get('/', async (req, res) => {
 
         const bindParams = {};
 
-        // 💡 1. 기본 SELECT 구문 (JOIN 및 개수 집계 서브쿼리 포함)
-        // 질문자님이 설계하신 대로 P, PC, C 테이블을 조인합니다.
+        // 💡 1. 기본 SELECT 구문 (LISTAGG 서브쿼리로 중복 원천 차단)
+        // - 기존 메인 쿼리의 LEFT JOIN PC, LEFT JOIN C를 과감하게 제거합니다.
+        // - 대신 한 사진이 여러 카테고리를 가질 경우 '풍경, 명소' 형태로 한 줄로 묶어 가져옵니다.
         let sql = `
             SELECT 
                 P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT,
-                C.CATEGORY_ID, C.CATEGORY_NAME,
                 NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT
+                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+                (
+                    SELECT LISTAGG(C.CATEGORY_NAME, ', ') WITHIN GROUP (ORDER BY C.CATEGORY_NAME)
+                    FROM PS_PHOTO_CATEMAP PC
+                    JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
+                    WHERE PC.PHOTO_ID = P.PHOTO_ID
+                ) AS CATEGORY_NAME
             FROM PS_PHOTO P
-            LEFT JOIN PS_PHOTO_CATEMAP PC ON P.PHOTO_ID = PC.PHOTO_ID
-            LEFT JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
-            -- 💡 미리 그룹핑해서 개수를 세어두고 한 번만 조인합니다 (속도 대폭 향상)
+            -- 미리 그룹핑해서 개수를 세어두고 한 번만 조인합니다
             LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
             LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
             WHERE 1=1
         `;
 
-        // 💡 2. 카테고리 필터링 적용 (카테고리 번호가 넘어온 경우)
+        // 💡 2. 카테고리 필터링 적용 (IN 서브쿼리를 사용하여 데이터 뻥튀기 방지)
         if (category && category.trim() !== '' && category !== 'undefined') {
             const parsedCategory = Number(category);
             if (!isNaN(parsedCategory)) { 
-                sql += ` AND PC.CATEGORY_ID = :category`;
+                // 해당 카테고리 ID를 가진 사진 번호들만 IN 조건으로 걸러내므로 중복이 발생하지 않습니다.
+                sql += ` AND P.PHOTO_ID IN (SELECT PHOTO_ID FROM PS_PHOTO_CATEMAP WHERE CATEGORY_ID = :category)`;
                 bindParams.category = parsedCategory;
             }
         }
 
         // 💡 3. 동적 정렬 (Sort) 적용
-        // 집계된 별칭(Alias)인 SCRAP_COUNT와 COMMENT_COUNT를 기준으로 정렬합니다.
         if (sort === 'scraps') {
             sql += ` ORDER BY SCRAP_COUNT DESC, P.PHOTO_ID DESC`;
         } else if (sort === 'comments') {
@@ -238,7 +242,7 @@ router.get('/', async (req, res) => {
 
         const result = await connection.execute(sql, bindParams, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-        // NAS URL 방어 코드 (기존과 동일)
+        // NAS URL 방어 코드
         const processedPhotos = result.rows.map(photo => ({
             ...photo,
             IMAGE_URL: photo.IMAGE_URL && photo.IMAGE_URL.startsWith('http') 
@@ -267,23 +271,27 @@ router.get('/:id', async (req, res) => {
     let connection;
     const photoId = req.params.id;
     try {
+        // 💡 프론트에서 넘어온 userNo 받기 (없으면 0)
+        const userNo = req.query.userNo ? Number(req.query.userNo) : 0;
+        
         connection = await db.getConnection();
 
         // 💡 0. 조회수 증가 (가장 먼저 실행)
-        const updateViewSql = `UPDATE PS_PHOTO SET VIEW_COUNT = VIEW_COUNT + 1 WHERE PHOTO_ID = :id`;
-        await connection.execute(updateViewSql, { id: photoId });
-        await connection.commit(); // 변경 사항 즉시 저장
+        await connection.execute(`UPDATE PS_PHOTO SET VIEW_COUNT = VIEW_COUNT + 1 WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: true });
 
-        // 1. 사진 상세 정보 조회
+        // 💡 IS_LIKED_BY_ME, IS_SCRAPPED_BY_ME 서브쿼리 추가 (PHOTO_ID 기준)
         const photoSql = `
-            SELECT P.*, C.CATEGORY_NAME, NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT
+            SELECT 
+                P.*, UI.NICKNAME,
+                (SELECT COUNT(*) FROM PS_LIKE_TABLE WHERE PHOTO_ID = P.PHOTO_ID AND USER_NO = :userNo) AS IS_LIKED_BY_ME,
+                (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE PHOTO_ID = P.PHOTO_ID AND USER_NO = :userNo) AS IS_SCRAPPED_BY_ME,
+                (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE PHOTO_ID = P.PHOTO_ID) AS SCRAP_COUNT
             FROM PS_PHOTO P
-            LEFT JOIN PS_PHOTO_CATEMAP PC ON P.PHOTO_ID = PC.PHOTO_ID
-            LEFT JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
-            WHERE P.PHOTO_ID = :id
+            LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
+            WHERE P.PHOTO_ID = :photoId
         `;
-        const photoResult = await connection.execute(photoSql, { id: photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        const photoResult = await connection.execute(photoSql, { photoId, userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
         if (photoResult.rows.length === 0) {
             return res.status(404).json({ success: false, message: "사진을 찾을 수 없습니다." });
@@ -321,40 +329,39 @@ router.get('/:id', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /photo/:id/like - 좋아요 토글 처리
+// [POST] /photo/:id/like - 좋아요 토글
 // ==========================================
 router.post('/:id/like', async (req, res) => {
     let connection;
-    const photoId = req.params.id;
-    const { isLiked } = req.body; // 프론트에서 true(하트 채움) 또는 false(하트 비움)를 보냄
-
     try {
+        const photoId = req.params.id;
+        const { isLiked, userNo } = req.body; 
         connection = await db.getConnection();
-        
-        // isLiked가 true면 1 증가, false면 1 감소
-        const operator = isLiked ? '+' : '-';
-        
-        // LIKE_COUNT가 0 미만으로 떨어지지 않도록 방어하는 조건 추가
-        const updateSql = `
-            UPDATE PS_PHOTO 
-            SET LIKE_COUNT = CASE 
-                WHEN LIKE_COUNT ${operator} 1 < 0 THEN 0 
-                ELSE LIKE_COUNT ${operator} 1 
-            END
-            WHERE PHOTO_ID = :id
-        `;
-        
-        await connection.execute(updateSql, { id: photoId });
-        await connection.commit();
 
-        res.json({ success: true, message: "좋아요 업데이트 완료" });
-    } catch (error) {
-        console.error("좋아요 업데이트 에러:", error);
-        res.status(500).json({ success: false, message: "서버 오류" });
-    } finally {
-        if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
+        if (isLiked) {
+            // 💡 사진 좋아요: POST_ID는 NULL(기본값 또는 생략) 처리하고 PHOTO_ID에 값을 넣습니다.
+            await connection.execute(
+                `INSERT INTO PS_LIKE_TABLE (LIKE_ID, USER_NO, PHOTO_ID, CREATED_AT) VALUES (PS_LIKE_TABLE_SEQ.NEXTVAL, :userNo, :photoId, SYSDATE)`,
+                { userNo, photoId }, { autoCommit: false }
+            );
+            await connection.execute(`UPDATE PS_PHOTO SET LIKE_COUNT = LIKE_COUNT + 1 WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: false });
+        } else {
+            // 💡 좋아요 취소
+            await connection.execute(
+                `DELETE FROM PS_LIKE_TABLE WHERE USER_NO = :userNo AND PHOTO_ID = :photoId`,
+                { userNo, photoId }, { autoCommit: false }
+            );
+            await connection.execute(`UPDATE PS_PHOTO SET LIKE_COUNT = GREATEST(LIKE_COUNT - 1, 0) WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: false });
         }
+        
+        await connection.commit();
+        res.json({ success: true });
+    } catch (error) {
+        if (connection) await connection.rollback();
+        console.error("사진 좋아요 처리 에러:", error);
+        res.status(500).json({ success: false });
+    } finally {
+        if (connection) { try { await connection.close(); } catch (e) {} }
     }
 });
 

@@ -1,0 +1,320 @@
+/* ==========================================================================
+   💡 전체 프레임 콤팩트화 및 정중앙 정렬
+   ========================================================================== */
+.post-detail-container {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center; /* 🚀 페이지 전체 요소를 화면 가로 중앙에 배치 */
+}
+
+.detail-body {
+    /* 🚀 기존 1200px에서 960px로 줄여 화면에 꽉 차지 않고 대폭 콤팩트하게 가둡니다 */
+    max-width: 850px; 
+    margin: 0 auto;    /* 상하 마진 0, 좌우 자동 마진으로 중앙 배치 */
+    padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.back-button-area {
+    margin-bottom: 20px;
+    text-align: left;  /* 뒤로가기 버튼을 왼쪽 끝에 정착 */
+}
+
+.btn-back {
+    background: #fff;
+    border: 1px solid #ced4da;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.detail-content-wrapper {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: center; /* 🚀 내부 아이템(왼쪽, 오른쪽)을 정중앙 정렬 */
+}
+
+/* ==========================================================================
+   💡 좌측 영역 (텍스트 박스 가로 대폭 확장 및 이미지 슬라이더 축소 통합)
+   ========================================================================== */
+.detail-left {
+    flex: 2.5; /* 🚀 대표님이 찾으신 최적의 황금 비율 적용 */
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch; 
+}
+
+/* 와이어프레임의 '게시글' 박스 */
+.post-text-content-box {
+    background: #fff;
+    padding: 24px;
+    min-height: 120px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    text-align: left; /* 좌측 기준 정렬 배치 */
+    
+    /* 🚀 핵심: 부모 너비를 100% 꽉 채우도록 설정 */
+    width: 100%; 
+    box-sizing: border-box;
+}
+
+/* 유튜브 프로필 아바타 + 닉네임 메타 조합 헤더 */
+.post-author-header-yt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.yt-author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f1f3f5;
+    object-fit: cover;
+}
+
+.yt-author-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px; /* 닉네임과 시간 사이 시원한 간격 격리 */
+}
+
+.author-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.post-time-ago-yt {
+    color: #868e96;
+    font-weight: 400;
+    font-size: 13px;
+}
+
+/* 타이틀과 본문 간의 폰트 크기 이질감 스케일 정돈 */
+.post-title-yt {
+    margin: 0 0 10px 0;
+    font-size: 18px; 
+    color: #212529;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.post-body-text-yt {
+    margin: 0;
+    line-height: 1.6;
+    color: #495057;
+    font-size: 14px; /* 본문 폰트 크기를 타이틀과 더 잘 어울리게 미세 조정 */
+    white-space: pre-wrap;
+}
+
+/* 와이어프레임의 '사진' 슬라이더 박스 */
+.post-image-slider-box {
+    background: #fff;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* 🚀 이미지 축소를 위해 슬라이더 기본 최소 높이를 줄임 */
+    min-height: 250px; 
+    position: relative;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    
+    /* 🚀 텍스트 박스와 가로 크기를 완전히 일치시킴 */
+    width: 100%; 
+    box-sizing: border-box;
+}
+
+.slider-image-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+}
+
+.slider-image-wrapper img {
+    max-width: 100%;
+    /* 🚀 요구사항 반영: 이미지가 너무 거대해지지 않도록 최대 높이를 450px -> 360px로 축소 */
+    max-height: 360px; 
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.slider-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 10px;
+    color: #212529;
+    transition: transform 0.2s;
+    z-index: 5;
+}
+
+.slider-btn:hover {
+    transform: scale(1.2);
+}
+
+
+/* ==========================================================================
+   💡 우측 통합 영역 (통계 + 댓글 + 카테고리 + 첨부파일)
+   ========================================================================== */
+.detail-right {
+    /* 🚀 핵심: 늘어나지도(0), 줄어들지도(0) 말고, 무조건 350px을 유지하라! */
+    flex: 0 0 320px; 
+    display: flex;
+    flex-direction: column;
+    gap: 16px; 
+}
+
+/* 우측 카드 박스 기저 레이아웃 */
+.info-box {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 1. 통계 단추 상자 */
+.action-stats-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.detail-right .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: #495057;
+    font-size: 14px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    padding: 0;
+}
+
+/* 2. 카테고리 & 태그 정보 상자 테마 정형화 */
+.metadata-display-box {
+    padding: 20px !important; 
+    display: flex;
+    flex-direction: column;
+    gap: 12px; 
+}
+
+.meta-display-item {
+    display: flex;          
+    align-items: center;    
+    margin: 0;
+    padding: 0;
+}
+
+.meta-display-label {
+    margin: 0;              
+    font-size: 14px;
+    font-weight: 700;
+    color: #222222;
+    width: 80px;            
+    flex-shrink: 0;         
+}
+
+.meta-display-value {
+    margin: 0;              
+    font-size: 14px;
+    color: #495057;
+}
+
+.meta-display-item:last-child .meta-display-value {
+    margin-bottom: 0;
+}
+
+/* 3. 댓글 피드 카드 스케일화 */
+.comment-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-list-area {
+    margin-bottom: 16px;
+}
+
+.comment-item {
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.comment-content-row {
+    display: flex;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #333;
+}
+
+.comment-text {
+    color: #495057;
+}
+
+.comment-date {
+    font-size: 11px;
+    color: #adb5bd;
+    margin-top: 4px;
+    text-align: left;
+}
+
+.comment-input-area {
+    display: flex;
+    gap: 8px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-color: #343a40;
+}
+
+.btn-submit {
+    background: #343a40;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
