@@ -1,40 +1,69 @@
 import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode'; // 🚀 토큰 디코딩 라이브러리 추가
 import './css/Sidebar.css'; 
 
 function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, sortOption, setSortOption }) {
+    // 💡 기존 카테고리 상태
     const [categories, setCategories] = useState([]);
+    
+    // 💡 팔로잉 전용: 팔로우한 작가 목록 상태
+    const [followingList, setFollowingList] = useState([]);
+    
     // 💡 접기/펴기 상태 관리
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
-        // pageType에 따라 게시물용 카테고리 또는 사진용 카테고리를 동적으로 불러옵니다.
-        const fetchCategories = async () => {
-            try {
-                const endpoint = pageType === 'post' 
-                    ? 'http://localhost:3010/category/post' 
-                    : 'http://localhost:3010/category/photo';
+        if (pageType === 'following') {
+            // ==========================================
+            // 🚀 [팔로잉 페이지] 내 팔로잉 목록 가져오기
+            // ==========================================
+            const fetchFollowingList = async () => {
+                const token = localStorage.getItem('jwtToken');
+                if (!token) return;
                 
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                if (data.success) {
-                    setCategories(data.categories);
+                try {
+                    const decoded = jwtDecode(token);
+                    const response = await fetch(`http://localhost:3010/follow/list?userNo=${decoded.userNo}`);
+                    const data = await response.json();
+                    if (data.success) {
+                        setFollowingList(data.followingList);
+                    }
+                } catch (error) {
+                    console.error("팔로잉 목록 로드 실패:", error);
                 }
-            } catch (error) {
-                console.error("카테고리 불러오기 실패:", error);
-            }
-        };
+            };
+            fetchFollowingList();
 
-        fetchCategories();
+        } else {
+            // ==========================================
+            // 📸 [사진/게시물 페이지] 카테고리 가져오기
+            // ==========================================
+            const fetchCategories = async () => {
+                try {
+                    const endpoint = pageType === 'post' 
+                        ? 'http://localhost:3010/category/post' 
+                        : 'http://localhost:3010/category/photo';
+                    
+                    const response = await fetch(endpoint);
+                    const data = await response.json();
+                    if (data.success) {
+                        setCategories(data.categories);
+                    }
+                } catch (error) {
+                    console.error("카테고리 불러오기 실패:", error);
+                }
+            };
+            fetchCategories();
+        }
     }, [pageType]);
 
-    // 카테고리 선택 핸들러
+    // 카테고리 및 정렬 선택 핸들러
     const handleCategoryClick = (categoryId) => {
-        setSelectedCategory(categoryId);
+        if (setSelectedCategory) setSelectedCategory(categoryId);
     };
 
-    // 정렬 선택 핸들러
     const handleSortClick = (sortType) => {
-        setSortOption(sortType);
+        if (setSortOption) setSortOption(sortType);
     };
 
     return (
@@ -42,7 +71,9 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
             
             {/* 1. 상단 타이틀 & 접기/펴기 토글 버튼 */}
             <div className="sidebar-top">
-                {!isCollapsed && <span className="sidebar-title">필터</span>}
+                {/* 🚀 pageType이 'following'이 아닐 때만 '필터' 텍스트 표시 */}
+                {!isCollapsed && pageType !== 'following' && <span className="sidebar-title">필터</span>}
+                
                 <button 
                     className="toggle-btn" 
                     onClick={() => setIsCollapsed(!isCollapsed)}
@@ -55,75 +86,102 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
             {/* 💡 사이드바가 열려있을 때만 내용 렌더링 */}
             {!isCollapsed && (
                 <>
-                    {/* 2. 카테고리 2열 그리드 영역 */}
-                    <div className="category-grid">
-                        <div 
-                            className={`filter-item ${selectedCategory === '' ? 'active' : ''}`}
-                            onClick={() => handleCategoryClick('')}
-                        >
-                            <div className="radio-circle"></div>
-                            전체
-                        </div>
-                        {categories.map(cat => (
-                            <div 
-                                key={cat.CATEGORY_ID}
-                                className={`filter-item ${Number(selectedCategory) === cat.CATEGORY_ID ? 'active' : ''}`}
-                                onClick={() => handleCategoryClick(cat.CATEGORY_ID)}
-                            >
-                                <div className="radio-circle"></div>
-                                {cat.CATEGORY_NAME}
+                    {pageType === 'following' ? (
+                        // ==========================================
+                        // 🌟 [팔로잉 모드] 사이드바 UI
+                        // ==========================================
+                        <>
+                            {/* 정렬 메뉴 (팔로워 순, 업데이트 순, 좋아요 순, 스크랩 순) */}
+                            <div className="sort-section">
+                                <h3 className="sidebar-title" style={{ marginTop: '10px' }}>정렬</h3>
+                                <div className="sort-grid">
+                                    <div className={`filter-item ${sortOption === 'followers' ? 'active' : ''}`} onClick={() => handleSortClick('followers')}>
+                                        <div className="radio-circle"></div>팔로워 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'updated' ? 'active' : ''}`} onClick={() => handleSortClick('updated')}>
+                                        <div className="radio-circle"></div>업데이트 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'likes' ? 'active' : ''}`} onClick={() => handleSortClick('likes')}>
+                                        <div className="radio-circle"></div>좋아요 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'scraps' ? 'active' : ''}`} onClick={() => handleSortClick('scraps')}>
+                                        <div className="radio-circle"></div>스크랩 순
+                                    </div>
+                                </div>
                             </div>
-                        ))}
-                    </div>
 
-                    {/* 3. 정렬 2열 그리드 영역 (조회수, 댓글 포함 6종) */}
-                    <div className="sort-section">
-                        <h3 className="sidebar-title" style={{ marginTop: '10px' }}>정렬</h3>
-                        <div className="sort-grid">
-                            <div 
-                                className={`filter-item ${sortOption === 'latest' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('latest')}
-                            >
-                                <div className="radio-circle"></div>
-                                최신 순
+                            {/* 팔로잉 관리 리스트 */}
+                            <div className="following-management-section" style={{ marginTop: '30px' }}>
+                                <h3 className="sidebar-title">팔로잉 관리</h3>
+                                <div className="following-user-list" style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {followingList.length > 0 ? followingList.map(user => (
+                                        // 기존 filter-item 클래스를 활용해 마우스 오버 효과 유지
+                                        <div key={user.USER_NO} className="filter-item" style={{ paddingLeft: '5px' }}>
+                                            <img 
+                                                src={user.PROFILE_IMAGE ? `http://localhost:3010/profile/${user.PROFILE_IMAGE}` : '/default-profile.png'} 
+                                                alt="프로필" 
+                                                style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '10px', objectFit: 'cover' }} 
+                                            />
+                                            <span className="nickname" style={{ fontSize: '14px', fontWeight: '500' }}>{user.NICKNAME}</span>
+                                        </div>
+                                    )) : (
+                                        <div style={{ fontSize: '13px', color: '#888', padding: '10px 5px' }}>팔로우한 작가가 없습니다.</div>
+                                    )}
+                                </div>
                             </div>
-                            <div 
-                                className={`filter-item ${sortOption === 'oldest' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('oldest')}
-                            >
-                                <div className="radio-circle"></div>
-                                오래된 순
+                        </>
+                    ) : (
+                        // ==========================================
+                        // 📸 [사진/게시물 모드] 사이드바 UI (기존 코드 유지)
+                        // ==========================================
+                        <>
+                            {/* 카테고리 영역 */}
+                            <div className="category-grid">
+                                <div 
+                                    className={`filter-item ${selectedCategory === '' ? 'active' : ''}`}
+                                    onClick={() => handleCategoryClick('')}
+                                >
+                                    <div className="radio-circle"></div>
+                                    전체
+                                </div>
+                                {categories.map(cat => (
+                                    <div 
+                                        key={cat.CATEGORY_ID}
+                                        className={`filter-item ${Number(selectedCategory) === cat.CATEGORY_ID ? 'active' : ''}`}
+                                        onClick={() => handleCategoryClick(cat.CATEGORY_ID)}
+                                    >
+                                        <div className="radio-circle"></div>
+                                        {cat.CATEGORY_NAME}
+                                    </div>
+                                ))}
                             </div>
-                            <div 
-                                className={`filter-item ${sortOption === 'likes' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('likes')}
-                            >
-                                <div className="radio-circle"></div>
-                                좋아요 순
+
+                            {/* 정렬 영역 */}
+                            <div className="sort-section">
+                                <h3 className="sidebar-title" style={{ marginTop: '10px' }}>정렬</h3>
+                                <div className="sort-grid">
+                                    <div className={`filter-item ${sortOption === 'latest' ? 'active' : ''}`} onClick={() => handleSortClick('latest')}>
+                                        <div className="radio-circle"></div>최신 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'oldest' ? 'active' : ''}`} onClick={() => handleSortClick('oldest')}>
+                                        <div className="radio-circle"></div>오래된 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'likes' ? 'active' : ''}`} onClick={() => handleSortClick('likes')}>
+                                        <div className="radio-circle"></div>좋아요 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'views' ? 'active' : ''}`} onClick={() => handleSortClick('views')}>
+                                        <div className="radio-circle"></div>조회수 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'scraps' ? 'active' : ''}`} onClick={() => handleSortClick('scraps')}>
+                                        <div className="radio-circle"></div>스크랩 순
+                                    </div>
+                                    <div className={`filter-item ${sortOption === 'comments' ? 'active' : ''}`} onClick={() => handleSortClick('comments')}>
+                                        <div className="radio-circle"></div>댓글 순
+                                    </div>
+                                </div>
                             </div>
-                            <div 
-                                className={`filter-item ${sortOption === 'views' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('views')}
-                            >
-                                <div className="radio-circle"></div>
-                                조회수 순
-                            </div>
-                            <div 
-                                className={`filter-item ${sortOption === 'scraps' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('scraps')}
-                            >
-                                <div className="radio-circle"></div>
-                                스크랩 순
-                            </div>
-                            <div 
-                                className={`filter-item ${sortOption === 'comments' ? 'active' : ''}`}
-                                onClick={() => handleSortClick('comments')}
-                            >
-                                <div className="radio-circle"></div>
-                                댓글 순
-                            </div>
-                        </div>
-                    </div>
+                        </>
+                    )}
                 </>
             )}
         </aside>

@@ -1,79 +1,89 @@
 /* ==========================================================================
-   💡 전체 프레임 콤팩트화 및 정중앙 정렬
+   💡 전체 프레임 (PhotoDetail과 동일한 배경색과 너비)
    ========================================================================== */
 .post-detail-container {
+    width: 100%;
     min-height: 100vh;
-    background-color: #f8f9fa;
+    background-color: #f4f6f8; 
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: center; /* 🚀 페이지 전체 요소를 화면 가로 중앙에 배치 */
 }
 
-.detail-body {
-    /* 🚀 기존 1200px에서 960px로 줄여 화면에 꽉 차지 않고 대폭 콤팩트하게 가둡니다 */
-    max-width: 850px; 
-    margin: 0 auto;    /* 상하 마진 0, 좌우 자동 마진으로 중앙 배치 */
-    padding: 24px;
+.post-detail-container .detail-body {
+    max-width: 870px; /* 🚀 사용자님이 지정하신 콤팩트 너비 */
+    margin: 0 auto;
+    padding: 30px 20px; 
     width: 100%;
     box-sizing: border-box;
 }
 
-.back-button-area {
+.post-detail-container .back-button-area {
     margin-bottom: 20px;
-    text-align: left;  /* 뒤로가기 버튼을 왼쪽 끝에 정착 */
 }
 
-.btn-back {
-    background: #fff;
-    border: 1px solid #ced4da;
-    padding: 8px 16px;
-    font-weight: 600;
+/* 둥글고 그림자 진 뒤로가기 버튼 */
+.post-detail-container .btn-back {
+    padding: 10px 20px;
+    background: #ffffff;
+    border: none;
+    border-radius: 20px;
     cursor: pointer;
-    border-radius: 4px;
+    font-weight: 600;
+    color: #4a4a4a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s ease;
 }
 
-.detail-content-wrapper {
+.post-detail-container .btn-back:hover {
+    background: #f0f0f0;
+}
+
+.post-detail-container .detail-content-wrapper {
     display: flex;
-    gap: 24px;
+    gap: 30px; 
     align-items: flex-start;
-    justify-content: center; /* 🚀 내부 아이템(왼쪽, 오른쪽)을 정중앙 정렬 */
+    width: 100%;
 }
 
 /* ==========================================================================
-   💡 좌측 영역 (텍스트 박스 가로 대폭 확장 및 이미지 슬라이더 축소 통합)
+   💡 좌측 영역 (flex: 4 비율)
    ========================================================================== */
-.detail-left {
-    flex: 2.5; /* 🚀 대표님이 찾으신 최적의 황금 비율 적용 */
+.post-detail-container .detail-left {
+    flex: 4; 
+    /* 🚀 핵심 1: 본문이 길어져도 박스 크기를 늘리지 못하게 막습니다. */
+    min-width: 0; 
+    
+    /* (옵션) 🚀 핵심 2: 만약 비율(flex) 대신 고정 픽셀로 박고 싶다면 
+       flex 값을 지우고 아래 width를 사용하세요. */
+    /* width: 500px; */ 
+    
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    align-items: stretch; 
+    gap: 20px;
+    align-items: stretch;
 }
 
-/* 와이어프레임의 '게시글' 박스 */
-.post-text-content-box {
-    background: #fff;
+/* 테두리를 없애고 라운드(16px)와 그림자 효과 적용 */
+.post-detail-container .post-text-content-box,
+.post-detail-container .post-image-slider-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     padding: 24px;
-    min-height: 120px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    text-align: left; /* 좌측 기준 정렬 배치 */
-    
-    /* 🚀 핵심: 부모 너비를 100% 꽉 채우도록 설정 */
-    width: 100%; 
+    border: none; 
+    width: 100%;
     box-sizing: border-box;
 }
 
 /* 유튜브 프로필 아바타 + 닉네임 메타 조합 헤더 */
-.post-author-header-yt {
+.post-detail-container .post-author-header-yt {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 18px;
 }
 
-.yt-author-avatar {
+.post-detail-container .yt-author-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -81,240 +91,294 @@
     object-fit: cover;
 }
 
-.yt-author-meta {
+.post-detail-container .yt-author-meta {
     display: flex;
     align-items: center;
-    gap: 14px; /* 닉네임과 시간 사이 시원한 간격 격리 */
+    gap: 14px;
 }
 
-.author-name {
+.post-detail-container .author-name {
     font-size: 15px;
     font-weight: 700;
     color: #212529;
 }
 
-.post-time-ago-yt {
+.post-detail-container .post-time-ago-yt {
     color: #868e96;
     font-weight: 400;
     font-size: 13px;
 }
 
-/* 타이틀과 본문 간의 폰트 크기 이질감 스케일 정돈 */
-.post-title-yt {
+.post-detail-container .post-title-yt {
     margin: 0 0 10px 0;
-    font-size: 18px; 
+    font-size: 18px;
     color: #212529;
     font-weight: 700;
     line-height: 1.4;
 }
 
-.post-body-text-yt {
+.post-detail-container .post-body-text-yt {
     margin: 0;
     line-height: 1.6;
     color: #495057;
-    font-size: 14px; /* 본문 폰트 크기를 타이틀과 더 잘 어울리게 미세 조정 */
+    font-size: 14px;
+    word-wrap: break-word;
     white-space: pre-wrap;
 }
 
-/* 와이어프레임의 '사진' 슬라이더 박스 */
-.post-image-slider-box {
-    background: #fff;
+/* ==========================================================================
+   💡 사진 슬라이더 영역 (잃어버린 HTML 복구 후 완벽 정상화)
+   ========================================================================== */
+.post-detail-container .post-image-slider-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     padding: 24px;
+    width: 100%;
+    box-sizing: border-box;
+    
+    /* 🚀 화살표를 가두는 절대 기준점 정상 작동! */
+    position: relative; 
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    /* 🚀 이미지 축소를 위해 슬라이더 기본 최소 높이를 줄임 */
-    min-height: 250px; 
-    position: relative;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    
-    /* 🚀 텍스트 박스와 가로 크기를 완전히 일치시킴 */
-    width: 100%; 
-    box-sizing: border-box;
+    justify-content: center;
+    min-height: 250px;
 }
 
-.slider-image-wrapper {
-    flex: 1;
+.post-detail-container .slider-image-wrapper {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    overflow: hidden;
 }
 
-.slider-image-wrapper img {
+.post-detail-container .slider-image-wrapper img {
     max-width: 100%;
-    /* 🚀 요구사항 반영: 이미지가 너무 거대해지지 않도록 최대 높이를 450px -> 360px로 축소 */
-    max-height: 360px; 
+    max-height: 500px;
     object-fit: contain;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
-.slider-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
+/* 🚀 화살표 버튼 (정확히 정중앙에 안착) */
+.post-detail-container .slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #e9ecef;
+    font-size: 20px;
+    font-weight: bold;
     cursor: pointer;
-    padding: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #212529;
-    transition: transform 0.2s;
-    z-index: 5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
-.slider-btn:hover {
-    transform: scale(1.2);
+.post-detail-container .slider-btn:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.1);
 }
 
+.post-detail-container .slider-btn.left {
+    left: 20px;
+}
+
+.post-detail-container .slider-btn.right {
+    right: 20px;
+}
 
 /* ==========================================================================
-   💡 우측 통합 영역 (통계 + 댓글 + 카테고리 + 첨부파일)
+   💡 우측 통합 영역 (flex: 3 비율)
    ========================================================================== */
-.detail-right {
-    /* 🚀 핵심: 늘어나지도(0), 줄어들지도(0) 말고, 무조건 350px을 유지하라! */
-    flex: 0 0 320px; 
+.post-detail-container .detail-right {
+    flex: 3; 
+    /* 🚀 핵심 1: 댓글이나 파일명이 아무리 길어도 박스를 밀어내지 못하게 방어합니다. */
+    min-width: 0; 
+    
+    /* (옵션) 🚀 핵심 2: 우측을 절대 변하지 않는 고정 크기로 만들고 싶다면 
+       flex 값을 지우고 아래 width를 사용하세요. */
+    /* width: 340px; */
+
     display: flex;
     flex-direction: column;
-    gap: 16px; 
+    gap: 20px; 
 }
 
 /* 우측 카드 박스 기저 레이아웃 */
-.info-box {
-    background: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 20px;
+.post-detail-container .info-box {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    padding: 24px;
+    border: none;
     box-sizing: border-box;
 }
 
-/* 1. 통계 단추 상자 */
-.action-stats-container {
+/* 1. 통계 단추 상자 (가운데 정렬, 40px 간격 시원하게 배치) */
+.post-detail-container .action-stats-container {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+    gap: 40px;
     align-items: center;
+    padding: 20px 0;
 }
 
-.detail-right .stat-item {
+.post-detail-container .stat-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: bold;
-    color: #495057;
-    font-size: 14px;
 }
 
-.icon-btn {
+.post-detail-container .icon-btn {
     background: none;
     border: none;
+    padding: 0;
     cursor: pointer;
     display: flex;
-    padding: 0;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: transform 0.2s ease;
 }
 
-/* 2. 카테고리 & 태그 정보 상자 테마 정형화 */
-.metadata-display-box {
-    padding: 20px !important; 
-    display: flex;
-    flex-direction: column;
-    gap: 12px; 
+.post-detail-container .icon-btn:hover {
+    transform: scale(1.15);
 }
 
-.meta-display-item {
-    display: flex;          
-    align-items: center;    
-    margin: 0;
-    padding: 0;
-}
-
-.meta-display-label {
-    margin: 0;              
-    font-size: 14px;
-    font-weight: 700;
-    color: #222222;
-    width: 80px;            
-    flex-shrink: 0;         
-}
-
-.meta-display-value {
-    margin: 0;              
-    font-size: 14px;
-    color: #495057;
-}
-
-.meta-display-item:last-child .meta-display-value {
-    margin-bottom: 0;
-}
-
-/* 3. 댓글 피드 카드 스케일화 */
-.comment-box {
-    display: flex;
-    flex-direction: column;
-}
-
-.comment-list-area {
-    margin-bottom: 16px;
-}
-
-.comment-item {
-    border-bottom: 1px solid #f1f3f5;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.comment-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.comment-content-row {
-    display: flex;
-    gap: 8px;
-    line-height: 1.4;
-}
-
-.comment-author {
+.post-detail-container .stat-number {
+    font-size: 16px;
     font-weight: bold;
     color: #333;
 }
 
-.comment-text {
+/* 2. 카테고리 & 태그 정보 상자 */
+.post-detail-container .metadata-display-box {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.post-detail-container .meta-display-item {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.post-detail-container .meta-display-label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222222;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.post-detail-container .meta-display-value {
+    margin: 0;
+    font-size: 14px;
     color: #495057;
 }
 
-.comment-date {
-    font-size: 11px;
-    color: #adb5bd;
-    margin-top: 4px;
-    text-align: left;
-}
-
-.comment-input-area {
+/* 3. 댓글 피드 (입력창 등 라운드 20px 처리) */
+.post-detail-container .comment-box {
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    min-height: 220px;
+    justify-content: space-between;
 }
 
-.comment-input {
-    flex: 1;
-    padding: 10px 16px;
-    border: 1px solid #ced4da;
-    border-radius: 20px;
+.post-detail-container .comment-list-area {
+    margin-bottom: 16px;
+}
+
+.post-detail-container .comment-item {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.post-detail-container .comment-content-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    word-break: break-all;
+}
+
+.post-detail-container .comment-author {
+    font-weight: bold;
+    color: #222;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.post-detail-container .comment-text {
+    color: #333;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.post-detail-container .comment-date {
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+    margin-top: 4px;
+}
+
+/* 더보기 버튼 */
+.post-detail-container .btn-more-comments {
+    display: block;
+    margin: 15px auto 5px auto;
+    background: #f0f2f5;
+    border: none;
+    color: #555;
     font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    width: fit-content;
+}
+.post-detail-container .btn-more-comments:hover {
+    background: #e4e6e9;
+    color: #333;
+}
+
+/* 입력창 */
+.post-detail-container .comment-input-area {
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 16px;
+}
+
+.post-detail-container .comment-input {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 10px 16px;
+    background: #fafafa;
     outline: none;
 }
 
-.comment-input:focus {
-    border-color: #343a40;
+.post-detail-container .comment-input:focus {
+    border-color: #b0b0b0;
 }
 
-.btn-submit {
-    background: #343a40;
-    color: #fff;
+.post-detail-container .btn-submit {
+    background: #333;
+    color: white;
     border: none;
-    padding: 10px 16px;
     border-radius: 20px;
+    padding: 8px 18px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
+    font-weight: bold;
 }

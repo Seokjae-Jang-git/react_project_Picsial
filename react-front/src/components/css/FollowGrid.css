@@ -1,0 +1,181 @@
+/* FollowGrid.css - .follow-grid-container 기반 독립적 스타일링 */
+
+.follow-grid-container {
+    width: 100%;
+}
+
+.follow-grid-container .grid-header {
+    margin-bottom: 24px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 12px;
+}
+
+.follow-grid-container .grid-header h2 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #222;
+    margin: 0;
+}
+
+.follow-grid-container .grid-header span {
+    font-size: 14px;
+    color: #666;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
+.follow-grid-container .author-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.follow-grid-container .author-card {
+    display: flex;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: #fff;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.follow-grid-container .author-info-section {
+    flex: 0 0 280px;
+    padding: 24px;
+    border-right: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.follow-grid-container .author-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.follow-grid-container .author-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.follow-grid-container .author-name-box {
+    flex: 1;
+}
+
+.follow-grid-container .author-nickname {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #222;
+}
+
+.follow-grid-container .author-intro {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.follow-grid-container .author-stats {
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+
+.follow-grid-container .stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: #555;
+}
+
+.follow-grid-container .stat-row strong {
+    color: #222;
+}
+
+.follow-grid-container .update-time {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #eee;
+    color: #888;
+}
+
+.follow-grid-container .author-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.follow-grid-container .btn-follow, 
+.follow-grid-container .btn-message {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.follow-grid-container .btn-follow {
+    background-color: #222;
+    color: #fff;
+}
+
+.follow-grid-container .btn-follow.following {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.follow-grid-container .btn-message {
+    background-color: #fff;
+    color: #222;
+    border: 1px solid #ddd;
+}
+
+.follow-grid-container .btn-message:hover {
+    background-color: #f8f9fa;
+}
+
+.follow-grid-container .author-photos-section {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    align-items: center;
+}
+
+.follow-grid-container .rep-photo-wrapper {
+    flex: 0 0 160px;
+    height: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fafafa;
+}
+
+.follow-grid-container .rep-photo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.follow-grid-container .rep-photo-wrapper img:hover {
+    transform: scale(1.05);
+}
+
+.follow-grid-container .no-photos {
+    color: #aaa;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
+}

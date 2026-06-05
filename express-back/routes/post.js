@@ -334,8 +334,8 @@ router.post('/upload', upload.fields([
         await sftp.mkdir('/picsial_images/post/attachment/', true);
 
         const insertPostSql = `
-            INSERT INTO PS_POST (POST_ID, USER_NO, TITLE, CONTENT, VIEW_COUNT, LIKE_COUNT, IS_PUBLIC, CREATED_AT)
-            VALUES (PS_POST_SEQ.NEXTVAL, :userNo, :title, :content, 0, 0, :isPublic, SYSDATE)
+            INSERT INTO PS_POST (POST_ID, USER_NO, TITLE, CONTENT, VIEW_COUNT, LIKE_COUNT, IS_PUBLIC)
+            VALUES (PS_POST_SEQ.NEXTVAL, :userNo, :title, :content, 0, 0, :isPublic)
             RETURNING POST_ID INTO :newPostId
         `;
         const postResult = await connection.execute(insertPostSql, {
@@ -345,12 +345,18 @@ router.post('/upload', upload.fields([
         
         const newPostId = postResult.outBinds.newPostId[0];
 
+        // ==========================================
+        // 1. 이미지 파일 처리 영역
+        // ==========================================
         if (req.files['images'] && req.files['images'].length > 0) {
             const images = req.files['images'];
             for (let i = 0; i < images.length; i++) {
                 const file = images[i];
+                
+                // 💡 한글 파일명 깨짐 방지 처리를 가장 상단에서 진행합니다.
+                const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-                const ext = path.extname(file.originalname);
+                const ext = path.extname(originalName);
                 
                 const saveFileName = `image-${uniqueSuffix}${ext}`;
                 const thumbFileName = `thumb_${saveFileName}`;
@@ -366,9 +372,10 @@ router.post('/upload', upload.fields([
 
                 await sftp.put(thumbBuffer, thumbRemotePath, { mode: 0o644 });
 
+                // 🚀 약속대로 CREATED_AT 및 SYSDATE 제외
                 const imgSql = `
-                    INSERT INTO PS_POST_IMAGE (IMAGE_ID, POST_ID, IMAGE_URL, THUMB_URL, SORT_ORDER, CREATED_AT)
-                    VALUES (PS_POST_IMAGE_SEQ.NEXTVAL, :postId, :imgUrl, :thumbUrl, :sortOrder, SYSDATE)
+                    INSERT INTO PS_POST_IMAGE (IMAGE_ID, POST_ID, IMAGE_URL, THUMB_URL, SORT_ORDER)
+                    VALUES (PS_POST_IMAGE_SEQ.NEXTVAL, :postId, :imgUrl, :thumbUrl, :sortOrder)
                 `;
                 await connection.execute(imgSql, { 
                     postId: newPostId, 
@@ -379,29 +386,37 @@ router.post('/upload', upload.fields([
             }
         }
 
+        // ==========================================
+        // 2. 첨부파일 처리 영역
+        // ==========================================
         if (req.files['attachments'] && req.files['attachments'].length > 0) {
             const files = req.files['attachments'];
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                
+                // 💡 한글 파일명 깨짐 방지 처리를 가장 상단에서 진행하여 변수 에러를 막습니다.
+                const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-                const ext = path.extname(file.originalname);
+                const ext = path.extname(originalName);
                 
                 const saveFileName = `attach-${uniqueSuffix}${ext}`;
                 const remotePath = `/picsial_images/post/attachment/${saveFileName}`;
 
                 await sftp.put(file.buffer, remotePath, { mode: 0o644 });
 
-                const originalName = file.originalname;
                 const fileSize = file.size;
 
+                // 🚀 약속대로 CREATED_AT 및 SYSDATE 제외
                 const fileSql = `
-                    INSERT INTO PS_POST_FILE (FILE_ID, POST_ID, FILE_URL, ORIGINAL_NAME, FILE_SIZE, SORT_ORDER, CREATED_AT)
-                    VALUES (PS_POST_FILE_SEQ.NEXTVAL, :postId, :fileUrl, :originalName, :fileSize, :sortOrder, SYSDATE)
+                    INSERT INTO PS_POST_FILE (FILE_ID, POST_ID, FILE_URL, ORIGINAL_NAME, FILE_SIZE, SORT_ORDER)
+                    VALUES (PS_POST_FILE_SEQ.NEXTVAL, :postId, :fileUrl, :originalName, :fileSize, :sortOrder)
                 `;
+                
+                // 여기서 originalName이 정상적으로 바인딩됩니다.
                 await connection.execute(fileSql, { 
                     postId: newPostId, 
                     fileUrl: saveFileName,
-                    originalName, 
+                    originalName: originalName, 
                     fileSize, 
                     sortOrder: i + 1 
                 });

@@ -1,0 +1,369 @@
+/* ==========================================================================
+   📝 게시물 업로드 전용 CSS (최상단 컨테이너로 완벽 격리)
+   ========================================================================== */
+
+/* 1. 페이지 레이아웃 및 상단 바 */
+.post-upload-page-container {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.post-upload-page-container .upload-main {
+    max-width: 1200px;
+    margin: 0px auto;
+    padding: 0 0px;
+}
+
+.post-upload-page-container .upload-top-bar {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.post-upload-page-container .btn-back {
+    background: none;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 5px 0;
+    transition: color 0.2s ease;
+}
+
+.post-upload-page-container .btn-back:hover {
+    color: #3A86FF;
+}
+
+.post-upload-page-container .upload-type-selector {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 25px;
+}
+
+.post-upload-page-container .upload-type-selector h2 {
+    margin: 0;
+}
+
+.post-upload-page-container .upload-header-actions {
+    margin-bottom: 20px;
+}
+
+/* ==========================================================================
+   2. 대시보드 메인 박스 및 왼쪽 콘텐츠 영역 (사진/첨부파일 영역)
+   ========================================================================== */
+.post-upload-page-container .upload-content-wrapper {
+    display: flex;
+    gap: 30px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.post-upload-page-container .upload-left {
+    flex: 1;
+    border-right: 1px solid #eee;
+    padding-right: 30px;
+}
+
+.post-upload-page-container .upload-title-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding-left: 2px;
+}
+
+.post-upload-page-container .upload-title-section h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* 이미지 리스트 그리드 (사진 업로드와 동일한 점선 스타일 공유) */
+.post-upload-page-container .photo-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.post-upload-page-container .photo-add-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    font-size: 32px;
+    color: #999;
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.post-upload-page-container .photo-add-btn:hover { 
+    border-color: #3A86FF; 
+    color: #3A86FF; 
+}
+
+.post-upload-page-container .thumbnail-item {
+    position: relative;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.post-upload-page-container .thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-upload-page-container .thumbnail-item.active {
+    border-color: #3A86FF;
+}
+
+.post-upload-page-container .btn-delete-thumb {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    border: none;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+    z-index: 5;
+}
+
+.post-upload-page-container .btn-delete-thumb:hover {
+    background-color: #ff4d4f;
+    transform: scale(1.1);
+}
+
+/* 첨부파일 섹션 관련 미세 조정 */
+.post-upload-page-container .attachment-section {
+    margin-top: 20px;
+}
+
+.post-upload-page-container .attachment-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.post-upload-page-container .attachment-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   3. 오른쪽 입력 폼 영역 (세로 간격 밀도 최적화 코어)
+   ========================================================================== */
+.post-upload-page-container .upload-right {
+    flex: 1;
+    max-width: 400px;
+}
+
+.post-upload-page-container .upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* 공개여부 토글 행 조정 */
+.post-upload-page-container .public-toggle {
+    display: flex;
+    align-items: center; 
+    width: 100%;
+    padding: 0 5px;
+    margin-bottom: 0; 
+}
+
+.post-upload-page-container .toggle-label {
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.post-upload-page-container .radio-group {
+    display: flex;
+    justify-content: center;
+    flex-grow: 1;
+    gap: 20px;
+}
+
+.post-upload-page-container .radio-group label {
+    cursor: pointer;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 입력창 그룹 정돈 */
+.post-upload-page-container .input-counter-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0; 
+}
+
+.post-upload-page-container .input-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-upload-page-container .form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    box-sizing: border-box; /* 패딩 삐져나옴 방지 */
+}
+
+.post-upload-page-container .form-input:focus {
+    outline: none;
+    border-color: #3A86FF;
+}
+
+/* 설명창(글쓰기) 텍스트 영역 */
+.post-upload-page-container .form-textarea {
+    /* 글쓰기 본문이므로 기본적으로 조금 더 넓게 설정 */
+    min-height: 150px; 
+    resize: none;
+    padding-bottom: 26px !important; 
+}
+
+.post-upload-page-container .char-counter {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 11px;
+    color: #868e96;
+    font-weight: 400;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   4. 다중 카테고리 / 장소 / 태그 셋업
+   ========================================================================== */
+.post-upload-page-container .category-multi-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; 
+    margin-bottom: 0;
+}
+
+.post-upload-page-container .category-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-upload-page-container .category-select {
+    flex-grow: 1;
+    margin-bottom: 0 !important;
+}
+
+/* 파일찾기 및 카테고리 추가/삭제 공용 버튼 스타일 */
+.post-upload-page-container .btn-cat-action {
+    height: 42px;
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    color: #495057;
+    font-size: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.post-upload-page-container .btn-cat-action.add { width: 42px; color: #3A86FF; border-color: #3A86FF; }
+.post-upload-page-container .btn-cat-action.remove { width: 42px; color: #ff4d4f; border-color: #ff4d4f; }
+
+.post-upload-page-container .btn-cat-action:hover {
+    background-color: #f8f9fa;
+}
+
+/* 태그 리스트 컴포넌트 */
+.post-upload-page-container .tag-input-container {
+    width: 100%;
+}
+
+.post-upload-page-container .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px; 
+}
+
+.post-upload-page-container .tag-badge {
+    background: #3A86FF;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-upload-page-container .tag-badge button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.post-upload-page-container .meta-preview-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   5. 최종 제출 업로드 버튼
+   ========================================================================== */
+.post-upload-page-container .btn-upload-submit {
+    background: #3A86FF;
+    color: white !important;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    margin-top: 5px; 
+}
+
+.post-upload-page-container .btn-upload-submit:hover {
+    background: #256FFF;
+}

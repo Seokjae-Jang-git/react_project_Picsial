@@ -171,11 +171,13 @@ function PostDetail() {
 
                         {/* 와이어프레임의 '사진' 슬라이더 박스 */}
                         {images.length > 0 && (
+                            /* 🚨 잃어버렸던 껍데기 박스 부활! (이게 없어서 모든 버그가 생겼습니다) */
                             <div className="post-image-slider-box">
-                                {images.length > 1 && (
-                                    <button className="slider-btn" onClick={() => setCurrentImgIdx(p => p === 0 ? images.length - 1 : p - 1)}>&lt;</button>
-                                )}
                                 
+                                {images.length > 1 && (
+                                    <button className="slider-btn left" onClick={() => setCurrentImgIdx(p => p === 0 ? images.length - 1 : p - 1)}>&lt;</button>
+                                )}
+
                                 <div className="slider-image-wrapper">
                                     <img 
                                         src={images[currentImgIdx]} 
@@ -183,10 +185,11 @@ function PostDetail() {
                                         referrerPolicy="no-referrer"
                                     />
                                 </div>
-                                
+
                                 {images.length > 1 && (
-                                    <button className="slider-btn" onClick={() => setCurrentImgIdx(p => p === images.length - 1 ? 0 : p + 1)}>&gt;</button>
+                                    <button className="slider-btn right" onClick={() => setCurrentImgIdx(p => p === images.length - 1 ? 0 : p + 1)}>&gt;</button>
                                 )}
+                                
                             </div>
                         )}
                     </div>

@@ -64,7 +64,9 @@ function LocationSearch({ value, onChange }) {
                     placeholder="장소 검색 (예: 서울, 해운대)" 
                     value={query}
                     onChange={(e) => {
-                        setQuery(e.target.value);
+                        const val = e.target.value;
+                        setQuery(val);      // 1. 자기 자신의 상태 업데이트
+                        onChange(val);      // 2. 🚀 핵심: 부모 컴포넌트(Upload_Photo.js)의 상태도 실시간 업데이트
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}

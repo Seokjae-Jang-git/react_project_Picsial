@@ -36,7 +36,7 @@ function Header() {
                 <nav className="header-nav">
                     <button className="header-tab-btn active" onClick={() => navigate('/photo')}>사진</button>
                     <button className="header-tab-btn active" onClick={() => navigate('/post')}>게시물</button>
-                    <button className="header-tab-btn">팔로잉</button>
+                    <button className="header-tab-btn active" onClick={() => navigate('/follow')}>팔로잉</button>
                 </nav>
             </div>
 

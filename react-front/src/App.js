@@ -11,6 +11,7 @@ import PhotoDetail from './components/PhotoDetail';
 import PostPage from './components/PostPage';
 import PostDetail from './components/PostDetail';
 import Upload from './components/Upload';
+import Follow from './components/Follow';
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/post" element={<PostPage />} />
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/upload" element={<Upload />} />
+          <Route path="/follow" element={<Follow />} />
         </Routes>
       </Box>
     </Box>
