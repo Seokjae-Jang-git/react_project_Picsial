@@ -10,6 +10,8 @@ const categoryRouter = require("./routes/category");
 const photoRoutes = require('./routes/photo')
 const postRoutes = require('./routes/post')
 const followRoutes = require('./routes/follow')
+const photogRoutes = require('./routes/photog')
+const mypageRoutes = require('./routes/mypage')
 
 const db = require("./db");
 
@@ -28,6 +30,8 @@ app.use("/category", categoryRouter);
 app.use('/photo', photoRoutes);
 app.use('/post', postRoutes);
 app.use('/follow', followRoutes);
+app.use('/photog', photogRoutes);
+app.use('/mypage', mypageRoutes);
 
 
 async function startServer() {

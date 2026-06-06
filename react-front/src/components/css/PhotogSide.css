@@ -1,0 +1,146 @@
+/* src/css/PhotogSide.css */
+.photog-sidebar {
+    width: 240px;
+    min-width: 240px; /* 창이 좁아져도 절대 찌그러지지 않게 방어 */
+    flex-shrink: 0; /* 우측 그리드에 밀려 축소되는 현상 방지 */
+    padding: 24px 20px; /* 기존 사이드바와 비슷한 상하좌우 여백 확보 */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.photog-sidebar .photog-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px !important; 
+    background: #ffffff !important; 
+    border: none !important; /* 브라우저 기본 테두리 완벽 삭제 */
+    border-radius: 20px !important; 
+    cursor: pointer; 
+    font-weight: 600; 
+    color: #4a4a4a; 
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important; 
+    transition: background-color 0.2s ease, transform 0.1s ease; 
+    margin-bottom: 30px; /* 프로필 사진과의 간격을 시원하게 띄움 */
+    align-self: flex-start; /* 버튼이 사이드바 가로폭을 꽉 채우지 않고 자기 크기만 가지도록 설정 */
+}
+
+/* 마우스 올렸을 때 클릭하는 맛 추가 */
+.photog-sidebar .photog-back-btn:hover {
+    background: #f8f9fa !important;
+    transform: translateY(-1px);
+}
+
+.photog-profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.photog-profile-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 1px solid #e9ecef; /* 사진 테두리 살짝 추가 */
+}
+
+.photog-nickname {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* 통계 전체 컨테이너 */
+.photog-sidebar .photog-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 행과 행 사이의 컴팩트한 간격 */
+    margin-bottom: 16px;
+    font-size: 13px;
+    width: 100%;
+}
+
+/* 각 줄의 배치 (좌우 정렬) */
+.photog-sidebar .stat-row {
+    display: flex;
+    justify-content: space-between; /* 💡 기획안대로 양옆으로 예쁘게 벌려줌 */
+    align-items: center;
+    color: #555;
+    white-space: nowrap;
+    padding: 0 4px; /* 사이드바 끝에 너무 붙지 않도록 미세 여백 */
+}
+
+/* 글자와 숫자 묶음 (예: "팔로워 22") */
+.photog-sidebar .stat-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 글자와 숫자 사이의 간격 */
+    min-width: 80px; /* 좌우 항목이 줄바꿈되거나 뒤틀리지 않도록 안정적인 최소 너비 확보 */
+}
+
+/* 통계 숫자 강조 */
+.photog-sidebar .stat-group strong {
+    color: #222;
+    font-weight: 600;
+}
+
+/* 하단 업데이트 영역 (점선 구분) */
+.photog-sidebar .stat-row.update-time {
+    justify-content: space-between;
+    border-top: 1px dashed #e1e1e1; /* 상단 점선 분리 */
+    padding-top: 10px;
+    margin-top: 4px;
+    color: #777;
+    font-size: 12px; /* 업데이트 날짜는 살짝 작고 차분하게 */
+}
+
+.photog-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-follow-photog {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 팔로우 안한 상태 (검은 버튼) */
+.btn-follow-photog.unfollowed {
+    background-color: #212529;
+    color: #fff;
+}
+
+/* 팔로우 한 상태 (회색 버튼) */
+.btn-follow-photog.followed {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.btn-msg-photog {
+    flex: 1;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    color: #495057;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-msg-photog:hover {
+    background-color: #f8f9fa;
+}

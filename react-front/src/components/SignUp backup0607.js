@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/SignUp.css';
 
+
 function SignUp() {
     const userIdRef = useRef(null);
     const emailRef = useRef(null);
@@ -16,11 +17,8 @@ function SignUp() {
     const [nicknameCheckStatus, setNicknameCheckStatus] = useState('');
     const [verifiedNickname, setVerifiedNickname] = useState('');
 
-    // 카테고리 데이터 및 선택 상태 분리
-    const [photoCategories, setPhotoCategories] = useState([]);
-    const [postCategories, setPostCategories] = useState([]);
-    const [selectedPhotoCategories, setSelectedPhotoCategories] = useState([]);
-    const [selectedPostCategories, setSelectedPostCategories] = useState([]);
+    const [categoryList, setCategoryList] = useState([]);
+    const [preferenceCategories, setPreferenceCategories] = useState([]);
 
     const [introText, setIntroText] = useState('');
     const MAX_INTRO_LENGTH = 100;
@@ -29,23 +27,13 @@ function SignUp() {
 
     const navigate = useNavigate();
 
-    // 두 API를 병렬로 호출하여 카테고리 데이터 로드
     useEffect(function() {
         async function fetchCategories() {
             try {
-                const [photoRes, postRes] = await Promise.all([
-                    fetch('http://localhost:3010/category/photo'),
-                    fetch('http://localhost:3010/category/post')
-                ]);
-
-                const photoData = await photoRes.json();
-                const postData = await postRes.json();
-
-                if (photoRes.ok && photoData.success) {
-                    setPhotoCategories(photoData.categories);
-                }
-                if (postRes.ok && postData.success) {
-                    setPostCategories(postData.categories);
+                const response = await fetch('http://localhost:3010/category');
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    setCategoryList(data.categories);
                 }
             } catch (error) {
                 console.error('카테고리 Fetch 에러:', error);
@@ -54,27 +42,13 @@ function SignUp() {
         fetchCategories();
     }, []);
 
-    // 사진 카테고리 선택 핸들러
-    function handlePhotoCategoryChange(id) {
-        if (selectedPhotoCategories.includes(id)) {
-            setSelectedPhotoCategories(selectedPhotoCategories.filter(catId => catId !== id));
-        } else {
-            setSelectedPhotoCategories([...selectedPhotoCategories, id]);
-        }
-    }
-
-    // 게시물 카테고리 선택 핸들러
-    function handlePostCategoryChange(id) {
-        if (selectedPostCategories.includes(id)) {
-            setSelectedPostCategories(selectedPostCategories.filter(catId => catId !== id));
-        } else {
-            setSelectedPostCategories([...selectedPostCategories, id]);
-        }
-    }
-
     async function handleCheckId() {
         const userId = userIdRef.current.value.trim();
-        if (!userId) { alert('중복 확인할 아이디를 입력하세요.'); return; }
+
+        if (!userId) {
+            alert('중복 확인할 아이디를 입력하세요.');
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:3010/auth/check-id', {
@@ -83,6 +57,7 @@ function SignUp() {
                 body: JSON.stringify({ userId })
             });
             const data = await response.json();
+
             if (response.ok && data.success) {
                 if (data.isDuplicate) {
                     alert(data.message);
@@ -93,15 +68,22 @@ function SignUp() {
                     setIdCheckStatus('checked');
                     setVerifiedId(userId);
                 }
+            } else {
+                alert(data.message || '중복 확인 중 에러가 발생했습니다.');
             }
         } catch (error) {
             console.error('중복확인 요청 에러:', error);
+            alert('서버와 통신에 실패했습니다.');
         }
     }
 
     async function handleCheckNickname() {
         const nickname = nicknameRef.current.value.trim();
-        if (!nickname) { alert('중복 확인할 닉네임을 입력하세요.'); return; }
+
+        if (!nickname) {
+            alert('중복 확인할 닉네임을 입력하세요.');
+            return;
+        }
 
         try {
             const response = await fetch('http://localhost:3010/auth/check-nickname', {
@@ -110,6 +92,7 @@ function SignUp() {
                 body: JSON.stringify({ nickname })
             });
             const data = await response.json();
+
             if (response.ok && data.success) {
                 if (data.isDuplicate) {
                     alert(data.message);
@@ -118,11 +101,22 @@ function SignUp() {
                 } else {
                     alert(data.message);
                     setNicknameCheckStatus('checked');
-                    setVerifiedNickname(nickname);
+                    setVerifiedNickname(nickname); // 통과된 닉네임 백업
                 }
+            } else {
+                alert(data.message || '중복 확인 중 에러가 발생했습니다.');
             }
         } catch (error) {
             console.error('닉네임 중복확인 요청 에러:', error);
+            alert('서버와 통신에 실패했습니다.');
+        }
+    }
+
+    function handleCategoryChange(id) {
+        if (preferenceCategories.includes(id)) {
+            setPreferenceCategories(preferenceCategories.filter(catId => catId !== id));
+        } else {
+            setPreferenceCategories([...preferenceCategories, id]);
         }
     }
 
@@ -134,15 +128,36 @@ function SignUp() {
         const nickname = nicknameRef.current.value.trim();
         const intro = introText.trim();
 
-        if (idCheckStatus !== 'checked' || verifiedId !== userId) { alert('아이디 중복확인을 완료해 주세요.'); return; }
-        if (nicknameCheckStatus !== 'checked' || verifiedNickname !== nickname) { alert('닉네임 중복확인을 완료해 주세요.'); return; }
-        if (!isChecked) { alert('약관에 동의해 주세요.'); return; }
-        if (password !== passwordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
+        if (idCheckStatus !== 'checked' || verifiedId !== userId) {
+            alert('아이디 중복확인을 완료해 주세요.');
+            return;
+        }
 
-        // 비밀번호 유효성 검사
+        if (nicknameCheckStatus !== 'checked' || verifiedNickname !== nickname) {
+            alert('닉네임 중복확인을 완료해 주세요.');
+            return;
+        }
+
+        if (!isChecked) {
+            alert('서비스 이용 약관 및 개인정보 보호정책에 동의해 주세요.');
+            return;
+        }
+
+        if (!userId || !email || !password || !nickname) {
+            alert('필수 입력 항목을 모두 채워주세요.');
+            return;
+        }
+
+        if (password !== passwordConfirm) {
+            alert('비밀번호와 비밀번호 확인 값이 일치하지 않습니다.');
+            return;
+        }
+
+        // 허용 특수문자: ~ ! @ # $ % ^ * ( ) _ + - =
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~!@#$%^*()_+\- =])[A-Za-z\d~!@#$%^*()_+\- =]{8,}$/;
+        
         if (!passwordRegex.test(password)) {
-            alert('비밀번호 제약조건을 확인해 주세요.');
+            alert('비밀번호 제약조건을 확인해 주세요.\n(대소문자, 숫자, 특수기호 포함 8자 이상)');
             return;
         }
 
@@ -151,22 +166,40 @@ function SignUp() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId, email, password, nickname,
+                    userId,
+                    email,
+                    password,
+                    nickname,
                     intro: intro || null,
-                    photoCategories: selectedPhotoCategories, // 분리된 데이터 전송
-                    postCategories: selectedPostCategories    // 분리된 데이터 전송
+                    preferenceCategories
                 })
             });
 
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || '회원가입 중 오류가 발생했습니다.');
+            }
+
             if (data.success) {
                 alert(data.message);
                 navigate('/login');
-            } else {
-                alert(data.message || '회원가입 실패');
+                
+                userIdRef.current.value = '';
+                emailRef.current.value = '';
+                nicknameRef.current.value = '';
+                setPassword('');
+                setPasswordConfirm('');
+                setIntroText('');
+                setPreferenceCategories([]);
+                setIdCheckStatus('');
+                setVerifiedId('');
+                setNicknameCheckStatus('');
+                setVerifiedNickname('');
             }
         } catch (error) {
             console.error('회원가입 요청 에러:', error);
+            alert(error.message);
         }
     }
 
@@ -174,6 +207,7 @@ function SignUp() {
         <div className="signup-container">
             <h2>Picsial 회원가입</h2>
             <form onSubmit={handleSubmit}>
+                
                 <div className="form-group">
                     <label>아이디 (필수)</label>
                     <div className="id-input-group">
@@ -288,37 +322,17 @@ function SignUp() {
                         </div>
                     </div>
                 </div>
-                
-                {/* 사진 카테고리 */}
-                <div className="form-group">
-                    <label>관심 카테고리 (사진)</label>
-                    <div className="category-checkbox-group">
-                        {photoCategories.map(function(category) {
-                            return (
-                                <label key={`photo-${category.CATEGORY_ID}`} className="category-checkbox-label">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={selectedPhotoCategories.includes(category.CATEGORY_ID)} 
-                                        onChange={function() { handlePhotoCategoryChange(category.CATEGORY_ID); }} 
-                                    />
-                                    {category.CATEGORY_NAME}
-                                </label>
-                            );
-                        })}
-                    </div>
-                </div>
 
-                {/* 게시물 카테고리 */}
                 <div className="form-group">
-                    <label>관심 카테고리 (게시물)</label>
+                    <label>관심 카테고리 (실시간 DB 반영)</label>
                     <div className="category-checkbox-group">
-                        {postCategories.map(function(category) {
+                        {categoryList.map(function(category) {
                             return (
-                                <label key={`post-${category.CATEGORY_ID}`} className="category-checkbox-label">
+                                <label key={category.CATEGORY_ID} className="category-checkbox-label">
                                     <input 
                                         type="checkbox" 
-                                        checked={selectedPostCategories.includes(category.CATEGORY_ID)} 
-                                        onChange={function() { handlePostCategoryChange(category.CATEGORY_ID); }} 
+                                        checked={preferenceCategories.includes(category.CATEGORY_ID)} 
+                                        onChange={function() { handleCategoryChange(category.CATEGORY_ID); }} 
                                     />
                                     {category.CATEGORY_NAME}
                                 </label>

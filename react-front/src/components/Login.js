@@ -1,16 +1,16 @@
 import React, { useRef } from 'react';
 import './css/Login.css';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import Hashids from 'hashids'; // 💡 인스턴스 설정 반영
 
+const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
 
 function Login() {
-    // 입력 필드를 useRef로 제어
     const userIdRef = useRef(null);
     const passwordRef = useRef(null);
-
     const navigate = useNavigate();
 
-    // 로그인 제출 핸들러
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -23,12 +23,9 @@ function Login() {
         }
 
         try {
-            // 백엔드 로그인 엔드포인트(/auth/login)로 요청
             const response = await fetch('http://localhost:3010/auth/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, password })
             });
 
@@ -40,10 +37,24 @@ function Login() {
 
             if (data.success) {
                 alert(data.message);
-                
                 localStorage.setItem('jwtToken', data.token);
 
-                navigate('/');
+                try {
+                    const decoded = jwtDecode(data.token);
+                    const myUserNo = decoded.userNo;
+
+                    if (myUserNo) {
+                        // 💡 확정된 인스턴스로 암호화
+                        const hashedId = hashids.encode(myUserNo);
+                        navigate(`/`);
+                    } else {
+                        console.error("토큰에 myUserNo 정보가 없습니다.");
+                        navigate('/');
+                    }
+                } catch (decodeError) {
+                    console.error("토큰 디코딩 및 암호화 실패:", decodeError);
+                    navigate('/');
+                }
             }
 
         } catch (error) {
@@ -60,23 +71,17 @@ function Login() {
                     <label>아이디</label>
                     <input type="text" ref={userIdRef} placeholder="아이디를 입력하세요" required />
                 </div>
-
                 <div className="form-group">
                     <label>비밀번호</label>
                     <input type="password" ref={passwordRef} placeholder="비밀번호를 입력하세요" required />
                 </div>
-
                 <button type="submit" className="login-submit-btn">로그인</button>
             </form>
             <div className="auth-actions">
                 <span className="auth-notice">계정이 없으신가요?</span>
-                <button onClick={() => navigate('/signup')} className="link-btn">
-                    회원가입
-                </button>
+                <button onClick={() => navigate('/signup')} className="link-btn">회원가입</button>
                 <br /><br />
-                <button onClick={() => navigate('/')} className="back-btn">
-                    메인으로 돌아가기
-                </button>
+                <button onClick={() => navigate('/')} className="back-btn">메인으로 돌아가기</button>
             </div>
         </div>
     );

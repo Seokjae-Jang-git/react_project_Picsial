@@ -160,4 +160,46 @@
     transform: scale(1);
 }
 
-/* (기존에 있던 @keyframes radioScale 부분은 이제 필요 없으니 완전히 삭제!) */
+/* =======================================================
+   [신규 추가] 팔로잉 목록 전용 스타일 분리
+   ======================================================= */
+
+.following-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+/* 팔로잉 개별 아이템 정렬 및 커서 처리 */
+.filter-item.following-item {
+    padding-left: 5px;
+    cursor: pointer;
+}
+
+/* 팔로잉 작가 프로필 이미지 */
+.following-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+/* 팔로잉 작가 닉네임 */
+.following-nickname {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 팔로우한 작가가 없을 때의 알림 텍스트 */
+.empty-following {
+    font-size: 13px;
+    color: #888;
+    padding: 10px 5px;
+}
+
+/* 정렬 타이틀 위쪽 간격 확보 */
+.sort-title-margin {
+    margin-top: 10px;
+}

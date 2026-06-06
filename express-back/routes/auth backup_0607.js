@@ -80,20 +80,21 @@ router.post('/check-nickname', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /auth/signup - 회원가입 API
+// 1. [POST] /auth/signup - 회원가입 API
 // ==========================================
 router.post('/signup', async (req, res) => {
-    // 1. 프론트엔드에서 분리되어 넘어온 카테고리 배열 두 개를 받습니다.
-    const { userId, email, password, nickname, intro, photoCategories, postCategories } = req.body; 
+    // 사용자가 입력한 userId, 한 줄 소개 intro를 구조분해 할당으로 받습니다.
+    const { userId, email, password, nickname, intro, preferenceCategories } = req.body; 
 
     let connection;
     try {
         connection = await db.getConnection();
 
-        // 2. 비밀번호 암호화
+        // 1. 비밀번호 단방향 암호화 (Salt round: 10)
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. 유저 기본 정보 삽입
+        // 2. 부모 테이블(PS_USER_INFO)에 유저 기본 정보 삽입
+        // USER_NO 자리에 지정하신 'SEQ_PS_USER_NO.NEXTVAL'을 주입하고 RETURNING으로 받아옵니다.
         const userSql = `INSERT INTO PS_USER_INFO (USER_NO, USER_ID, EMAIL, PASSWORD, NICKNAME, INTRO) 
              VALUES (PS_USER_INFO_SEQ.NEXTVAL, :userId, :email, :password, :nickname, :intro)
              RETURNING USER_NO INTO :userNo`;
@@ -104,39 +105,32 @@ router.post('/signup', async (req, res) => {
             password: hashedPassword,
             nickname,
             intro: intro || null,
-            userNo: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+            userNo: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } // 발행된 시퀀스 번호 꺼내기
         };
 
         const userResult = await connection.execute(userSql, userBind);
-        const newUserNo = userResult.outBinds.userNo[0]; 
+        const newUserNo = userResult.outBinds.userNo[0]; // 새로 생성된 유저의 고유 번호 (숫자)
 
-        // 4. 사진 카테고리 매핑 (PS_USER_PREF_PHOTO)
-        if (photoCategories && photoCategories.length > 0) {
-            const photoSql = `
+        // 3. 자식 테이블(PS_USER_PREFERENCE)에 선호 카테고리 매핑 데이터 삽입
+        if (preferenceCategories && preferenceCategories.length > 0) {
+            // 수정된 컬럼명 USER_NO와 시퀀스 ADMIN.PS_USER_PREFERENCE_SEQ.NEXTVAL 적용
+            const prefSql = `
                 INSERT INTO PS_USER_PREF_PHOTO (PREF_ID, USER_NO, CATEGORY_ID) 
                 VALUES (PS_USER_PREF_PHOTO_SEQ.NEXTVAL, :userNo, :categoryId)
             `;
-            for (const catId of photoCategories) {
-                await connection.execute(photoSql, { userNo: newUserNo, categoryId: catId });
+
+            // 프론트엔드에서 넘어온 카테고리 ID 배열을 돌며 다중 매핑 저장
+            for (const catId of preferenceCategories) {
+                await connection.execute(prefSql, { userNo: newUserNo, categoryId: catId });
             }
         }
 
-        // 5. 게시물 카테고리 매핑 (PS_USER_PREF_POST) - 새로 추가된 부분
-        if (postCategories && postCategories.length > 0) {
-            const postSql = `
-                INSERT INTO PS_USER_PREF_POST (PREF_ID, USER_NO, CATEGORY_ID) 
-                VALUES (PS_USER_PREF_POST_SEQ.NEXTVAL, :userNo, :categoryId)
-            `;
-            for (const catId of postCategories) {
-                await connection.execute(postSql, { userNo: newUserNo, categoryId: catId });
-            }
-        }
-
-        // 6. 커밋
+        // 4. 트랜잭션 최종 커밋 (모든 INSERT 성공 시 DB에 실제 반영)
         await connection.commit();
         res.status(201).json({ success: true, message: "Picsial 회원가입이 성공적으로 완료되었습니다!" });
 
     } catch (error) {
+        // 과정 중 하나라도 실패하면 롤백하여 데이터 정합성 유지
         if (connection) await connection.rollback();
         console.error("회원가입 트랜잭션 에러:", error);
         res.status(500).json({ success: false, message: "서버 오류로 회원가입에 실패했습니다.", error: error.message });

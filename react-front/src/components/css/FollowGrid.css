@@ -10,7 +10,6 @@
 .follow-grid-container .photog-card-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
 }
 
 /* 카드 디자인도 사진 페이지와 맞게 테두리를 살짝 옅게 조정 */
@@ -70,27 +69,51 @@
     overflow: hidden;
 }
 
+/* 전체 통계 컨테이너 여백 축소 */
 .follow-grid-container .photog-stats {
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px; /* 💡 행과 행 사이의 간격을 6px로 아주 타이트하게 조절 */
+    margin-bottom: 14px;
     font-size: 13px;
+    width: 100%;
 }
 
+/* 각 줄의 가로 배치 설정 */
 .follow-grid-container .stat-row {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
+    justify-content: center; /* 가운데 정렬로 예쁘게 모아줌 */
+    align-items: center;
     color: #555;
+    white-space: nowrap;
 }
 
-.follow-grid-container .stat-row strong {
+/* 글자와 숫자 묶음 (예: "팔로워 2") */
+.follow-grid-container .stat-group {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 글자와 숫자 사이 간격 */
+    min-width: 55px; /* '/'를 기준으로 좌우 대칭이 맞도록 최소 너비 고정 */
+    justify-content: center;
+}
+
+.follow-grid-container .stat-group strong {
     color: #222;
 }
 
-.follow-grid-container .update-time {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed #eee;
-    color: #888;
+/* 중간 구분자 '/' 스타일 */
+.follow-grid-container .stat-divider {
+    margin: 0 10px; /* 구분자 양옆 간격 */
+    color: #cccccc;
+    font-size: 11px;
+}
+
+/* 업데이트 행 전용 스타일 (상단 점선 및 양끝 정렬) */
+.follow-grid-container .stat-row.update-time {
+    justify-content: space-between; /* 업데이트 날짜는 양끝으로 벌림 */
+    border-top: 1px dashed #e1e1e1; /* 💡 점선 구분선 유지 */
+    padding-top: 8px; /* 점선과 글자 사이 간격 */
+    margin-top: 4px; /* 윗 줄과의 간격 */
 }
 
 .follow-grid-container .photog-actions {

@@ -1,0 +1,105 @@
+.mypage-side {
+    width: 260px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.mypage-side__profile-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+/* 프로필 박스 클릭 가능 스타일 및 호버 효과 */
+.mypage-side__profile-box.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    border-radius: 8px;
+    padding: 12px; /* 마우스 올렸을 때 배경 영역 확보 */
+    margin: -12px -12px 12px -12px; /* 원래 마진 밸런스 유지 */
+}
+
+.mypage-side__profile-box.clickable:hover {
+    background-color: #f8f9fa; /* 은은한 회색 배경 */
+    transform: translateY(-2px); /* 아주 살짝 위로 뜨는 느낌 지향 */
+}
+
+.mypage-side__avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #eaeaea;
+    margin-bottom: 12px;
+}
+
+.mypage-side__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mypage-side__avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+}
+
+.mypage-side__nickname {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    color: #333;
+}
+
+.mypage-side__stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+}
+
+.mypage-side__stat-item span {
+    font-weight: bold;
+    color: #222;
+    margin-left: 4px;
+}
+
+.mypage-side__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.mypage-side__link {
+    display: block;
+    padding: 12px 16px;
+    color: #555;
+    text-decoration: none;
+    font-size: 15px;
+    border-radius: 6px;
+    background-color: #fdfdfd;
+    border: 1px solid #e8e8e8;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.mypage-side__link:hover {
+    background-color: #f5f5f5;
+    color: #000;
+}
+
+.mypage-side__link.active {
+    background-color: #222222;
+    color: #ffffff;
+    border-color: #222222;
+    font-weight: 500;
+}

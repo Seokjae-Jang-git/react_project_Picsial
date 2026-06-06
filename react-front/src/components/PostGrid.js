@@ -82,9 +82,25 @@ function PostCard({ post, formatTimeAgo }) {
 
     return (
         <div className="vertical-post-card" onClick={() => navigate(`/post/${post.POST_ID}`)}>
-            <div className="post-card-top">
-                <span className="post-photog">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
-                <span className="post-time">{formatTimeAgo(post.CREATED_AT)}</span>
+            <div className="post-photog-header-yt">
+                {post.PROFILE_IMAGE_URL ? (
+                    <img 
+                        src={post.PROFILE_IMAGE_URL} 
+                        alt="프로필" 
+                        className="yt-photog-avatar"
+                    />
+                ) : (
+                    <svg className="yt-photog-avatar" viewBox="0 0 24 24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor: '#f1f3f5'}}>
+                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                    </svg>
+                )}
+                
+                <div className="yt-photog-meta">
+                    <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
+                    <span className="post-time-ago-yt">
+                        {post.CREATED_AT ? post.CREATED_AT.split('T')[0] : ''} {/* 날짜 포맷은 기존 쓰시던 함수로 맞춰주세요 */}
+                    </span>
+                </div>
             </div>
 
             <div className="post-card-content">

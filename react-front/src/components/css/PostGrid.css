@@ -30,14 +30,41 @@
     cursor: pointer;
 }
 
-/* 상단 메타 정보 (작성자, 시간) */
-.post-card-top {
+/* =========================================================
+   게시물 그리드 카드 상단 프로필 헤더 (PostDetail.js 스타일 통일)
+   ========================================================= */
+
+.post-photog-header-yt {
     display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #495057;
-    font-weight: 500;
-    margin-bottom: 4px !important; /* 💡 6px -> 4px로 더욱 좁힘 */
+    align-items: center;
+    gap: 10px; /* 💡 사진과 텍스트 그룹(닉네임+날짜) 사이의 간격 */
+}
+
+.yt-photog-avatar {
+    width: 28px;  /* 그리드 카드에 맞게 크기 조절 (필요시 수정) */
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee; /* 아주 연한 테두리로 디테일 추가 */
+}
+
+/* 💡 닉네임과 날짜를 묶어주는 컨테이너 */
+.yt-photog-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 💡 닉네임과 날짜 사이의 간격! 원하시던 딱 붙은 정렬이 여기서 완성됩니다. */
+}
+
+.photog-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+}
+
+.post-time-ago-yt {
+    font-size: 11px;
+    color: #999;
+    font-weight: 400;
 }
 
 /* 🚨 [신규 추가] 바로 이 녀석이 범인이었습니다! 숨겨진 중간 래퍼의 여백 파괴 */

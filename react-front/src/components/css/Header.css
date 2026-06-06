@@ -1,3 +1,16 @@
+/* ==========================================================================
+   [Header] Picsial 공통 헤더 스타일 (오염 방지용 스콥 레이아웃)
+   ========================================================================== */
+
+/* 기본 테마 변수 안전장치 (기존 전역 변수가 있다면 그것을 따릅니다) */
+:root {
+    --primary-color: #3a86ff;
+    --text-color: #212529;
+    --border-color: #e9ecef;
+    --gray-bg: #f8f9fa;
+}
+
+/* 헤더 최상위 컨테이너 */
 .picsial-header {
     display: flex;
     justify-content: space-between;
@@ -15,33 +28,40 @@
     z-index: 999; 
     
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   좌측 영역 (로고 및 네비게이션)
+   -------------------------------------------------------------------------- */
+.picsial-header .header-left {
+    display: flex;
+    align-items: center;
 }
 
 /* 로고 스타일링 */
-.header-logo {
+.picsial-header .header-logo {
     font-size: 24px;
     font-weight: 800;
     color: var(--text-color);
     cursor: pointer;
     letter-spacing: -0.5px;
     margin-right: 30px;
+    user-select: none;
 }
 
-.header-logo span {
+.picsial-header .header-logo span {
     color: var(--primary-color); /* 온점(.)에 포인트 컬러 지정 */
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-}
-
-.header-nav {
+/* 네비게이션 탭 바 */
+.picsial-header .header-nav {
     display: flex;
     gap: 8px;
 }
 
-.header-tab-btn {
+.picsial-header .header-tab-btn {
     border: none;
     background: none;
     padding: 8px 16px;
@@ -53,20 +73,23 @@
     transition: all 0.2s ease;
 }
 
-.header-tab-btn:hover, .header-tab-btn.active {
+.picsial-header .header-tab-btn:hover, 
+.picsial-header .header-tab-btn.active {
     color: var(--primary-color);
     background-color: #EBF2FF; /* 은은한 블루 배경 */
 }
 
-/* 검색창 */
-.header-center {
+/* --------------------------------------------------------------------------
+   중앙 영역 (검색창)
+   -------------------------------------------------------------------------- */
+.picsial-header .header-center {
     flex-grow: 1;
     max-width: 450px;
     margin: 0 20px;
 }
 
 /* 검색창 wrapper 수정 */
-.search-bar-wrapper {
+.picsial-header .search-bar-wrapper {
     display: flex;
     align-items: center;
     background-color: var(--gray-bg);
@@ -80,14 +103,14 @@
 }
 
 /* 💡 포커스 되었을 때의 상태도 더 강조해 주면 좋습니다 */
-.search-bar-wrapper:focus-within {
+.picsial-header .search-bar-wrapper:focus-within {
     border-color: var(--primary-color);
     background-color: #fff;
     /* 그림자를 조금 더 뚜렷하게 해서 검색창이 '떠오르는' 느낌을 줌 */
     box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.2);
 }
 
-.header-search-input {
+.picsial-header .header-search-input {
     border: none;
     background: none;
     width: 100%;
@@ -97,7 +120,7 @@
     color: var(--text-color);
 }
 
-.header-search-btn {
+.picsial-header .header-search-btn {
     border: none;
     background: none;
     cursor: pointer;
@@ -105,14 +128,16 @@
     font-size: 14px;
 }
 
-/* 우측 유저 영역 */
-.header-right {
+/* --------------------------------------------------------------------------
+   우측 영역 (유저 메뉴 및 버튼)
+   -------------------------------------------------------------------------- */
+.picsial-header .header-right {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.header-user-btn {
+.picsial-header .header-user-btn {
     border: none;
     background: none;
     color: #495057;
@@ -124,18 +149,18 @@
     transition: background 0.2s;
 }
 
-.header-user-btn:hover {
+.picsial-header .header-user-btn:hover {
     background-color: var(--gray-bg);
 }
 
 /* 업로드 버튼 차별화 */
-.header-user-btn.upload {
+.picsial-header .header-user-btn.upload {
     color: var(--primary-color);
     font-weight: 600;
 }
 
-/* 로그인/로그아웃 버튼 */
-.header-auth-btn {
+/* 로그인/로그아웃 공통 버튼 */
+.picsial-header .header-auth-btn {
     border: none;
     padding: 8px 20px;
     font-size: 14px;
@@ -146,7 +171,7 @@
 }
 
 /* 로그인 버튼 스타일 강화 */
-.login-btn {
+.picsial-header .login-btn {
     background-color: var(--primary-color); /* 테마 컬러 사용 */
     color: #000000;
     padding: 8px 24px;                      /* 좌우 패딩을 늘려 버튼을 더 길게 */
@@ -158,18 +183,19 @@
     transition: all 0.2s ease;
 }
 
-.login-btn:hover {
+.picsial-header .login-btn:hover {
     background-color: #256FFF;              /* 호버 시 더 진한 색으로 */
     color: white;
     transform: translateY(-1px);            /* 마우스 올리면 살짝 위로 올라가는 효과 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.logout-btn {
+/* 로그아웃 버튼 */
+.picsial-header .logout-btn {
     background-color: var(--gray-bg);
     color: #6c757d;
 }
 
-.logout-btn:hover {
+.picsial-header .logout-btn:hover {
     background-color: #e2e6ea;
 }

@@ -13,6 +13,9 @@ import PostDetail from './components/PostDetail';
 import Upload from './components/Upload';
 import Follow from './components/Follow';
 import Photog from './components/Photog';
+import MyPage from './components/MyPage';
+import MyPageDash from './components/MyPageDash';
+import MyAccount from './components/MyAccount';
 
 
 function App() {
@@ -34,7 +37,15 @@ function App() {
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/follow" element={<Follow />} />
-          <Route path="/photograper" element={<Photog />} />
+          <Route path="/photog/:hashedId" element={<Photog />} />
+          <Route path="/mypage/:hashedId" element={<MyPage />} >
+            <Route index element={<MyPageDash />} />
+            <Route path="account" element={<MyAccount />} /> 
+          </Route>
+            
+            
+            
+
         </Routes>
       </Box>
     </Box>

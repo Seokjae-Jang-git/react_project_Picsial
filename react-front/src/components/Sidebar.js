@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { jwtDecode } from 'jwt-decode'; // 🚀 토큰 디코딩 라이브러리 추가
+import Hashids from 'hashids';
+import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode'; 
 import './css/Sidebar.css'; 
 
-function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, sortOption, setSortOption, refreshTrigger }) {    // 💡 기존 카테고리 상태
+function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, sortOption, setSortOption, refreshTrigger }) {    
     const [categories, setCategories] = useState([]);
-    
-    // 💡 팔로잉 전용: 팔로우한 작가 목록 상태
     const [followingList, setFollowingList] = useState([]);
-    
-    // 💡 접기/펴기 상태 관리
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const navigate = useNavigate();
+  const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
 
     useEffect(() => {
         if (pageType === 'following') {
-            // ==========================================
-            // 🚀 [팔로잉 페이지] 내 팔로잉 목록 가져오기
-            // ==========================================
             const fetchFollowingList = async () => {
                 const token = localStorage.getItem('jwtToken');
                 if (!token) return;
@@ -32,11 +30,7 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                 }
             };
             fetchFollowingList();
-
         } else {
-            // ==========================================
-            // 📸 [사진/게시물 페이지] 카테고리 가져오기
-            // ==========================================
             const fetchCategories = async () => {
                 try {
                     const endpoint = pageType === 'post' 
@@ -56,7 +50,6 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
         }
     }, [pageType, refreshTrigger]);
 
-    // 카테고리 및 정렬 선택 핸들러
     const handleCategoryClick = (categoryId) => {
         if (setSelectedCategory) setSelectedCategory(categoryId);
     };
@@ -68,11 +61,9 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
     return (
         <aside className={`photo-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
             
-            {/* 1. 상단 타이틀 & 접기/펴기 토글 버튼 */}
             <div className="sidebar-top">
                 {!isCollapsed && (
                     <span className="sidebar-title">
-                        {/* 🚀 팔로잉 페이지면 '정렬', 아니면 '필터' 출력 */}
                         {pageType === 'following' ? '정렬' : '필터'}
                     </span>
                 )}
@@ -85,12 +76,10 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                 </button>
             </div>
 
-            {/* 💡 사이드바가 열려있을 때만 내용 렌더링 */}
             {!isCollapsed && (
                 <>
                     {pageType === 'following' ? (
                         <>
-                            {/* 🚀 인라인 스타일(marginTop)을 모두 제거하여 기존 사이드바와 간격 통일 */}
                             <div className="sort-section">
                                 <div className="sort-grid">
                                     <div className={`filter-item ${sortOption === 'followers' ? 'active' : ''}`} onClick={() => handleSortClick('followers')}>
@@ -108,38 +97,46 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                                 </div>
                             </div>
 
-                            {/* 팔로잉 관리 리스트 */}
+                            {/* 팔로잉 리스트 영역 */}
                             <div className="sort-section">
-                                <h3 className="sidebar-title">팔로잉 관리</h3>
-                                <div className="following-user-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
+                                <h3 className="sidebar-title">팔로잉 목록</h3>
+                                <div className="following-user-list">
                                     {followingList.length > 0 ? followingList.map(user => (
-                                        <div key={user.USER_NO} className="filter-item" style={{ paddingLeft: '5px' }} onClick={() => alert("이동")}>
-                                            <img 
-                                                src={user.PROFILE_IMAGE ? user.PROFILE_IMAGE : '/default-profile.png'} 
-                                                alt="프로필" 
-                                                style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '10px', objectFit: 'cover' }} 
-                                            />
-                                            <span className="nickname" style={{ fontSize: '14px', fontWeight: '500' }}>{user.NICKNAME}</span>
+                                        <div 
+                                            key={user.USER_NO} 
+                                            className="filter-item following-item"
+                                            onClick={() => {
+                                                const hashedId = hashids.encode(user.USER_NO);
+                                                navigate(`/photog/${hashedId}`);
+                                            }}
+                                        >
+                                            {user.PROFILE_IMAGE_URL ? (
+                                                <img 
+                                                    src={user.PROFILE_IMAGE_URL} 
+                                                    alt="프로필 이미지" 
+                                                    className="yt-photog-avatar"
+                                                />
+                                            ) : (
+                                                <svg className="yt-photog-avatar" viewBox="0 0 24 24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor: '#f1f3f5'}}>
+                                                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                                </svg>
+                                            )}
+                                            <span className="following-nickname">{user.NICKNAME}</span>
                                         </div>
                                     )) : (
-                                        <div style={{ fontSize: '13px', color: '#888', padding: '10px 5px' }}>팔로우한 작가가 없습니다.</div>
+                                        <div className="empty-following">팔로우한 작가가 없습니다.</div>
                                     )}
                                 </div>
                             </div>
                         </>
                     ) : (
-                        // ==========================================
-                        // 📸 [사진/게시물 모드] 사이드바 UI (기존 코드 유지)
-                        // ==========================================
                         <>
-                            {/* 카테고리 영역 */}
                             <div className="category-grid">
                                 <div 
                                     className={`filter-item ${selectedCategory === '' ? 'active' : ''}`}
                                     onClick={() => handleCategoryClick('')}
                                 >
-                                    <div className="radio-circle"></div>
-                                    전체
+                                    <div className="radio-circle"></div>전체
                                 </div>
                                 {categories.map(cat => (
                                     <div 
@@ -147,15 +144,13 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                                         className={`filter-item ${Number(selectedCategory) === cat.CATEGORY_ID ? 'active' : ''}`}
                                         onClick={() => handleCategoryClick(cat.CATEGORY_ID)}
                                     >
-                                        <div className="radio-circle"></div>
-                                        {cat.CATEGORY_NAME}
+                                        <div className="radio-circle"></div>{cat.CATEGORY_NAME}
                                     </div>
                                 ))}
                             </div>
 
-                            {/* 정렬 영역 */}
                             <div className="sort-section">
-                                <h3 className="sidebar-title" style={{ marginTop: '10px' }}>정렬</h3>
+                                <h3 className="sidebar-title sort-title-margin">정렬</h3>
                                 <div className="sort-grid">
                                     <div className={`filter-item ${sortOption === 'latest' ? 'active' : ''}`} onClick={() => handleSortClick('latest')}>
                                         <div className="radio-circle"></div>최신 순

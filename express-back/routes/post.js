@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
         let sql = `
             SELECT 
                 P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                UI.NICKNAME,
+                UI.NICKNAME, UI.PROFILE_IMAGE_URL,
                 NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
                 NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
                 (
@@ -85,8 +85,18 @@ router.get('/', async (req, res) => {
                 return `${process.env.NAS_BASE_URL_POS_IMG}/${fileName}`; 
             });
 
+            let finalProfileUrl = post.PROFILE_IMAGE_URL;
+            if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
+                const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
+                if (profileBaseUrl) {
+                    finalProfileUrl = `${profileBaseUrl}/${finalProfileUrl}`;
+                }
+            }
+
+            // 3. 최종 조립된 데이터를 반환
             return {
                 ...post,
+                PROFILE_IMAGE_URL: finalProfileUrl, // 완성된 주소로 덮어쓰기
                 CATEGORIES: post.CATEGORIES ? post.CATEGORIES.split(', ') : [],
                 TAGS: post.TAGS ? post.TAGS.split(', ') : [],
                 THUMB_LIST: fullThumbUrls
@@ -119,7 +129,7 @@ router.get('/:id', async (req, res) => {
         const postSql = `
             SELECT 
                 P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                UI.NICKNAME,
+                UI.NICKNAME, UI.PROFILE_IMAGE_URL,
                 (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE POST_ID = P.POST_ID) AS SCRAP_COUNT,
                 (SELECT COUNT(*) FROM PS_COMMENT_TABLE WHERE POST_ID = P.POST_ID) AS COMMENT_COUNT,
                 (SELECT COUNT(*) FROM PS_LIKE_TABLE WHERE POST_ID = P.POST_ID AND USER_NO = :userNo) AS IS_LIKED_BY_ME,
@@ -157,6 +167,14 @@ router.get('/:id', async (req, res) => {
 
         const postData = postResult.rows[0];
         
+        // 💡 [추가] 게시물 작성자의 프로필 이미지 URL 조립
+        if (postData.PROFILE_IMAGE_URL && !postData.PROFILE_IMAGE_URL.startsWith('http')) {
+            const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
+            if (profileBaseUrl) {
+                postData.PROFILE_IMAGE_URL = `${profileBaseUrl}/${postData.PROFILE_IMAGE_URL}`;
+            }
+        }
+
         // 이미지 URL 결합 처리
         const imgList = postData.ALL_IMAGES ? postData.ALL_IMAGES.split(',') : [];
         const fullImageUrls = imgList.map(fileName => {

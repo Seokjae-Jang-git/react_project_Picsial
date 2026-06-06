@@ -152,11 +152,19 @@ function PostDetail() {
                             
                             {/* 🚀 [유튜브 스타일] 작성자 프로필 상단 헤더 */}
                             <div className="post-photog-header-yt">
-                                <img 
-                                    src="https://api.dicebear.com/7.x/bottts/svg?seed=picsial" 
-                                    alt="프로필 이미지" 
-                                    className="yt-photog-avatar"
-                                />
+                                {/* 💡 프로필 이미지 유무에 따른 동적 렌더링 */}
+                                {post.PROFILE_IMAGE_URL ? (
+                                    <img 
+                                        src={post.PROFILE_IMAGE_URL} 
+                                        alt="프로필 이미지" 
+                                        className="yt-photog-avatar"
+                                    />
+                                ) : (
+                                    <svg className="yt-photog-avatar" viewBox="0 0 24 24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor: '#f1f3f5'}}>
+                                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                    </svg>
+                                )}
+                                
                                 <div className="yt-photog-meta">
                                     <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
                                     {/* 🚀 요구사항: 닉네임 우측으로 간격이 확실하게 확보된 시간 배치 */}

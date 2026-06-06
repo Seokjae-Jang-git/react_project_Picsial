@@ -1,0 +1,140 @@
+/* 💡 3열 -> 5열로 변경 */
+.photog-post-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 아래는 공유해주신 원본 PostGrid.css의 타이트한 여백을 그대로 적용한 코드입니다 */
+.photog-post-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px !important; 
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important; 
+    justify-content: flex-start !important; 
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.photog-post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+
+.photog-post-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 4px !important; 
+}
+
+.photog-post-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+}
+
+.photog-post-title {
+    margin: 0 0 1px 0 !important;
+    font-size: 15px;
+    color: #212529;
+    font-weight: 700; 
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
+    width: 100%;
+}
+
+.photog-post-snippet {
+    margin: 0 0 6px 0 !important;
+    font-size: 13px; 
+    color: #6c757d; 
+    line-height: 1.3 !important; 
+    font-weight: 400; 
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 34px; 
+}
+
+.photog-post-media {
+    position: relative;
+    width: 100%;
+    height: 250px; 
+    background: #f1f3f5;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px !important; 
+}
+
+.photog-media-box {
+    width: 100%;
+    height: 100%;
+}
+
+.photog-media-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photog-slide-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+.photog-slide-arrow:hover { background: rgba(255, 255, 255, 1); }
+.photog-slide-arrow.left { left: 8px; }
+.photog-slide-arrow.right { right: 8px; }
+
+.photog-post-bottom {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    gap: 16px;
+    border-top: none; 
+    margin-top: 0 !important; 
+    padding-top: 0 !important; 
+}
+
+.photog-bottom-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #868e96; 
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.photog-bottom-item svg {
+    flex-shrink: 0;
+}

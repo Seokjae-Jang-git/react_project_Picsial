@@ -1,20 +1,39 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import './css/Header.css';
+import Hashids from 'hashids'; // 💡 인스턴스 설정 반영
+
+const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
 
 function Header() {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [userNo, setUserNo] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('jwtToken');
-        setIsLoggedIn(!!token);
+        
+        if (token) {
+            setIsLoggedIn(true);
+            try {
+                const decoded = jwtDecode(token);
+                setUserNo(decoded.myUserNo); 
+            } catch (error) {
+                console.error('헤더 토큰 디코딩 실패:', error);
+                setIsLoggedIn(false);
+            }
+        } else {
+            setIsLoggedIn(false);
+            setUserNo(null);
+        }
     }, []);
 
     const handleLogout = () => {
         localStorage.clear();
         setIsLoggedIn(false);
+        setUserNo(null);
         alert('로그아웃 되었습니다.');
         navigate('/');
         window.location.reload();
@@ -29,7 +48,6 @@ function Header() {
     return (
         <header className="picsial-header">
             <div className="header-left">
-                {/* 로고에 브랜드 정체성 부여 */}
                 <div className="header-logo" onClick={() => navigate('/')}>
                     Picsial<span>.</span>
                 </div>
@@ -57,7 +75,35 @@ function Header() {
                 {isLoggedIn ? (
                     <>
                         <button className="header-user-btn upload" onClick={() => navigate('/upload')}>업로드</button>
-                        <button className="header-user-btn" onClick={() => navigate('/mypage')}>마이페이지</button>
+                        <button className="header-user-btn" 
+                            onClick={() => {
+                                let currentUserNo = userNo;
+                                
+                                if (!currentUserNo) {
+                                    const token = localStorage.getItem('jwtToken');
+                                    if (token) {
+                                        try {
+                                            const decoded = jwtDecode(token);
+                                            // 💡 핵심 수정: myUserNo -> userNo 로 변경!
+                                            currentUserNo = decoded.userNo; 
+                                            setUserNo(currentUserNo); 
+                                        } catch (e) {
+                                            console.error("헤더 실시간 토큰 파싱 에러:", e);
+                                        }
+                                    }
+                                }
+
+                                if (!currentUserNo) {
+                                    alert('유저 정보를 확인할 수 없습니다. 다시 로그인해 주세요.');
+                                    return;
+                                }
+
+                                const hashedId = hashids.encode(Number(currentUserNo));
+                                navigate(`/mypage/${hashedId}`);
+                            }}
+                        >
+                            마이페이지
+                        </button>
                         <button className="header-user-btn" onClick={() => navigate('/messages')}>메세지</button>
                         <button className="header-user-btn" onClick={() => navigate('/notifications')}>알림</button>
                         <button className="header-auth-btn logout-btn" onClick={handleLogout}>로그아웃</button>

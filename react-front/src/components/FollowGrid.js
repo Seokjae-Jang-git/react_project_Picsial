@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🚀 1. 네비게이트 임포트
 import { jwtDecode } from 'jwt-decode';
+import Hashids from 'hashids';
 import './css/FollowGrid.css';
 
 function FollowGrid({ sortOption, onFollowChange }) {
     const [photogs, setPhotogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate(); // 🚀 2. 초기화
+    const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
 
     const sortLabel = {
         'followers': '팔로워 순',
@@ -24,7 +26,6 @@ function FollowGrid({ sortOption, onFollowChange }) {
 
             try {
                 const decoded = jwtDecode(token);
-                // 백엔드 API 호출 (아직 안 만들었지만 미리 연결해둡니다)
                 const response = await fetch(`http://localhost:3010/follow/photogs?sort=${sortOption}&userNo=${decoded.userNo}`);
                 const data = await response.json();
                 
@@ -117,12 +118,23 @@ function FollowGrid({ sortOption, onFollowChange }) {
                         <div key={photog.USER_NO} className="photog-card">
                             
                             <div className="photog-info-section">
-                                <div className="photog-profile-top" onClick={() => alert("이동")}>
-                                    <img 
-                                        src={photog.PROFILE_IMAGE ? `http://localhost:3010/profile/${photog.PROFILE_IMAGE}` : '/default-profile.png'} 
-                                        alt="프로필" 
-                                        className="photog-avatar" 
-                                    />
+                                <div className="photog-profile-top"
+                                    onClick={() => {
+                                        // USER_NO(예: 15)를 암호화(예: 'aB8x9Zkq')하여 주소로 사용
+                                        const hashedId = hashids.encode(photog.USER_NO);
+                                        navigate(`/photog/${hashedId}`);
+                                    }}>
+                                    {photog.PROFILE_IMAGE_URL ? (
+                                        <img 
+                                            src={photog.PROFILE_IMAGE_URL} 
+                                            alt="프로필 이미지" 
+                                            className="photog-avatar"
+                                        />
+                                    ) : (
+                                        <svg className="yt-photog-avatar" viewBox="0 0 24 24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" style={{backgroundColor: '#f1f3f5'}}>
+                                            <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                        </svg>
+                                    )}
                                     <div className="photog-name-box">
                                         <h3 className="photog-nickname">{photog.NICKNAME}</h3>
                                         <p className="photog-intro">{photog.INTRO || '소개글이 없습니다.'}</p>
@@ -130,11 +142,32 @@ function FollowGrid({ sortOption, onFollowChange }) {
                                 </div>
 
                                 <div className="photog-stats">
-                                    <div className="stat-row"><span>팔로워</span> <strong>{photog.FOLLOWER_COUNT}</strong></div>
-                                    <div className="stat-row"><span>좋아요</span> <strong>{photog.TOTAL_LIKES}</strong></div>
-                                    <div className="stat-row"><span>스크랩</span> <strong>{photog.TOTAL_SCRAPS}</strong></div>
+                                    {/* 첫 번째 줄: 팔로워 / 팔로잉 */}
+                                    <div className="stat-row">
+                                        <div className="stat-group">
+                                            <span>팔로워</span> <strong>{photog.FOLLOWER_COUNT || 0}</strong>
+                                        </div>
+                                        <span className="stat-divider">/</span>
+                                        <div className="stat-group">
+                                            <span>팔로잉</span> <strong>{photog.FOLLOWING_COUNT || 0}</strong>
+                                        </div>
+                                    </div>
+
+                                    {/* 두 번째 줄: 좋아요 / 스크랩 */}
+                                    <div className="stat-row">
+                                        <div className="stat-group">
+                                            <span>좋아요</span> <strong>{photog.TOTAL_LIKES || 0}</strong>
+                                        </div>
+                                        <span className="stat-divider">/</span>
+                                        <div className="stat-group">
+                                            <span>스크랩</span> <strong>{photog.TOTAL_SCRAPS || 0}</strong>
+                                        </div>
+                                    </div>
+
+                                    {/* 세 번째 줄: 구분선 및 업데이트 */}
                                     <div className="stat-row update-time">
-                                        <span>업데이트</span> {photog.LAST_UPDATE ? photog.LAST_UPDATE : '기록 없음'}
+                                        <span>업데이트</span>
+                                        <span>{photog.LAST_UPDATE ? photog.LAST_UPDATE : '기록 없음'}</span>
                                     </div>
                                 </div>
 
