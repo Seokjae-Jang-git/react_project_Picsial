@@ -76,14 +76,14 @@
 }
 
 /* 유튜브 프로필 아바타 + 닉네임 메타 조합 헤더 */
-.post-detail-container .post-author-header-yt {
+.post-detail-container .post-photog-header-yt {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 18px;
 }
 
-.post-detail-container .yt-author-avatar {
+.post-detail-container .yt-photog-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -91,13 +91,13 @@
     object-fit: cover;
 }
 
-.post-detail-container .yt-author-meta {
+.post-detail-container .yt-photog-meta {
     display: flex;
     align-items: center;
     gap: 14px;
 }
 
-.post-detail-container .author-name {
+.post-detail-container .photog-name {
     font-size: 15px;
     font-weight: 700;
     color: #212529;
@@ -312,7 +312,7 @@
     word-break: break-all;
 }
 
-.post-detail-container .comment-author {
+.post-detail-container .comment-photog {
     font-weight: bold;
     color: #222;
     white-space: nowrap;

@@ -1,34 +1,34 @@
-/* Follow.css */
+/* Follow.css (PhotoPage.css 완벽 이식 버전) */
+
 .follow-page-container {
     width: 100%;
-    min-height: 100vh;
-    background-color: #f4f6f8;
-}
-
-.follow-main-content {
-    max-width: 100%; /* 전체 컨텐츠 최대 너비 */
-    margin: 0 auto;
-    padding: 30px 20px;
-}
-
-/* 💡 핵심 레이아웃: 사이드바와 그리드 가로 배치 */
-.follow-layout-wrapper {
+    height: 100vh; /* 전체 화면 높이를 강제 고정 */
     display: flex;
-    gap: 30px;
-    align-items: flex-start;
+    flex-direction: column;
+    overflow: hidden; /* 페이지 전체 스크롤은 막음 */
 }
 
-/* 왼쪽 사이드바 영역 (비율 고정) */
-.follow-layout-wrapper .sidebar {
-    flex: 0 0 250px; /* 사이드바 너비 250px 고정 */
+/* 사이드바와 본문 영역을 수평으로 나란히 배치하는 공간 */
+.follow-page-body {
+    display: flex;
+    flex-grow: 1; /* 헤더를 제외한 나머지 높이를 꽉 채움 */
+    overflow: hidden; /* 자식들의 독립된 스크롤을 위해 숨김 처리 */
 }
 
-/* 오른쪽 그리드 영역 (남은 공간 모두 차지) */
-.follow-layout-wrapper .follow-grid-container {
-    flex: 1;
-    min-width: 0; /* 넘침 방지 */
-    background: #fff;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+/* 우측 작가 콘텐츠 영역 */
+.follow-content-area {
+    flex-grow: 1;
+    background-color: #fff;
+    overflow-y: auto; /* 우측 영역만 따로 스크롤되도록 설정 */
+    height: 100%;
+    transition: all 0.3s ease; 
+    
+    /* 🚀 PhotoPage.css와 동일한 여백 셋팅 */
+    padding-right: 0; 
+    box-sizing: border-box;
+}
+
+/* 대칭 교정: 사이드바가 접혔을 때 */
+.follow-page-body.sidebar-collapsed .follow-content-area {
+    padding-right: 65px; 
 }

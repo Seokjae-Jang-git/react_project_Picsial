@@ -151,14 +151,14 @@ function PostDetail() {
                         <div className="post-text-content-box">
                             
                             {/* 🚀 [유튜브 스타일] 작성자 프로필 상단 헤더 */}
-                            <div className="post-author-header-yt">
+                            <div className="post-photog-header-yt">
                                 <img 
                                     src="https://api.dicebear.com/7.x/bottts/svg?seed=picsial" 
                                     alt="프로필 이미지" 
-                                    className="yt-author-avatar"
+                                    className="yt-photog-avatar"
                                 />
-                                <div className="yt-author-meta">
-                                    <span className="author-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
+                                <div className="yt-photog-meta">
+                                    <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
                                     {/* 🚀 요구사항: 닉네임 우측으로 간격이 확실하게 확보된 시간 배치 */}
                                     <span className="post-time-ago-yt">{formatTimeAgo(post.CREATED_AT)}</span>
                                 </div>
@@ -235,7 +235,7 @@ function PostDetail() {
                                         {displayedComments.map(comment => (
                                             <div key={comment.COMMENT_ID} className="comment-item">
                                                 <div className="comment-content-row">
-                                                    <span className="comment-author">유저 {comment.USER_NO}</span>
+                                                    <span className="comment-photog">유저 {comment.USER_NO}</span>
                                                     <span className="comment-text">{comment.CONTENT}</span>
                                                 </div>
                                                 <div className="comment-date">

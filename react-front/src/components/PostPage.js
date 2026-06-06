@@ -10,10 +10,10 @@ function PostPage() {
     const [sortOption, setSortOption] = useState('latest');
 
     return (
-        <div className="page-wrapper">
+        <div className="post-page-container">
             <Header />
             
-            <div className="content-layout">
+            <div className="post-page-body">
                 {/* 💡 pageType="post"를 전달하여 게시물 카테고리를 부르도록 지시 */}
                 <Sidebar 
                     pageType="post" 

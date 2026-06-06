@@ -64,7 +64,7 @@
 .comment-list-area { margin-bottom: 16px; }
 .comment-item { margin-bottom: 15px; font-size: 14px; }
 .comment-content-row { display: flex; align-items: flex-start; gap: 8px; word-break: break-all; }
-.comment-author { font-weight: bold; color: #222; white-space: nowrap; flex-shrink: 0; }
+.comment-photog { font-weight: bold; color: #222; white-space: nowrap; flex-shrink: 0; }
 .comment-text { color: #333; line-height: 1.4; flex-grow: 1; }
 .comment-date { font-size: 11px; color: #999; text-align: right; margin-top: 4px; }
 

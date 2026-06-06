@@ -225,7 +225,7 @@ function PhotoDetail() {
                                         {displayedComments.map(comment => (
                                             <div key={comment.COMMENT_ID} className="comment-item">
                                                 <div className="comment-content-row">
-                                                    <span className="comment-author">유저 {comment.USER_NO}</span>
+                                                    <span className="comment-photog">유저 {comment.USER_NO}</span>
                                                     <span className="comment-text">{comment.CONTENT}</span>
                                                 </div>
                                                 <div className="comment-date">

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode'; // 🚀 토큰 디코딩 라이브러리 추가
 import './css/Sidebar.css'; 
 
-function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, sortOption, setSortOption }) {
-    // 💡 기존 카테고리 상태
+function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, sortOption, setSortOption, refreshTrigger }) {    // 💡 기존 카테고리 상태
     const [categories, setCategories] = useState([]);
     
     // 💡 팔로잉 전용: 팔로우한 작가 목록 상태
@@ -55,7 +54,7 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
             };
             fetchCategories();
         }
-    }, [pageType]);
+    }, [pageType, refreshTrigger]);
 
     // 카테고리 및 정렬 선택 핸들러
     const handleCategoryClick = (categoryId) => {
@@ -71,9 +70,12 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
             
             {/* 1. 상단 타이틀 & 접기/펴기 토글 버튼 */}
             <div className="sidebar-top">
-                {/* 🚀 pageType이 'following'이 아닐 때만 '필터' 텍스트 표시 */}
-                {!isCollapsed && pageType !== 'following' && <span className="sidebar-title">필터</span>}
-                
+                {!isCollapsed && (
+                    <span className="sidebar-title">
+                        {/* 🚀 팔로잉 페이지면 '정렬', 아니면 '필터' 출력 */}
+                        {pageType === 'following' ? '정렬' : '필터'}
+                    </span>
+                )}
                 <button 
                     className="toggle-btn" 
                     onClick={() => setIsCollapsed(!isCollapsed)}
@@ -87,13 +89,9 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
             {!isCollapsed && (
                 <>
                     {pageType === 'following' ? (
-                        // ==========================================
-                        // 🌟 [팔로잉 모드] 사이드바 UI
-                        // ==========================================
                         <>
-                            {/* 정렬 메뉴 (팔로워 순, 업데이트 순, 좋아요 순, 스크랩 순) */}
+                            {/* 🚀 인라인 스타일(marginTop)을 모두 제거하여 기존 사이드바와 간격 통일 */}
                             <div className="sort-section">
-                                <h3 className="sidebar-title" style={{ marginTop: '10px' }}>정렬</h3>
                                 <div className="sort-grid">
                                     <div className={`filter-item ${sortOption === 'followers' ? 'active' : ''}`} onClick={() => handleSortClick('followers')}>
                                         <div className="radio-circle"></div>팔로워 순
@@ -111,14 +109,13 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                             </div>
 
                             {/* 팔로잉 관리 리스트 */}
-                            <div className="following-management-section" style={{ marginTop: '30px' }}>
+                            <div className="sort-section">
                                 <h3 className="sidebar-title">팔로잉 관리</h3>
-                                <div className="following-user-list" style={{ marginTop: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div className="following-user-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
                                     {followingList.length > 0 ? followingList.map(user => (
-                                        // 기존 filter-item 클래스를 활용해 마우스 오버 효과 유지
-                                        <div key={user.USER_NO} className="filter-item" style={{ paddingLeft: '5px' }}>
+                                        <div key={user.USER_NO} className="filter-item" style={{ paddingLeft: '5px' }} onClick={() => alert("이동")}>
                                             <img 
-                                                src={user.PROFILE_IMAGE ? `http://localhost:3010/profile/${user.PROFILE_IMAGE}` : '/default-profile.png'} 
+                                                src={user.PROFILE_IMAGE ? user.PROFILE_IMAGE : '/default-profile.png'} 
                                                 alt="프로필" 
                                                 style={{ width: '28px', height: '28px', borderRadius: '50%', marginRight: '10px', objectFit: 'cover' }} 
                                             />

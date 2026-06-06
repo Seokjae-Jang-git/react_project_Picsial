@@ -83,7 +83,7 @@ function PostCard({ post, formatTimeAgo }) {
     return (
         <div className="vertical-post-card" onClick={() => navigate(`/post/${post.POST_ID}`)}>
             <div className="post-card-top">
-                <span className="post-author">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
+                <span className="post-photog">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
                 <span className="post-time">{formatTimeAgo(post.CREATED_AT)}</span>
             </div>
 

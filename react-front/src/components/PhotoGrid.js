@@ -28,32 +28,6 @@ function PhotoGrid({ photos }) {
                         decoding="async"
                     />
                     
-                    {/* 2. 마우스 올렸을 때 나타날 정보 오버레이 */}
-                    {/* <div className="stats-overlay">
-                        <div className="stat-item">
-                            <span className="grid-icon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                            </span>
-                            {photo.VIEW_COUNT || 0}
-                        </div>
-                        <div className="stat-item">
-                            <span className="grid-icon">♡</span>
-                            {photo.LIKE_COUNT || 0}
-                        </div>
-                        <div className="stat-item">
-                            <span className="grid-icon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                            </span>
-                            {photo.SCRAP_COUNT || 0}
-                        </div>
-                        <div className="stat-item">
-                            <span className="grid-icon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            </span>
-                            {photo.COMMENT_COUNT || 0}
-                        </div>
-                    </div> */}
-                    
                     <div className="stats-overlay">
                         {/* 여기를 감싸는 별도 div가 없어도 overlay가 직접 row로 배치되게 설정할 겁니다 */}
                         <div className="stat-item">

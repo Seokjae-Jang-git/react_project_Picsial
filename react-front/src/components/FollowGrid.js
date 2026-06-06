@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 🚀 1. 네비게이트 임포트
 import { jwtDecode } from 'jwt-decode';
 import './css/FollowGrid.css';
 
-function FollowGrid({ sortOption }) {
-    const [authors, setAuthors] = useState([]);
+function FollowGrid({ sortOption, onFollowChange }) {
+    const [photogs, setPhotogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate(); // 🚀 2. 초기화
 
     const sortLabel = {
         'followers': '팔로워 순',
@@ -15,7 +17,7 @@ function FollowGrid({ sortOption }) {
 
     // 💡 1. 작가 목록 및 데이터 불러오기
     useEffect(() => {
-        const fetchAuthors = async () => {
+        const fetchphotogs = async () => {
             setIsLoading(true);
             const token = localStorage.getItem('jwtToken');
             if (!token) return;
@@ -23,11 +25,11 @@ function FollowGrid({ sortOption }) {
             try {
                 const decoded = jwtDecode(token);
                 // 백엔드 API 호출 (아직 안 만들었지만 미리 연결해둡니다)
-                const response = await fetch(`http://localhost:3010/follow/authors?sort=${sortOption}&userNo=${decoded.userNo}`);
+                const response = await fetch(`http://localhost:3010/follow/photogs?sort=${sortOption}&userNo=${decoded.userNo}`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    setAuthors(data.authors);
+                    setPhotogs(data.photogs);
                 }
             } catch (error) {
                 console.error("작가 목록 로드 실패:", error);
@@ -36,7 +38,7 @@ function FollowGrid({ sortOption }) {
             }
         };
 
-        fetchAuthors();
+        fetchphotogs();
     }, [sortOption]);
 
     // 💡 2. 팔로우 / 팔로우 취소 토글 로직
@@ -47,12 +49,22 @@ function FollowGrid({ sortOption }) {
         try {
             const decoded = jwtDecode(token);
             
-            // 프론트엔드 UI 즉각 업데이트 (Optimistic UI - 반응속도를 위해 먼저 바꿈)
-            setAuthors(prev => prev.map(author => 
-                author.USER_NO === targetUserNo 
-                    ? { ...author, IS_FOLLOWING: currentStatus === 'Y' ? 'N' : 'Y' } 
-                    : author
-            ));
+            // 🚀 1. 프론트엔드 UI 즉각 업데이트: 버튼 색상 변경 + 팔로워 숫자 증감!
+            setPhotogs(prev => prev.map(photog => {
+                if (photog.USER_NO === targetUserNo) {
+                    const isCurrentlyFollowing = currentStatus === 'Y';
+                    return { 
+                        ...photog, 
+                        // 상태 뒤집기
+                        IS_FOLLOWING: isCurrentlyFollowing ? 'N' : 'Y',
+                        // 팔로우 취소면 -1, 새로 팔로우면 +1
+                        FOLLOWER_COUNT: isCurrentlyFollowing 
+                            ? Math.max(0, photog.FOLLOWER_COUNT - 1) 
+                            : photog.FOLLOWER_COUNT + 1
+                    };
+                }
+                return photog;
+            }));
 
             // 백엔드에 토글 요청
             const response = await fetch('http://localhost:3010/follow/toggle', {
@@ -65,12 +77,26 @@ function FollowGrid({ sortOption }) {
             });
             const data = await response.json();
 
-            if (!data.success) {
-                // 실패 시 롤백
+            if (data.success) {
+                // DB 업데이트 성공 시 사이드바에 신호탄 쏘기
+                if (onFollowChange) onFollowChange();
+            } else {
+                // 🚀 2. 실패 시 롤백 로직: 원래 상태와 숫자로 원상복구
                 alert("처리 중 오류가 발생했습니다.");
-                setAuthors(prev => prev.map(author => 
-                    author.USER_NO === targetUserNo ? { ...author, IS_FOLLOWING: currentStatus } : author
-                ));
+                setPhotogs(prev => prev.map(photog => {
+                    if (photog.USER_NO === targetUserNo) {
+                        const isCurrentlyFollowing = currentStatus === 'Y';
+                        return { 
+                            ...photog, 
+                            IS_FOLLOWING: currentStatus,
+                            // 올렸던 건 다시 내리고, 내렸던 건 다시 올림
+                            FOLLOWER_COUNT: isCurrentlyFollowing
+                                ? photog.FOLLOWER_COUNT + 1
+                                : Math.max(0, photog.FOLLOWER_COUNT - 1)
+                        };
+                    }
+                    return photog;
+                }));
             }
         } catch (error) {
             console.error("팔로우 토글 에러:", error);
@@ -83,41 +109,41 @@ function FollowGrid({ sortOption }) {
         <div className="follow-grid-container">
             {/* 🚀 4. 요청하신 상단 '추천 작가 목록' 헤더 삭제 완료 */}
             
-            <div className="author-card-list">
-                {authors.length === 0 ? (
-                    <div className="empty-authors">조건에 맞는 작가가 없습니다.</div>
+            <div className="photog-card-list">
+                {photogs.length === 0 ? (
+                    <div className="empty-photogs">조건에 맞는 작가가 없습니다.</div>
                 ) : (
-                    authors.map(author => (
-                        <div key={author.USER_NO} className="author-card">
+                    photogs.map(photog => (
+                        <div key={photog.USER_NO} className="photog-card">
                             
-                            <div className="author-info-section">
-                                <div className="author-profile-top">
+                            <div className="photog-info-section">
+                                <div className="photog-profile-top" onClick={() => alert("이동")}>
                                     <img 
-                                        src={author.PROFILE_IMAGE ? `http://localhost:3010/profile/${author.PROFILE_IMAGE}` : '/default-profile.png'} 
+                                        src={photog.PROFILE_IMAGE ? `http://localhost:3010/profile/${photog.PROFILE_IMAGE}` : '/default-profile.png'} 
                                         alt="프로필" 
-                                        className="author-avatar" 
+                                        className="photog-avatar" 
                                     />
-                                    <div className="author-name-box">
-                                        <h3 className="author-nickname">{author.NICKNAME}</h3>
-                                        <p className="author-intro">{author.INTRO || '소개글이 없습니다.'}</p>
+                                    <div className="photog-name-box">
+                                        <h3 className="photog-nickname">{photog.NICKNAME}</h3>
+                                        <p className="photog-intro">{photog.INTRO || '소개글이 없습니다.'}</p>
                                     </div>
                                 </div>
 
-                                <div className="author-stats">
-                                    <div className="stat-row"><span>팔로워</span> <strong>{author.FOLLOWER_COUNT}</strong></div>
-                                    <div className="stat-row"><span>좋아요</span> <strong>{author.TOTAL_LIKES}</strong></div>
-                                    <div className="stat-row"><span>스크랩</span> <strong>{author.TOTAL_SCRAPS}</strong></div>
+                                <div className="photog-stats">
+                                    <div className="stat-row"><span>팔로워</span> <strong>{photog.FOLLOWER_COUNT}</strong></div>
+                                    <div className="stat-row"><span>좋아요</span> <strong>{photog.TOTAL_LIKES}</strong></div>
+                                    <div className="stat-row"><span>스크랩</span> <strong>{photog.TOTAL_SCRAPS}</strong></div>
                                     <div className="stat-row update-time">
-                                        <span>업데이트</span> {author.LAST_UPDATE ? author.LAST_UPDATE : '기록 없음'}
+                                        <span>업데이트</span> {photog.LAST_UPDATE ? photog.LAST_UPDATE : '기록 없음'}
                                     </div>
                                 </div>
 
-                                <div className="author-actions">
+                                <div className="photog-actions">
                                     <button 
-                                        className={`btn-follow ${author.IS_FOLLOWING === 'Y' ? 'following' : ''}`}
-                                        onClick={() => handleFollowToggle(author.USER_NO, author.IS_FOLLOWING)}
+                                        className={`btn-follow ${photog.IS_FOLLOWING === 'Y' ? 'following' : ''}`}
+                                        onClick={() => handleFollowToggle(photog.USER_NO, photog.IS_FOLLOWING)}
                                     >
-                                        {author.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
+                                        {photog.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
                                     </button>
                                     <button className="btn-message" onClick={() => alert('메시지 기능은 준비 중입니다.')}>
                                         메시지
@@ -125,17 +151,16 @@ function FollowGrid({ sortOption }) {
                                 </div>
                             </div>
 
-                            <div className="author-photos-section">
-                                {author.topPhotos && author.topPhotos.length > 0 ? (
-                                    author.topPhotos.map(photo => (
-                                        <div key={photo.PHOTO_ID} className="rep-photo-wrapper">
+                            <div className="photog-photos-section">
+                                {photog.topPhotos && photog.topPhotos.length > 0 ? (
+                                    photog.topPhotos.map(photo => (
+                                        <div 
+                                            key={photo.PHOTO_ID} 
+                                            className="rep-photo-wrapper"
+                                            onClick={() => navigate(`/photo/${photo.PHOTO_ID}`)} // 🚀 3. 상세 페이지로 이동
+                                        >
                                             <img 
-                                                src={
-                                                    photo.THUMB_URL.startsWith('http') 
-                                                        ? photo.THUMB_URL 
-                                                        // 🚀 여기만 REACT_APP_ 을 붙여줍니다!
-                                                        : `${process.env.REACT_APP_NAS_BASE_URL}/${photo.THUMB_URL}`
-                                                } 
+                                                src={photo.THUMB_URL} 
                                                 alt="대표 사진" 
                                             />
                                         </div>

@@ -4,9 +4,9 @@ const oracledb = require('oracledb');
 const db = require('../db'); // DB 연결 모듈 경로 (프로젝트에 맞게 수정)
 
 // ==========================================
-// 1. [GET] /follow/authors - 추천 작가 목록 및 통계/사진 가져오기
+// 1. [GET] /follow/photogs - 추천 작가 목록 및 통계/사진 가져오기
 // ==========================================
-router.get('/authors', async (req, res) => {
+router.get('/photogs', async (req, res) => {
     let connection;
     try {
         const userNo = Number(req.query.userNo);
@@ -21,7 +21,7 @@ router.get('/authors', async (req, res) => {
         if (sortOption === 'scraps') orderByClause = 'ORDER BY TOTAL_SCRAPS DESC';
 
         // 💡 2단계: 작가 기본 정보, 통계, 내 팔로우 여부(가상 컬럼)를 한 번에 가져오는 서브쿼리 조합
-        const authorSql = `
+        const photogSql = `
             SELECT 
                 U.USER_NO, 
                 U.NICKNAME, 
@@ -46,26 +46,33 @@ router.get('/authors', async (req, res) => {
             ${orderByClause}
         `;
         
-        const authorResult = await connection.execute(authorSql, { userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-        let authors = authorResult.rows;
+        const photogResult = await connection.execute(photogSql, { userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+        let photogs = photogResult.rows;
 
         // 💡 3단계: 각 작가별로 '좋아요가 가장 많은 대표 사진 5장' 가져오기
-        for (let author of authors) {
+        for (let photog of photogs) {
             const photoSql = `
                 SELECT PHOTO_ID, THUMB_URL
                 FROM (
                     SELECT PHOTO_ID, THUMB_URL 
                     FROM PS_PHOTO 
-                    WHERE USER_NO = :authorNo 
+                    WHERE USER_NO = :photogNo 
                     ORDER BY LIKE_COUNT DESC
                 )
                 WHERE ROWNUM <= 5
             `;
-            const photoResult = await connection.execute(photoSql, { authorNo: author.USER_NO }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-            author.topPhotos = photoResult.rows;
+            const photoResult = await connection.execute(photoSql, { photogNo: photog.USER_NO }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+            
+            // 🚀 핵심: photo.js처럼 백엔드에서 미리 NAS 주소를 조립해서 프론트엔드로 넘겨줍니다!
+            photog.topPhotos = photoResult.rows.map(photo => ({
+                ...photo,
+                THUMB_URL: photo.THUMB_URL && photo.THUMB_URL.startsWith('http')
+                    ? photo.THUMB_URL
+                    : `${process.env.NAS_BASE_URL}/${photo.THUMB_URL}`
+            }));
         }
 
-        res.json({ success: true, authors });
+        res.json({ success: true, photogs });
 
     } catch (error) {
         console.error("작가 목록 로드 에러:", error);
