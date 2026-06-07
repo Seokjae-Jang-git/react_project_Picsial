@@ -210,4 +210,76 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// ==========================================
+// [DELETE] /auth/delete-account - 계정 삭제 API
+// ==========================================
+router.delete('/delete-account', async (req, res) => {
+    // 프론트에서 넘어온 userNo와 reason
+    // (JWT 미들웨어를 쓰신다면 req.user.userNo 등으로 대체 가능합니다)
+    const { userNo, reason } = req.body; 
+
+    if (!userNo) {
+        return res.status(400).json({ success: false, message: "유저 식별 정보가 없습니다." });
+    }
+
+    let connection;
+    try {
+        connection = await db.getConnection();
+
+        // 1. 삭제할 유저의 USER_ID 조회 (이력 테이블에 남기기 위해)
+        const checkSql = `SELECT USER_ID FROM PS_USER_INFO WHERE USER_NO = :userNo`;
+        const checkResult = await connection.execute(
+            checkSql, 
+            { userNo }, 
+            { outFormat: oracledb.OUT_FORMAT_OBJECT } 
+        );
+
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "존재하지 않는 유저입니다." });
+        }
+        const userId = checkResult.rows[0].USER_ID;
+
+        // 2. PS_DELETED_USER 테이블에 삭제 이력 삽입
+        // DELETED_AT은 테이블 Default값(SYSDATE)이 있으므로 생략합니다.
+        const insertHistSql = `
+            INSERT INTO PS_DELETED_USER (DEL_NO, USER_NO, USER_ID, REASON)
+            VALUES (PS_DELETED_USER_SEQ.NEXTVAL, :userNo, :userId, :reason)
+        `;
+        await connection.execute(insertHistSql, { 
+            userNo, 
+            userId, 
+            reason: reason || '사유 미작성' 
+        });
+
+        // 3. PS_USER_INFO에서 유저 정보 삭제
+        // 🚨 주의: 외래키에 ON DELETE CASCADE가 없으면 여기서 ORA-02292 에러가 터집니다!
+        const deleteUserSql = `DELETE FROM PS_USER_INFO WHERE USER_NO = :userNo`;
+        await connection.execute(deleteUserSql, { userNo });
+
+        // 4. 모든 작업이 성공하면 트랜잭션 커밋
+        await connection.commit();
+        res.json({ success: true, message: "계정이 삭제되었습니다." });
+
+    } catch (error) {
+        // 오류 발생 시 롤백 (이력은 남았는데 본계정은 안 지워지는 등 데이터 꼬임 방지)
+        if (connection) await connection.rollback();
+        
+        console.error("계정 삭제 API 에러:", error);
+
+        // ORA-02292: 자식 레코드가 발견되었습니다 에러 처리
+        if (error.message.includes('ORA-02292')) {
+            return res.status(409).json({ 
+                success: false, 
+                message: "DB 외래키 제약조건 오류: 해당 유저의 글/사진/댓글 등 자식 데이터가 남아있어 삭제할 수 없습니다. (CASCADE 확인 필요)" 
+            });
+        }
+
+        res.status(500).json({ success: false, message: "서버 오류로 계정 삭제에 실패했습니다." });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+});
+
 module.exports = router;

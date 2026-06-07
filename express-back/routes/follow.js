@@ -200,4 +200,88 @@ router.get('/list', async (req, res) => {
     }
 });
 
+// ==========================================
+// [GET] /follow/following - 내가 팔로잉 중인 작가 목록 및 통계 조회 (6가지 정렬 및 오타 수정 완료)
+// ==========================================
+router.get('/following', async (req, res) => {
+    let connection;
+    try {
+        const userNo = Number(req.query.userNo);
+        const sortOption = req.query.sort || 'following_latest';
+        
+        if (!userNo) {
+            return res.status(400).json({ success: false, message: "유저 번호 누락" });
+        }
+
+        connection = await db.getConnection();
+
+        // 정렬 조건문 구성
+        let orderByClause = '';
+        if (sortOption === 'followers') {
+            orderByClause = 'ORDER BY FOLLOWER_COUNT DESC, U.USER_NO DESC';
+        } else if (sortOption === 'following') {
+            orderByClause = 'ORDER BY FOLLOWING_COUNT DESC, U.USER_NO DESC';
+        } else if (sortOption === 'likes') {
+            orderByClause = 'ORDER BY TOTAL_LIKES DESC, U.USER_NO DESC';
+        } else if (sortOption === 'scraps') {
+            orderByClause = 'ORDER BY TOTAL_SCRAPS DESC, U.USER_NO DESC';
+        } else if (sortOption === 'following_oldest') {
+            orderByClause = 'ORDER BY F_MAIN.FOLLOW_ID ASC'; 
+        } else if (sortOption === 'updated') {
+            orderByClause = 'ORDER BY LAST_UPDATE DESC NULLS LAST, U.USER_NO DESC';
+        } else {
+            orderByClause = 'ORDER BY F_MAIN.FOLLOW_ID DESC'; // 기본값: 최근 팔로우한 순
+        }
+
+        // 💡 핵심 수정: 서브쿼리 안의 && 를 오라클 표준 AND 로 교체 완료!
+        const sql = `
+            SELECT 
+                U.USER_NO, U.NICKNAME, U.PROFILE_IMAGE_URL, U.INTRO,
+                (SELECT COUNT(*) FROM PS_FOLLOW WHERE FOLLOWING_NO = U.USER_NO) AS FOLLOWER_COUNT,
+                (SELECT COUNT(*) FROM PS_FOLLOW WHERE FOLLOWER_NO = U.USER_NO) AS FOLLOWING_COUNT,
+                NVL((SELECT SUM(LIKE_COUNT) FROM PS_PHOTO WHERE USER_NO = U.USER_NO), 0) + 
+                NVL((SELECT SUM(LIKE_COUNT) FROM PS_POST WHERE USER_NO = U.USER_NO), 0) AS TOTAL_LIKES,
+                NVL((SELECT COUNT(*) FROM PS_SCRAP_TABLE S JOIN PS_POST P ON S.POST_ID = P.POST_ID WHERE P.USER_NO = U.USER_NO), 0) AS TOTAL_SCRAPS, 
+                TO_CHAR(
+                    GREATEST(
+                        NVL((SELECT MAX(CREATED_AT) FROM PS_PHOTO WHERE USER_NO = U.USER_NO), TO_DATE('1970-01-01', 'YYYY-MM-DD')),
+                        NVL((SELECT MAX(CREATED_AT) FROM PS_POST WHERE USER_NO = U.USER_NO AND IS_PUBLIC = 'Y'), TO_DATE('1970-01-01', 'YYYY-MM-DD'))
+                    ), 
+                    'YYYY-MM-DD'
+                ) AS LAST_UPDATE,
+                'Y' AS IS_FOLLOWING 
+            FROM PS_USER_INFO U
+            JOIN PS_FOLLOW F_MAIN ON U.USER_NO = F_MAIN.FOLLOWING_NO
+            WHERE F_MAIN.FOLLOWER_NO = :userNo
+            ${orderByClause}
+        `;
+        
+        const result = await connection.execute(sql, { userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+        
+        const processedList = result.rows.map(user => {
+            let finalProfileUrl = user.PROFILE_IMAGE_URL;
+            if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
+                const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
+                if (profileBaseUrl) {
+                    finalProfileUrl = `${profileBaseUrl}/${finalProfileUrl}`;
+                }
+            }
+            return {
+                ...user,
+                PROFILE_IMAGE_URL: finalProfileUrl
+            };
+        });
+
+        res.json({ success: true, list: processedList });
+
+    } catch (error) {
+        console.error("내 팔로잉 리스트 로드 에러:", error);
+        res.status(500).json({ success: false, message: "팔로잉 리스트를 불러오지 못했습니다." });
+    } finally {
+        if (connection) {
+            try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+});
+
 module.exports = router;

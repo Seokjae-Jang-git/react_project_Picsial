@@ -1,4 +1,4 @@
-.upload-page-container { min-height: 100vh; background-color: #f8f9fa; }
+.upload-page-container { height: 100vh; background-color: #f8f9fa; overflow: hidden;}
 .upload-main { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
 
 /* 🚀 수정: 양 끝 정렬(space-between)을 제거하고, 

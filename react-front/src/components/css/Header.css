@@ -41,18 +41,11 @@
 }
 
 /* 로고 스타일링 */
-.picsial-header .header-logo {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-color);
-    cursor: pointer;
-    letter-spacing: -0.5px;
-    margin-right: 30px;
-    user-select: none;
-}
-
-.picsial-header .header-logo span {
-    color: var(--primary-color); /* 온점(.)에 포인트 컬러 지정 */
+.picsial-header .header-logo-img {
+    height: 50px;       /* 적절한 로고 높이로 수정하세요 */
+    width: auto;        /* 비율 유지 */
+    cursor: pointer;    /* 클릭 가능 표시 */
+    margin-right: 20px; /* 옆 메뉴와의 간격 */
 }
 
 /* 네비게이션 탭 바 */

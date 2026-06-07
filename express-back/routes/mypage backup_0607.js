@@ -115,30 +115,29 @@ router.get('/', async (req, res) => {
 });
 
 // ==========================================
-// [GET] /photos : 내 업로드 사진 목록 조회 (중복 방지 IN 쿼리 및 6가지 정렬 적용 / 전체 조회)
+// [GET] /photos : 내 업로드 사진 목록 조회 (중복 방지 IN 쿼리 및 6가지 정렬 적용)
 // ==========================================
 router.get('/photos', async (req, res) => {
     let connection;
     try {
         const { userNo, category, sort } = req.query;
+        const limit = Number(req.query.limit) || 12;
 
         if (!userNo) {
             return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
         }
 
         connection = await db.getConnection();
+        const bindParams = { userNo, limit };
         
-        // 💡 limit 제거
-        const bindParams = { userNo };
-        
-        // 1. 카테고리 필터링
+        // 💡 1. 카테고리 필터링 (참고하신 IN 서브쿼리 방식으로 중복 원천 차단)
         let categoryCondition = '';
         if (category && category !== '') {
             categoryCondition = `AND P.PHOTO_ID IN (SELECT PHOTO_ID FROM PS_PHOTO_CATEMAP WHERE CATEGORY_ID = :category)`;
             bindParams.category = Number(category);
         }
 
-        // 2. 6가지 동적 정렬 적용
+        // 💡 2. 6가지 동적 정렬 적용
         let orderByClause = '';
         if (sort === 'scraps') {
             orderByClause = 'ORDER BY SCRAP_COUNT DESC, P.PHOTO_ID DESC';
@@ -151,21 +150,23 @@ router.get('/photos', async (req, res) => {
         } else if (sort === 'oldest') {
             orderByClause = 'ORDER BY P.PHOTO_ID ASC';
         } else {
-            orderByClause = 'ORDER BY P.PHOTO_ID DESC'; // 기본값: 최신순
+            orderByClause = 'ORDER BY P.PHOTO_ID DESC'; // 기본값: 최신순 (latest)
         }
 
-        // 💡 ROWNUM 껍데기 제거: 전체 목록이 정렬되어 출력됩니다.
+        // 메인 오라클 쿼리 조립
         const sql = `
-            SELECT 
-                P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT,
-                NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT
-            FROM PS_PHOTO P
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
-            WHERE P.USER_NO = :userNo 
-            ${categoryCondition}
-            ${orderByClause}
+            SELECT * FROM (
+                SELECT 
+                    P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT,
+                    NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+                    NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT
+                FROM PS_PHOTO P
+                LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
+                LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
+                WHERE P.USER_NO = :userNo 
+                ${categoryCondition}
+                ${orderByClause}
+            ) WHERE ROWNUM <= :limit
         `;
 
         const result = await connection.execute(sql, bindParams, { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -192,28 +193,31 @@ router.get('/photos', async (req, res) => {
 });
 
 // ==========================================
-// [GET] /mypage/posts - 내 게시물 필터링 및 6가지 정렬 조회 (전체 조회)
+// [GET] /mypage/posts - 내 게시물 필터링 및 6가지 정렬 조회 (ORA-00904 완벽 수선 버전)
 // ==========================================
 router.get('/posts', async (req, res) => {
     let connection;
     try {
         const { userNo, category, sort } = req.query;
+        const limit = Number(req.query.limit) || 6;
 
         if (!userNo) {
             return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
         }
 
         connection = await db.getConnection();
-        
-        // 💡 limit 제거
-        const bindParams = { userNo };
+        const bindParams = { userNo, limit };
 
+        // 💡 핵심 수선 구문: 기존의 'AND P.CATEGORY_ID = :category'를 완전히 폐기합니다.
+        // 사진 목록에서 검증하셨던 중복 방지용 IN 서브쿼리 메커니즘을 이식했습니다.
         let categoryCondition = '';
         if (category && category !== '') {
+            // ※ 만약 테이블을 생성하실 때 게시물 카테고리 매핑 테이블명을 다르게 지으셨다면 PS_POST_CATEMAP 이 부분만 맞추면 됩니다.
             categoryCondition = `AND P.POST_ID IN (SELECT POST_ID FROM PS_POST_CATEMAP WHERE CATEGORY_ID = :category)`;
             bindParams.category = Number(category);
         }
 
+        // 6가지 동적 정렬 조건문 구성
         let orderByClause = '';
         if (sort === 'scraps') {
             orderByClause = 'ORDER BY SCRAP_COUNT DESC, P.POST_ID DESC';
@@ -226,28 +230,30 @@ router.get('/posts', async (req, res) => {
         } else if (sort === 'oldest') {
             orderByClause = 'ORDER BY P.POST_ID ASC';
         } else {
-            orderByClause = 'ORDER BY P.POST_ID DESC'; 
+            orderByClause = 'ORDER BY P.POST_ID DESC'; // 기본값: 최신순 (latest)
         }
 
-        // 💡 ROWNUM 껍데기 제거
+        // 메인 오라클 쿼리 조립
         const sql = `
-            SELECT 
-                P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                UI.NICKNAME,
-                NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
-                (
-                    SELECT LISTAGG(IMG.THUMB_URL, ',') WITHIN GROUP (ORDER BY IMG.SORT_ORDER)
-                    FROM PS_POST_IMAGE IMG
-                    WHERE IMG.POST_ID = P.POST_ID
-                ) AS ALL_THUMBS
-            FROM PS_POST P
-            LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
-            LEFT JOIN (SELECT POST_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY POST_ID) S ON P.POST_ID = S.POST_ID
-            LEFT JOIN (SELECT POST_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY POST_ID) CM ON P.POST_ID = CM.POST_ID
-            WHERE P.USER_NO = :userNo
-            ${categoryCondition}
-            ${orderByClause}
+            SELECT * FROM (
+                SELECT 
+                    P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
+                    UI.NICKNAME,
+                    NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+                    NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+                    (
+                        SELECT LISTAGG(IMG.THUMB_URL, ',') WITHIN GROUP (ORDER BY IMG.SORT_ORDER)
+                        FROM PS_POST_IMAGE IMG
+                        WHERE IMG.POST_ID = P.POST_ID
+                    ) AS ALL_THUMBS
+                FROM PS_POST P
+                LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
+                LEFT JOIN (SELECT POST_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY POST_ID) S ON P.POST_ID = S.POST_ID
+                LEFT JOIN (SELECT POST_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY POST_ID) CM ON P.POST_ID = CM.POST_ID
+                WHERE P.USER_NO = :userNo
+                ${categoryCondition}  -- 👈 P.CATEGORY_ID가 제거된 안전한 동적 서브쿼리 반영
+                ${orderByClause}
+            ) WHERE ROWNUM <= :limit
         `;
 
         const result = await connection.execute(
@@ -255,10 +261,11 @@ router.get('/posts', async (req, res) => {
             bindParams, 
             { 
                 outFormat: oracledb.OUT_FORMAT_OBJECT,
-                fetchInfo: { CONTENT: { type: oracledb.STRING } } 
+                fetchInfo: { CONTENT: { type: oracledb.STRING } } // CLOB 방어막 유지
             }
         );
 
+        // 이미지 주소 조립 및 썸네일 배열 생성 처리
         const processedPosts = result.rows.map(post => {
             const thumbList = post.ALL_THUMBS ? post.ALL_THUMBS.split(',') : [];
             const fullThumbUrls = thumbList.map(fileName => {
@@ -281,189 +288,6 @@ router.get('/posts', async (req, res) => {
         if (connection) { 
             try { await connection.close(); } catch (e) {} 
         }
-    }
-});
-
-// ==========================================
-// [GET] /mypage/scrap/photos - 내가 스크랩한 사진 목록 조회 (전체 조회)
-// ==========================================
-router.get('/scrap/photos', async (req, res) => {
-    let connection;
-    try {
-        const { userNo, category, sort } = req.query;
-
-        if (!userNo) {
-            return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
-        }
-
-        connection = await db.getConnection();
-        
-        // 💡 limit 제거
-        const bindParams = { userNo };
-
-        let categoryCondition = '';
-        if (category && category !== '') {
-            categoryCondition = `AND P.PHOTO_ID IN (SELECT PHOTO_ID FROM PS_PHOTO_CATEMAP WHERE CATEGORY_ID = :category)`;
-            bindParams.category = Number(category);
-        }
-
-        let orderByClause = '';
-        if (sort === 'scrap_latest') {
-            orderByClause = 'ORDER BY ST.CREATED_AT DESC, P.PHOTO_ID DESC';
-        } else if (sort === 'scrap_oldest') {
-            orderByClause = 'ORDER BY ST.CREATED_AT ASC, P.PHOTO_ID ASC';
-        } else if (sort === 'latest') {
-            orderByClause = 'ORDER BY P.CREATED_AT DESC, P.PHOTO_ID DESC';
-        } else if (sort === 'oldest') {
-            orderByClause = 'ORDER BY P.CREATED_AT ASC, P.PHOTO_ID ASC';
-        } else if (sort === 'likes') {
-            orderByClause = 'ORDER BY P.LIKE_COUNT DESC, P.PHOTO_ID DESC';
-        } else if (sort === 'views') {
-            orderByClause = 'ORDER BY P.VIEW_COUNT DESC, P.PHOTO_ID DESC';
-        } else if (sort === 'comments') {
-            orderByClause = 'ORDER BY COMMENT_COUNT DESC, P.PHOTO_ID DESC';
-        } else {
-            orderByClause = 'ORDER BY ST.CREATED_AT DESC'; 
-        }
-
-        // 💡 ROWNUM 껍데기 제거
-        const sql = `
-            SELECT 
-                P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                NVL(S_COUNT.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
-                ST.CREATED_AT AS SCRAP_DATE
-            FROM PS_SCRAP_TABLE ST
-            JOIN PS_PHOTO P ON ST.PHOTO_ID = P.PHOTO_ID
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE WHERE PHOTO_ID IS NOT NULL GROUP BY PHOTO_ID) S_COUNT ON P.PHOTO_ID = S_COUNT.PHOTO_ID
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
-            WHERE ST.USER_NO = :userNo AND ST.PHOTO_ID IS NOT NULL
-            ${categoryCondition}
-            ${orderByClause}
-        `;
-
-        const result = await connection.execute(sql, bindParams, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-
-        const processedPhotos = result.rows.map(photo => ({
-            ...photo,
-            IMAGE_URL: photo.IMAGE_URL && photo.IMAGE_URL.startsWith('http') 
-                ? photo.IMAGE_URL 
-                : `${process.env.NAS_BASE_URL}/${photo.IMAGE_URL}`,
-            THUMB_URL: photo.THUMB_URL && photo.THUMB_URL.startsWith('http')
-                ? photo.THUMB_URL 
-                : `${process.env.NAS_BASE_URL}/${photo.THUMB_URL}`
-        }));
-
-        res.json({ success: true, list: processedPhotos });
-
-    } catch (error) {
-        console.error("스크랩 사진 조회 에러:", error.message);
-        res.status(500).json({ success: false, message: "스크랩 사진 목록 불러오기 실패" });
-    } finally {
-        if (connection) { try { await connection.close(); } catch (e) {} }
-    }
-});
-
-// ==========================================
-// [GET] /mypage/scrap/posts - 내가 스크랩한 게시물 목록 조회 (전체 조회)
-// ==========================================
-router.get('/scrap/posts', async (req, res) => {
-    let connection;
-    try {
-        const { userNo, category, sort } = req.query;
-
-        if (!userNo) {
-            return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
-        }
-
-        connection = await db.getConnection();
-        
-        // 💡 limit 제거
-        const bindParams = { userNo };
-
-        let categoryCondition = '';
-        if (category && category !== '') {
-            categoryCondition = `AND P.POST_ID IN (SELECT POST_ID FROM PS_POST_CATEMAP WHERE CATEGORY_ID = :category)`;
-            bindParams.category = Number(category);
-        }
-
-        let orderByClause = '';
-        if (sort === 'scrap_latest') {
-            orderByClause = 'ORDER BY ST.CREATED_AT DESC, P.POST_ID DESC';
-        } else if (sort === 'scrap_oldest') {
-            orderByClause = 'ORDER BY ST.CREATED_AT ASC, P.POST_ID ASC';
-        } else if (sort === 'latest') {
-            orderByClause = 'ORDER BY P.CREATED_AT DESC, P.POST_ID DESC';
-        } else if (sort === 'oldest') {
-            orderByClause = 'ORDER BY P.CREATED_AT ASC, P.POST_ID ASC';
-        } else if (sort === 'likes') {
-            orderByClause = 'ORDER BY P.LIKE_COUNT DESC, P.POST_ID DESC';
-        } else if (sort === 'views') {
-            orderByClause = 'ORDER BY P.VIEW_COUNT DESC, P.POST_ID DESC';
-        } else if (sort === 'comments') {
-            orderByClause = 'ORDER BY COMMENT_COUNT DESC, P.POST_ID DESC';
-        } else {
-            orderByClause = 'ORDER BY ST.CREATED_AT DESC'; 
-        }
-
-        // 💡 ROWNUM 껍데기 제거
-        const sql = `
-            SELECT 
-                P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                UI.NICKNAME, UI.PROFILE_IMAGE_URL,
-                NVL(S_COUNT.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
-                (
-                    SELECT LISTAGG(IMG.THUMB_URL, ',') WITHIN GROUP (ORDER BY IMG.SORT_ORDER)
-                    FROM PS_POST_IMAGE IMG
-                    WHERE IMG.POST_ID = P.POST_ID
-                ) AS ALL_THUMBS,
-                ST.CREATED_AT AS SCRAP_DATE
-            FROM PS_SCRAP_TABLE ST
-            JOIN PS_POST P ON ST.POST_ID = P.POST_ID
-            LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
-            LEFT JOIN (SELECT POST_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE WHERE POST_ID IS NOT NULL GROUP BY POST_ID) S_COUNT ON P.POST_ID = S_COUNT.POST_ID
-            LEFT JOIN (SELECT POST_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY POST_ID) CM ON P.POST_ID = CM.POST_ID
-            WHERE ST.USER_NO = :userNo AND ST.POST_ID IS NOT NULL
-            ${categoryCondition}
-            ${orderByClause}
-        `;
-
-        const result = await connection.execute(
-            sql, 
-            bindParams, 
-            { 
-                outFormat: oracledb.OUT_FORMAT_OBJECT,
-                fetchInfo: { CONTENT: { type: oracledb.STRING } }
-            }
-        );
-
-        const processedPosts = result.rows.map(post => {
-            const thumbList = post.ALL_THUMBS ? post.ALL_THUMBS.split(',') : [];
-            const fullThumbUrls = thumbList.map(fileName => {
-                if (fileName.startsWith('http')) return fileName; 
-                return `${process.env.NAS_BASE_URL_POS_IMG}/${fileName}`; 
-            });
-
-            let profileUrl = post.PROFILE_IMAGE_URL;
-            if (profileUrl && !profileUrl.startsWith('http')) {
-                profileUrl = process.env.NAS_BASE_URL_PROFILE ? `${process.env.NAS_BASE_URL_PROFILE}/${profileUrl}` : profileUrl;
-            }
-
-            return {
-                ...post,
-                PROFILE_IMAGE_URL: profileUrl,
-                THUMB_LIST: fullThumbUrls
-            };
-        });
-
-        res.json({ success: true, list: processedPosts });
-
-    } catch (error) {
-        console.error("스크랩 게시물 조회 에러:", error.message);
-        res.status(500).json({ success: false, message: "스크랩 게시물 목록 불러오기 실패" });
-    } finally {
-        if (connection) { try { await connection.close(); } catch (e) {} }
     }
 });
 
@@ -758,7 +582,197 @@ router.get('/post', async (req, res) => {
     }
 });
 
+// ==========================================
+// [GET] /mypage/scrap/photos - 내가 스크랩한 사진 목록 조회
+// ==========================================
+router.get('/scrap/photos', async (req, res) => {
+    let connection;
+    try {
+        const { userNo, category, sort } = req.query;
+        const limit = Number(req.query.limit) || 12;
 
+        if (!userNo) {
+            return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
+        }
+
+        connection = await db.getConnection();
+        const bindParams = { userNo, limit };
+
+        // 카테고리 필터링
+        let categoryCondition = '';
+        if (category && category !== '') {
+            categoryCondition = `AND P.PHOTO_ID IN (SELECT PHOTO_ID FROM PS_PHOTO_CATEMAP WHERE CATEGORY_ID = :category)`;
+            bindParams.category = Number(category);
+        }
+
+        // 💡 동적 정렬 (스크랩 날짜순 포함)
+        let orderByClause = '';
+        if (sort === 'scrap_latest') {
+            orderByClause = 'ORDER BY ST.CREATED_AT DESC, P.PHOTO_ID DESC';
+        } else if (sort === 'scrap_oldest') {
+            orderByClause = 'ORDER BY ST.CREATED_AT ASC, P.PHOTO_ID ASC';
+        } else if (sort === 'latest') {
+            orderByClause = 'ORDER BY P.CREATED_AT DESC, P.PHOTO_ID DESC';
+        } else if (sort === 'oldest') {
+            orderByClause = 'ORDER BY P.CREATED_AT ASC, P.PHOTO_ID ASC';
+        } else if (sort === 'likes') {
+            orderByClause = 'ORDER BY P.LIKE_COUNT DESC, P.PHOTO_ID DESC';
+        } else if (sort === 'views') {
+            orderByClause = 'ORDER BY P.VIEW_COUNT DESC, P.PHOTO_ID DESC';
+        } else if (sort === 'comments') {
+            orderByClause = 'ORDER BY COMMENT_COUNT DESC, P.PHOTO_ID DESC';
+        } else {
+            orderByClause = 'ORDER BY ST.CREATED_AT DESC'; // 기본값: 스크랩 최신순
+        }
+
+        // 💡 스크랩 테이블(ST)과 사진 테이블(P)을 조인하여 가져옵니다.
+        const sql = `
+            SELECT * FROM (
+                SELECT 
+                    P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
+                    NVL(S_COUNT.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+                    NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+                    ST.CREATED_AT AS SCRAP_DATE
+                FROM PS_SCRAP_TABLE ST
+                JOIN PS_PHOTO P ON ST.PHOTO_ID = P.PHOTO_ID
+                LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE WHERE PHOTO_ID IS NOT NULL GROUP BY PHOTO_ID) S_COUNT ON P.PHOTO_ID = S_COUNT.PHOTO_ID
+                LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
+                WHERE ST.USER_NO = :userNo AND ST.PHOTO_ID IS NOT NULL
+                ${categoryCondition}
+                ${orderByClause}
+            ) WHERE ROWNUM <= :limit
+        `;
+
+        const result = await connection.execute(sql, bindParams, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        // 이미지 주소 가공 (NAS 방어코드)
+        const processedPhotos = result.rows.map(photo => ({
+            ...photo,
+            IMAGE_URL: photo.IMAGE_URL && photo.IMAGE_URL.startsWith('http') 
+                ? photo.IMAGE_URL 
+                : `${process.env.NAS_BASE_URL}/${photo.IMAGE_URL}`,
+            THUMB_URL: photo.THUMB_URL && photo.THUMB_URL.startsWith('http')
+                ? photo.THUMB_URL 
+                : `${process.env.NAS_BASE_URL}/${photo.THUMB_URL}`
+        }));
+
+        res.json({ success: true, list: processedPhotos });
+
+    } catch (error) {
+        console.error("스크랩 사진 조회 에러:", error.message);
+        res.status(500).json({ success: false, message: "스크랩 사진 목록 불러오기 실패" });
+    } finally {
+        if (connection) { try { await connection.close(); } catch (e) {} }
+    }
+});
+
+// ==========================================
+// [GET] /mypage/scrap/posts - 내가 스크랩한 게시물 목록 조회
+// ==========================================
+router.get('/scrap/posts', async (req, res) => {
+    let connection;
+    try {
+        const { userNo, category, sort } = req.query;
+        const limit = Number(req.query.limit) || 6;
+
+        if (!userNo) {
+            return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
+        }
+
+        connection = await db.getConnection();
+        const bindParams = { userNo, limit };
+
+        // 카테고리 필터링
+        let categoryCondition = '';
+        if (category && category !== '') {
+            categoryCondition = `AND P.POST_ID IN (SELECT POST_ID FROM PS_POST_CATEMAP WHERE CATEGORY_ID = :category)`;
+            bindParams.category = Number(category);
+        }
+
+        // 동적 정렬
+        let orderByClause = '';
+        if (sort === 'scrap_latest') {
+            orderByClause = 'ORDER BY ST.CREATED_AT DESC, P.POST_ID DESC';
+        } else if (sort === 'scrap_oldest') {
+            orderByClause = 'ORDER BY ST.CREATED_AT ASC, P.POST_ID ASC';
+        } else if (sort === 'latest') {
+            orderByClause = 'ORDER BY P.CREATED_AT DESC, P.POST_ID DESC';
+        } else if (sort === 'oldest') {
+            orderByClause = 'ORDER BY P.CREATED_AT ASC, P.POST_ID ASC';
+        } else if (sort === 'likes') {
+            orderByClause = 'ORDER BY P.LIKE_COUNT DESC, P.POST_ID DESC';
+        } else if (sort === 'views') {
+            orderByClause = 'ORDER BY P.VIEW_COUNT DESC, P.POST_ID DESC';
+        } else if (sort === 'comments') {
+            orderByClause = 'ORDER BY COMMENT_COUNT DESC, P.POST_ID DESC';
+        } else {
+            orderByClause = 'ORDER BY ST.CREATED_AT DESC'; // 기본값
+        }
+
+        // 💡 게시물과 스크랩 테이블 조인 및 썸네일 LISTAGG 처리
+        const sql = `
+            SELECT * FROM (
+                SELECT 
+                    P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
+                    UI.NICKNAME, UI.PROFILE_IMAGE_URL,
+                    NVL(S_COUNT.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+                    NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+                    (
+                        SELECT LISTAGG(IMG.THUMB_URL, ',') WITHIN GROUP (ORDER BY IMG.SORT_ORDER)
+                        FROM PS_POST_IMAGE IMG
+                        WHERE IMG.POST_ID = P.POST_ID
+                    ) AS ALL_THUMBS,
+                    ST.CREATED_AT AS SCRAP_DATE
+                FROM PS_SCRAP_TABLE ST
+                JOIN PS_POST P ON ST.POST_ID = P.POST_ID
+                LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
+                LEFT JOIN (SELECT POST_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE WHERE POST_ID IS NOT NULL GROUP BY POST_ID) S_COUNT ON P.POST_ID = S_COUNT.POST_ID
+                LEFT JOIN (SELECT POST_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY POST_ID) CM ON P.POST_ID = CM.POST_ID
+                WHERE ST.USER_NO = :userNo AND ST.POST_ID IS NOT NULL
+                ${categoryCondition}
+                ${orderByClause}
+            ) WHERE ROWNUM <= :limit
+        `;
+
+        const result = await connection.execute(
+            sql, 
+            bindParams, 
+            { 
+                outFormat: oracledb.OUT_FORMAT_OBJECT,
+                fetchInfo: { CONTENT: { type: oracledb.STRING } } // CLOB 방어막 유지
+            }
+        );
+
+        // 이미지 주소 조립 및 썸네일 배열 생성 처리
+        const processedPosts = result.rows.map(post => {
+            const thumbList = post.ALL_THUMBS ? post.ALL_THUMBS.split(',') : [];
+            const fullThumbUrls = thumbList.map(fileName => {
+                if (fileName.startsWith('http')) return fileName; 
+                return `${process.env.NAS_BASE_URL_POS_IMG}/${fileName}`; 
+            });
+
+            // 프로필 이미지 주소 가공
+            let profileUrl = post.PROFILE_IMAGE_URL;
+            if (profileUrl && !profileUrl.startsWith('http')) {
+                profileUrl = process.env.NAS_BASE_URL_PROFILE ? `${process.env.NAS_BASE_URL_PROFILE}/${profileUrl}` : profileUrl;
+            }
+
+            return {
+                ...post,
+                PROFILE_IMAGE_URL: profileUrl,
+                THUMB_LIST: fullThumbUrls
+            };
+        });
+
+        res.json({ success: true, list: processedPosts });
+
+    } catch (error) {
+        console.error("스크랩 게시물 조회 에러:", error.message);
+        res.status(500).json({ success: false, message: "스크랩 게시물 목록 불러오기 실패" });
+    } finally {
+        if (connection) { try { await connection.close(); } catch (e) {} }
+    }
+});
 
 
 module.exports = router;

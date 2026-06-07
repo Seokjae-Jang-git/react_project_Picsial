@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 import './css/MyAccount.css';
 
 const MyAccount = () => {
+    const navigate = useNavigate();
+
     const { myUserNo, refreshProfile } = useOutletContext();
 
     // 프로필 상태
@@ -267,9 +271,9 @@ const MyAccount = () => {
                 {/* 3. 계정 삭제 섹션 (1행의 우측으로 당겨옴) */}
                 <aside className="account-section delete-section">
                     <h3>계정 삭제</h3>
-                    <div className="delete-desc">삭제 후 동일한 아이디로 재가입이 불가하며,</div>
-                    <div className="delete-desc">모든 데이터가 복구 불가능합니다.</div>
-                    <button className="delete-btn" onClick={() => alert('계정 삭제 화면 추후 개발')}>계정 삭제</button>
+                    <div className="delete-desc">삭제 후 모든 데이터가 삭제되며,</div>
+                    <div className="delete-desc">복구 불가능해집니다.</div>
+                    <button className="delete-btn" onClick={() => navigate('./del-account')}>계정 삭제</button>
                 </aside>
 
             </div>

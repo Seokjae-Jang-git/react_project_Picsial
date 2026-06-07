@@ -46,7 +46,7 @@ const MyPageDash = () => {
                 </div>
                 
                 <div className="photo-grid">
-                    {myPhotos.map((photo) => (
+                    {myPhotos.slice(0, 6).map((photo) => (
                         <div 
                             key={photo.PHOTO_ID} 
                             className="photo-card-wrapper" 
@@ -104,12 +104,16 @@ const MyPageDash = () => {
             <section className="mypage-dash__section">
                 <div className="mypage-dash__section-header">
                     <h4 className="mypage-dash__section-title">내 게시물</h4>
-                    <button className="mypage-dash__more-btn" onClick={() => navigate(`/mypage/${hashedId}/uploads`)}>
+                    {/* 💡 두 번째 인자로 state 객체를 넘겨 목적지 탭 정보를 전달합니다. */}
+                    <button 
+                        className="mypage-dash__more-btn" 
+                        onClick={() => navigate(`/mypage/${hashedId}/uploads`, { state: { activeTab: 'post' } })}
+                    >
                         더보기 &gt;
                     </button>
                 </div>
                 <div className="post-grid-container">
-                    {myPosts.map((post) => {
+                    {myPosts.slice(0, 6).map((post) => {
                         // Main.js의 슬라이더 첫 장 고정 규칙 그대로 이식
                         const thumbs = post.THUMB_LIST || [];
 

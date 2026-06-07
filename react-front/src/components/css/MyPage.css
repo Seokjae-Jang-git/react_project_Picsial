@@ -22,6 +22,13 @@
     box-sizing: border-box;
 }
 
+/* 💡 [추가] 왼쪽 사이드바 영역 고정 박스 */
+.mypage-wrapper .mypage-side-box {
+    width: 250px;       /* 👈 일정한 사이드바 폭 고정 (디자인에 맞춰 240px~260px 사이 조정 가능) */
+    flex-shrink: 0;     /* 👈 핵심: 우측 콘텐츠가 길어지거나 늘어나도 절대 찌러지지 않게 방어 */
+    box-sizing: border-box;
+}
+
 /* 3. 우측 대시보드 영역 (독립 스크롤 활성화) */
 .mypage-content-area {
     flex-grow: 1;
@@ -37,4 +44,3 @@
     grid-template-columns: repeat(6, 1fr);
     gap: 14px; /* 카드가 작아지므로 간격도 살짝 줄임 */
 }
-

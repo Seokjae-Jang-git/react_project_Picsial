@@ -23,15 +23,12 @@ function formatTimeAgo(dateString) {
 function formatShootDate(dateString) {
     if (!dateString) return '정보 없음';
 
-    // 1. 먼저 ISO 형식(T가 포함된 경우 등)으로 파싱을 시도합니다.
     let date = new Date(dateString);
 
-    // 2. 만약 파싱에 실패했다면, '-'를 '/'로 바꾸어 다시 파싱을 시도합니다 (호환성 확보)
     if (isNaN(date.getTime())) {
         date = new Date(dateString.replace(/-/g, '/'));
     }
 
-    // 3. 그래도 실패하면 '정보 없음'을 반환합니다.
     if (isNaN(date.getTime())) return '정보 없음';
 
     const yyyy = date.getFullYear();
@@ -43,7 +40,7 @@ function formatShootDate(dateString) {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
 
-// 💡 1. 토큰 해독 함수 추가 (PostDetail.js와 동일)
+// 💡 토큰 해독 함수
 const getCurrentUserNo = () => {
     const token = localStorage.getItem('jwtToken'); 
     if (!token) return null; 
@@ -71,7 +68,8 @@ function PhotoDetail() {
     const [likeCount, setLikeCount] = useState(0); 
     const [isScrapped, setIsScrapped] = useState(false);
     const [scrapCount, setScrapCount] = useState(0);
-    const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
 
     const currentUserNo = getCurrentUserNo();
 
@@ -88,9 +86,10 @@ function PhotoDetail() {
                 setLikeCount(data.photo.LIKE_COUNT || 0);
                 setScrapCount(data.photo.SCRAP_COUNT || 0);
 
-                // 💡 백엔드에서 판별해준 상태를 State에 적용 (새로고침 유지 마법!)
+                // 백엔드 상태 적용
                 setIsLiked(data.photo.IS_LIKED_BY_ME > 0); 
                 setIsScrapped(data.photo.IS_SCRAPPED_BY_ME > 0);
+                setIsFollowing(data.photo.IS_FOLLOWING_BY_ME > 0);
             }
         } catch (error) {
             console.error("사진 상세 조회 에러:", error);
@@ -112,7 +111,7 @@ function PhotoDetail() {
             await fetch(`http://localhost:3010/photo/${id}/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isLiked: newIsLiked, userNo: currentUserNo }) // 하드코딩 교체
+                body: JSON.stringify({ isLiked: newIsLiked, userNo: currentUserNo })
             });
         } catch (error) {
             setIsLiked(!newIsLiked);
@@ -130,7 +129,7 @@ function PhotoDetail() {
             await fetch(`http://localhost:3010/photo/${id}/scrap`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isScrapped: newIsScrapped, userNo: currentUserNo }) // 하드코딩 교체
+                body: JSON.stringify({ isScrapped: newIsScrapped, userNo: currentUserNo })
             });
         } catch (error) {
             setIsScrapped(!newIsScrapped);
@@ -147,7 +146,7 @@ function PhotoDetail() {
             const response = await fetch(`http://localhost:3010/photo/${id}/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: commentInput, userNo: currentUserNo }) // 하드코딩 교체
+                body: JSON.stringify({ content: commentInput, userNo: currentUserNo })
             });
 
             const data = await response.json();
@@ -161,6 +160,38 @@ function PhotoDetail() {
         } catch (error) {
             console.error("댓글 등록 실패:", error);
             alert("댓글 등록 중 오류가 발생했습니다.");
+        }
+    };
+
+    const handleFollowToggle = async () => {
+        if (!currentUserNo) return alert("로그인이 필요합니다.");
+        if (currentUserNo === photo.USER_NO) return alert("자기 자신은 팔로우할 수 없습니다.");
+
+        const previousStatus = isFollowing;
+        const targetUserNo = photo.USER_NO;
+
+        // 프론트엔드 즉각 업데이트
+        setIsFollowing(!previousStatus);
+
+        try {
+            const response = await fetch('http://localhost:3010/photo/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    followerNo: currentUserNo,
+                    followingNo: targetUserNo
+                })
+            });
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error("팔로우 토글 에러:", error);
+            alert("처리 중 오류가 발생했습니다.");
+            // 실패 시 롤백
+            setIsFollowing(previousStatus);
         }
     };
 
@@ -247,17 +278,17 @@ function PhotoDetail() {
                             </form>
                         </div>
 
-                        {/* 💡 메타데이터 박스: 제목 삭제 및 영역 통합 */}
                         <div className="info-box metadata-box">
                             <h3 className="meta-section-title">사진 정보</h3>
                             <div className="meta-basic-info">
-                                <p><strong>이름 :</strong> {photo.TITLE}</p>
+                                <p><strong>제목 :</strong> {photo.TITLE}</p>
+                                <p><strong>설명 :</strong> {photo.DESCRIPTION || '설명이 없습니다.'}</p>
                                 <p><strong>촬영일 :</strong> {formatShootDate(photo.SHOOT_DATE)}</p>
                                 <p><strong>장소 :</strong> {photo.LOCATION || '정보 없음'}</p>
                                 <p><strong>카테고리 :</strong> {photo.CATEGORY_NAME || '미분류'}</p>
+                                <p><strong>태그 :</strong> {photo.TAGS || '태그 없음'}</p>
                             </div>
 
-                            {/* 💡 제목 삭제 및 grid 구조만 유지 */}
                             <div className="meta-exif-area">
                                 <div className="exif-grid">
                                     <div className="exif-item exif-item-model">
@@ -293,16 +324,35 @@ function PhotoDetail() {
                         </div>
 
                         <div className="info-box profile-box">
-                            <div className="profile-image-placeholder">이미지</div>
+                            <div className="profile-image-placeholder">
+                                {photo.PROFILE_IMAGE_URL ? (
+                                    <img 
+                                        src={photo.PROFILE_IMAGE_URL} 
+                                        alt="프로필" 
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                                    />
+                                ) : (
+                                    <svg viewBox="0 0 24 24" fill="#ccc" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%', backgroundColor: '#f1f3f5', borderRadius: '50%' }}>
+                                        <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
+                                    </svg>
+                                )}
+                            </div>
                             <p className="profile-nickname">{photo.NICKNAME || `유저 ${photo.USER_NO}`}</p>
-                            <button className="btn-follow">팔로우</button>
+                            
+                            {currentUserNo !== photo.USER_NO && (
+                                <button 
+                                    className={`btn-follow ${isFollowing ? 'following' : ''}`}
+                                    onClick={handleFollowToggle}
+                                >
+                                    {isFollowing ? '팔로우 취소' : '팔로우'}
+                                </button>
+                            )}
                         </div>
 
                     </div>
                 </div>
             </main>
             
-            {/* 💡 라이트박스 모달 렌더링 */}
             {isModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
                     <img src={photo.IMAGE_URL} alt="원본" className="modal-image" />

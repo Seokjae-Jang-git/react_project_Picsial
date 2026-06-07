@@ -12,6 +12,7 @@ const postRoutes = require('./routes/post')
 const followRoutes = require('./routes/follow')
 const photogRoutes = require('./routes/photog')
 const mypageRoutes = require('./routes/mypage')
+const messageRoutes = require('./routes/message')
 
 const db = require("./db");
 
@@ -32,6 +33,7 @@ app.use('/post', postRoutes);
 app.use('/follow', followRoutes);
 app.use('/photog', photogRoutes);
 app.use('/mypage', mypageRoutes);
+app.use('/message', messageRoutes);
 
 
 async function startServer() {

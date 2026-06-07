@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Hashids from 'hashids'; // 💡 인스턴스 설정 반영
 
-const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
+const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
 function Login() {
     const userIdRef = useRef(null);

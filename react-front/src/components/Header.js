@@ -48,9 +48,13 @@ function Header() {
     return (
         <header className="picsial-header">
             <div className="header-left">
-                <div className="header-logo" onClick={() => navigate('/')}>
-                    Picsial<span>.</span>
-                </div>
+                <img 
+                    src={`${process.env.REACT_APP_NAS_BASE_URL_LOGO}/logo_picsial.png`} 
+                    alt="Picsial Logo" 
+                    className="header-logo-img" 
+                    onClick={() => navigate('/')} 
+                    style={{ cursor: 'pointer' }} // 마우스 올렸을 때 포인터 표시
+                />
                 <nav className="header-nav">
                     <button className="header-tab-btn active" onClick={() => navigate('/photo')}>사진</button>
                     <button className="header-tab-btn active" onClick={() => navigate('/post')}>게시물</button>
@@ -104,7 +108,7 @@ function Header() {
                         >
                             마이페이지
                         </button>
-                        <button className="header-user-btn" onClick={() => navigate('/messages')}>메세지</button>
+                        <button className="header-user-btn" onClick={() => navigate('/message')}>메세지</button>
                         <button className="header-user-btn" onClick={() => navigate('/notifications')}>알림</button>
                         <button className="header-auth-btn logout-btn" onClick={handleLogout}>로그아웃</button>
                     </>

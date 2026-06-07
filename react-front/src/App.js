@@ -16,6 +16,11 @@ import Photog from './components/Photog';
 import MyPage from './components/MyPage';
 import MyPageDash from './components/MyPageDash';
 import MyAccount from './components/MyAccount';
+import DelAccount from './components/DelAccount';
+import MyUpload from './components/MyUpload';
+import MyScrap from './components/MyScrap';
+import MyFollowing from './components/MyFollowing';
+import Message from './components/Message';
 
 
 function App() {
@@ -38,9 +43,14 @@ function App() {
           <Route path="/upload" element={<Upload />} />
           <Route path="/follow" element={<Follow />} />
           <Route path="/photog/:hashedId" element={<Photog />} />
+          <Route path="/message" element={<Message />} />
           <Route path="/mypage/:hashedId" element={<MyPage />} >
             <Route index element={<MyPageDash />} />
             <Route path="account" element={<MyAccount />} /> 
+            <Route path="account/del-account" element={<DelAccount />} />
+            <Route path="uploads" element={<MyUpload />} />
+            <Route path="scraps" element={<MyScrap />} />
+            <Route path="followings" element={<MyFollowing />} />
           </Route>
             
             

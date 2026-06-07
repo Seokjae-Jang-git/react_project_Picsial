@@ -10,7 +10,7 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const navigate = useNavigate();
-  const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
+  const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
     useEffect(() => {
         if (pageType === 'following') {

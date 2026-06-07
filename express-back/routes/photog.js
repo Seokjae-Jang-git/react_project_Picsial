@@ -6,7 +6,7 @@ const oracledb = require('oracledb');
 const Hashids = require('hashids/cjs'); // 🚀 Hashids 불러오기
 
 // 🚀 암호화/복호화를 위한 열쇠(Salt)와 최소 길이(8자리) 설정
-const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
+const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
 // 1. 작가 프로필 정보 조회 API (에러 원인 완벽 제거)
 router.get('/profile/:hashedId', async (req, res) => {

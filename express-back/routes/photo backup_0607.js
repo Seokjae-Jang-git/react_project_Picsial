@@ -182,8 +182,8 @@ router.post('/upload-bulk', upload.array('files', 20), async (req, res) => {
     }
 });
 
-/// ==========================================
-// [GET] /photo - 사진 전체 목록 조회 (NJS-098 에러 복구 및 중복 방지 완료)
+// ==========================================
+// [GET] /photo - 사진 전체 목록 조회 (중복 버그 완벽 수선 버전)
 // ==========================================
 router.get('/', async (req, res) => {
     let connection;
@@ -191,35 +191,60 @@ router.get('/', async (req, res) => {
         const { category, sort } = req.query;
         connection = await db.getConnection();
 
-        // 💡 목록 조회용 바인드 파라미터 초기화
         const bindParams = {};
 
+        // 💡 1. 기본 SELECT 구문 (LISTAGG 서브쿼리로 중복 원천 차단)
+        // - 기존 메인 쿼리의 LEFT JOIN PC, LEFT JOIN C를 과감하게 제거합니다.
+        // - 대신 한 사진이 여러 카테고리를 가질 경우 '풍경, 명소' 형태로 한 줄로 묶어 가져옵니다.
         let sql = `
+            // SELECT 
+            //     P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT,
+            //     NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+            //     NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+            //     (
+            //         SELECT LISTAGG(C.CATEGORY_NAME, ', ') WITHIN GROUP (ORDER BY C.CATEGORY_NAME)
+            //         FROM PS_PHOTO_CATEMAP PC
+            //         JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
+            //         WHERE PC.PHOTO_ID = P.PHOTO_ID
+            //     ) AS CATEGORY_NAME
+            // FROM PS_PHOTO P
+            // -- 미리 그룹핑해서 개수를 세어두고 한 번만 조인합니다
+            // LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
+            // LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
+            // WHERE 1=1
             SELECT 
-                P.PHOTO_ID, P.USER_NO, P.TITLE, P.IMAGE_URL, P.THUMB_URL, P.VIEW_COUNT, P.LIKE_COUNT,
-                NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
-                NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
+                P.PHOTO_ID, P.USER_NO, P.TITLE, P.DESCRIPTION, P.IMAGE_URL, P.THUMB_URL, 
+                P.CAMERA_MODEL, P.LENS, P.FOCAL_LENGTH, P.APERTURE, P.SHUTTER_SPEED, 
+                P.ISO, P.SHOOT_DATE, P.LOCATION, P.VIEW_COUNT, P.LIKE_COUNT,
                 (
                     SELECT LISTAGG(C.CATEGORY_NAME, ', ') WITHIN GROUP (ORDER BY C.CATEGORY_NAME)
                     FROM PS_PHOTO_CATEMAP PC
                     JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
                     WHERE PC.PHOTO_ID = P.PHOTO_ID
-                ) AS CATEGORY_NAME
+                ) AS CATEGORY_NAME,
+                (
+                    -- 💡 태그 매핑 테이블과 태그 마스터 테이블을 조인하여 쉼표로 나열합니다.
+                    -- ※ 실제 DB의 태그 테이블명(예: PS_PHOTO_TAGMAP, PS_TAG)에 맞게 이름을 수정해 주세요!
+                    SELECT LISTAGG(T.TAG_NAME, ', ') WITHIN GROUP (ORDER BY T.TAG_NAME)
+                    FROM PS_PHOTO_TAGMAP PT
+                    JOIN PS_TAG T ON PT.TAG_ID = T.TAG_ID
+                    WHERE PT.PHOTO_ID = P.PHOTO_ID
+                ) AS TAGS
             FROM PS_PHOTO P
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY PHOTO_ID) S ON P.PHOTO_ID = S.PHOTO_ID
-            LEFT JOIN (SELECT PHOTO_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY PHOTO_ID) CM ON P.PHOTO_ID = CM.PHOTO_ID
-            WHERE 1=1
+            WHERE P.PHOTO_ID = :id
         `;
 
-        // 카테고리가 있을 때만 안전하게 :category 바인딩 추가
+        // 💡 2. 카테고리 필터링 적용 (IN 서브쿼리를 사용하여 데이터 뻥튀기 방지)
         if (category && category.trim() !== '' && category !== 'undefined') {
             const parsedCategory = Number(category);
             if (!isNaN(parsedCategory)) { 
+                // 해당 카테고리 ID를 가진 사진 번호들만 IN 조건으로 걸러내므로 중복이 발생하지 않습니다.
                 sql += ` AND P.PHOTO_ID IN (SELECT PHOTO_ID FROM PS_PHOTO_CATEMAP WHERE CATEGORY_ID = :category)`;
-                bindParams.category = parsedCategory; // 👈 여기서 값을 채워주므로 에러가 나지 않습니다.
+                bindParams.category = parsedCategory;
             }
         }
 
+        // 💡 3. 동적 정렬 (Sort) 적용
         if (sort === 'scraps') {
             sql += ` ORDER BY SCRAP_COUNT DESC, P.PHOTO_ID DESC`;
         } else if (sort === 'comments') {
@@ -231,11 +256,13 @@ router.get('/', async (req, res) => {
         } else if (sort === 'oldest') {
             sql += ` ORDER BY P.PHOTO_ID ASC`;
         } else {
+            // 기본값: 최신순
             sql += ` ORDER BY P.PHOTO_ID DESC`;
         }
 
         const result = await connection.execute(sql, bindParams, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
+        // NAS URL 방어 코드
         const processedPhotos = result.rows.map(photo => ({
             ...photo,
             IMAGE_URL: photo.IMAGE_URL && photo.IMAGE_URL.startsWith('http') 
@@ -258,40 +285,27 @@ router.get('/', async (req, res) => {
 });
 
 // ==========================================
-// [GET] /photo/:id - 사진 상세 단건 및 댓글 조회 (태그 테이블명 오류 수선 완료)
+// [GET] /photo/:id - 사진 상세 및 댓글 목록 조회
 // ==========================================
 router.get('/:id', async (req, res) => {
     let connection;
-    const photoId = Number(req.params.id); 
+    const photoId = req.params.id;
     try {
+        // 💡 프론트에서 넘어온 userNo 받기 (없으면 0)
         const userNo = req.query.userNo ? Number(req.query.userNo) : 0;
         
         connection = await db.getConnection();
 
-        // 0. 조회수 증가
+        // 💡 0. 조회수 증가 (가장 먼저 실행)
         await connection.execute(`UPDATE PS_PHOTO SET VIEW_COUNT = VIEW_COUNT + 1 WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: true });
 
-        // 💡 1. 메인 사진 정보 조회 
+        // 💡 IS_LIKED_BY_ME, IS_SCRAPPED_BY_ME 서브쿼리 추가 (PHOTO_ID 기준)
         const photoSql = `
             SELECT 
-                P.*, UI.NICKNAME, UI.PROFILE_IMAGE_URL,
+                P.*, UI.NICKNAME,
                 (SELECT COUNT(*) FROM PS_LIKE_TABLE WHERE PHOTO_ID = P.PHOTO_ID AND USER_NO = :userNo) AS IS_LIKED_BY_ME,
                 (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE PHOTO_ID = P.PHOTO_ID AND USER_NO = :userNo) AS IS_SCRAPPED_BY_ME,
-                (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE PHOTO_ID = P.PHOTO_ID) AS SCRAP_COUNT,
-                -- 💡 [추가됨] 현재 로그인한 유저가 이 사진의 작성자를 팔로우 중인지 판별
-                (SELECT COUNT(*) FROM PS_FOLLOW WHERE FOLLOWER_NO = :userNo AND FOLLOWING_NO = P.USER_NO) AS IS_FOLLOWING_BY_ME,
-                (
-                    SELECT LISTAGG(C.CATEGORY_NAME, ', ') WITHIN GROUP (ORDER BY C.CATEGORY_NAME)
-                    FROM PS_PHOTO_CATEMAP PC
-                    JOIN PS_CATEGORY_PHOTO C ON PC.CATEGORY_ID = C.CATEGORY_ID
-                    WHERE PC.PHOTO_ID = P.PHOTO_ID
-                ) AS CATEGORY_NAME,
-                (
-                    SELECT LISTAGG(T.TAG_NAME, ', ') WITHIN GROUP (ORDER BY T.TAG_NAME)
-                    FROM PS_PHOTO_TAGMAP PT
-                    JOIN PS_TAG_PHOTO T ON PT.TAG_ID = T.TAG_ID
-                    WHERE PT.PHOTO_ID = P.PHOTO_ID
-                ) AS TAGS
+                (SELECT COUNT(*) FROM PS_SCRAP_TABLE WHERE PHOTO_ID = P.PHOTO_ID) AS SCRAP_COUNT
             FROM PS_PHOTO P
             LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
             WHERE P.PHOTO_ID = :photoId
@@ -303,35 +317,19 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ success: false, message: "사진을 찾을 수 없습니다." });
         }
 
+        // 💡 [수정] 아래 4줄을 추가하여 URL을 가공합니다.
         const photoData = photoResult.rows[0];
         photoData.IMAGE_URL = photoData.IMAGE_URL && photoData.IMAGE_URL.startsWith('http') ? photoData.IMAGE_URL : `${process.env.NAS_BASE_URL}/${photoData.IMAGE_URL}`;
         photoData.THUMB_URL = photoData.THUMB_URL && photoData.THUMB_URL.startsWith('http') ? photoData.THUMB_URL : `${process.env.NAS_BASE_URL}/${photoData.THUMB_URL}`;
 
-        if (photoData.PROFILE_IMAGE_URL && !photoData.PROFILE_IMAGE_URL.startsWith('http')) {
-            const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
-
-            if (profileBaseUrl) {
-                // .env 변수가 존재할 때만 정상적으로 주소를 조립합니다.
-                photoData.PROFILE_IMAGE_URL = `${profileBaseUrl}/${photoData.PROFILE_IMAGE_URL}`;
-            } else {
-                // 💡 만약 .env 변수가 없다면 절대 하드코딩된 주소를 붙이지 않습니다.
-                // 대신 서버 로그에 아주 강력한 경고를 남겨 개발자가 정의하도록 유도합니다.
-                console.error("❌ CRITICAL CONFIG ERROR: .env 파일에 'NAS_BASE_URL_PROFILE' 변수가 정의되지 않았습니다. 프로필 이미지를 정상적으로 불러올 수 없습니다.");
-                
-                // 팁: 이미지 주소를 조립하지 않음으로써 프론트엔드에서는 엑스박스가 뜨게 되지만, 
-                // 이것은 소스 코드에 보안적 위험 요소를 남기는 것보다 훨씬 안전한 선택입니다.
-                // 필요하다면 여기서 user.PROFILE_IMAGE_URL = null; 처리를 하여 기본 이모티콘이 뜨게 할 수도 있습니다.
-            }
-        }
-
-        // 2. 댓글 목록 조회
+        // 2. 해당 사진의 댓글 목록 조회
         const commentSql = `
             SELECT COMMENT_ID, USER_NO, CONTENT, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_AT
             FROM PS_COMMENT_TABLE
-            WHERE PHOTO_ID = :photoId
+            WHERE PHOTO_ID = :id
             ORDER BY COMMENT_ID DESC
         `;
-        const commentResult = await connection.execute(commentSql, { photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+        const commentResult = await connection.execute(commentSql, { id: photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
         // 3. 응답 전송
         res.json({ 
@@ -460,52 +458,6 @@ router.post('/:id/comment', async (req, res) => {
     } catch (error) {
         console.error("댓글 등록 에러:", error);
         res.status(500).json({ success: false, message: "서버 오류" });
-    } finally {
-        if (connection) {
-            try { await connection.close(); } catch (e) { console.error(e); }
-        }
-    }
-});
-
-// ==========================================
-// 2. [POST] /photo/toggle - 팔로우 / 팔로우 취소 처리
-// ==========================================
-router.post('/toggle', async (req, res) => {
-    let connection;
-    try {
-        const { followerNo, followingNo } = req.body;
-        connection = await db.getConnection();
-
-        // 1. 현재 팔로우 상태인지 확인
-        const checkSql = `SELECT FOLLOW_ID FROM PS_FOLLOW WHERE FOLLOWER_NO = :followerNo AND FOLLOWING_NO = :followingNo`;
-        const checkResult = await connection.execute(checkSql, { followerNo, followingNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
-
-        let action = '';
-        if (checkResult.rows.length > 0) {
-            // 2-A. 이미 팔로우 중이면 -> DELETE (팔로우 취소)
-            const deleteSql = `DELETE FROM PS_FOLLOW WHERE FOLLOWER_NO = :followerNo AND FOLLOWING_NO = :followingNo`;
-            await connection.execute(deleteSql, { followerNo, followingNo }, { autoCommit: false });
-            action = 'unfollowed';
-        } else {
-            // 2-B. 팔로우 중이 아니면 -> INSERT (팔로우)
-            // 🚀 사용자가 요청한 약속대로 CREATED_AT (SYSDATE) 제외
-            const insertSql = `
-                INSERT INTO PS_FOLLOW (FOLLOW_ID, FOLLOWER_NO, FOLLOWING_NO) 
-                VALUES (PS_FOLLOW_SEQ.NEXTVAL, :followerNo, :followingNo)
-            `;
-            await connection.execute(insertSql, { followerNo, followingNo }, { autoCommit: false });
-            action = 'followed';
-        }
-
-        await connection.commit();
-        res.json({ success: true, action });
-
-    } catch (error) {
-        console.error("팔로우 토글 에러:", error);
-        if (connection) {
-            try { await connection.rollback(); } catch (e) { console.error("롤백 실패:", e); }
-        }
-        res.status(500).json({ success: false, message: "팔로우 처리 중 오류가 발생했습니다." });
     } finally {
         if (connection) {
             try { await connection.close(); } catch (e) { console.error(e); }

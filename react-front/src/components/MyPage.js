@@ -7,7 +7,7 @@ import MyPageDash from './MyPageDash';
 import './css/MyPage.css';
 
 import Hashids from 'hashids';
-const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
+const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
 const MyPage = () => {
     const navigate = useNavigate();
@@ -63,8 +63,10 @@ const MyPage = () => {
         <div className="mypage-root">
             <Header />
             <div className="mypage-wrapper">
-                {/* 💡 3. MyPageSide에 변경되는 숫자(refreshTrigger)를 프롭스로 전달! */}
-                <MyPageSide myUserNo={userNo} hashedId={hashedId} refreshTrigger={refreshTrigger} />
+                {/* 💡 찌그러짐을 방지하기 위해 사이드바를 고정 가로 폭 박스로 감싸줍니다. */}
+                <div className="mypage-side-box">
+                    <MyPageSide myUserNo={userNo} hashedId={hashedId} refreshTrigger={refreshTrigger} />
+                </div>
                 
                 <main className="mypage-content-area">
                     {/* 하위 탭 컴포넌트(대시보드 등)에서 사용할 수 있도록 context 주입 */}

@@ -78,10 +78,10 @@ const MyPageSide = ({ myUserNo, hashedId, refreshTrigger }) => {
                 <NavLink to={`/mypage/${hashedId}/scraps`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
                     내 스크랩
                 </NavLink>
-                <NavLink to={`/mypage/${hashedId}/following`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
+                <NavLink to={`/mypage/${hashedId}/followings`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
                     내 팔로잉
                 </NavLink>
-                <NavLink to={`/mypage/${hashedId}/messages`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
+                <NavLink to={`/message`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
                     메세지
                 </NavLink>
                 <NavLink to={`/mypage/${hashedId}/notifications`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>

@@ -1,0 +1,181 @@
+/* MyFollowing.css - .my-following-container 기반 독립적 스타일링 */
+
+.my-following-container {
+    width: 100%;
+    padding: 24px; 
+    box-sizing: border-box;
+}
+
+.my-following-container .my-following-filter-group {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.my-following-container .my-following-sort-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* 💡 핵심 변경: List(세로 쌓임)에서 Grid(바둑판 배열)로 완벽 전환 */
+.my-following-container .my-following-card-list {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+}
+
+.my-following-container .my-following-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #f0f0f0; 
+    border-radius: 12px;
+    background-color: #fff;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
+}
+
+/* 💡 카드의 전체 공간을 꽉 채우도록 flex: 1 적용, 우측 border 제거 */
+.my-following-container .my-following-info-section {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.my-following-container .my-following-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.my-following-container .my-following-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.my-following-container .my-following-avatar-default {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #f1f3f5;
+}
+
+.my-following-container .my-following-name-box {
+    flex: 1;
+}
+
+.my-following-container .my-following-nickname {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #222;
+}
+
+.my-following-container .my-following-intro {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.my-following-container .my-following-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px; 
+    margin-bottom: 14px;
+    font-size: 13px;
+    width: 100%;
+}
+
+.my-following-container .my-following-stat-row {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    color: #555;
+    white-space: nowrap;
+}
+
+.my-following-container .my-following-stat-group {
+    display: flex;
+    align-items: center;
+    gap: 6px; 
+    min-width: 55px; 
+    justify-content: center;
+}
+
+.my-following-container .my-following-stat-group strong {
+    color: #222;
+}
+
+.my-following-container .my-following-stat-divider {
+    margin: 0 10px; 
+    color: #cccccc;
+    font-size: 11px;
+}
+
+.my-following-container .my-following-update-time {
+    justify-content: space-between; 
+    border-top: 1px dashed #e1e1e1; 
+    padding-top: 8px; 
+    margin-top: 4px; 
+}
+
+.my-following-container .my-following-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.my-following-container .my-following-btn-follow, 
+.my-following-container .my-following-btn-message {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.my-following-container .my-following-btn-follow {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.my-following-container .my-following-btn-follow.my-following-not-following {
+    background-color: #4263EB;
+    color: #fff;
+}
+
+.my-following-container .my-following-btn-message {
+    background-color: #fff;
+    color: #222;
+    border: 1px solid #ddd;
+}
+
+.my-following-container .my-following-btn-message:hover {
+    background-color: #f8f9fa;
+}
+
+.my-following-container .my-following-empty {
+    grid-column: 1 / -1; /* 에러 메시지는 그리드 전체를 차지하도록 설정 */
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 15px;
+}

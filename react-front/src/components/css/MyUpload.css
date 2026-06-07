@@ -1,0 +1,165 @@
+/* 최상단 컨테이너 */
+.my-upload-container {
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* [상단 영역] 사진 / 게시물 전환 라디오 버튼 그룹 */
+.my-upload-container .tab-radio-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.my-upload-container .tab-label {
+    cursor: pointer;
+    padding: 6px 20px;
+    border: 1px solid #000;
+    font-weight: bold;
+    background-color: #fff;
+    transition: background-color 0.2s ease;
+}
+
+/* 활성화된 탭 스타일 */
+.my-upload-container .tab-label.active {
+    background-color: #e0e0e0;
+}
+
+/* [필터 영역] 카테고리 선택 및 정렬 드롭다운 그룹 */
+.my-upload-container .filter-select-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.my-upload-container .filter-select {
+    padding: 5px 10px;
+    border: 1px solid #000;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* [콘텐츠 영역] 5열 이미지 그리드 (내 업로드 - 사진) */
+.my-upload-container .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+
+.my-upload-container .photo-item {
+    border: 2px solid #000;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: #fafafa;
+}
+
+/* [콘텐츠 영역] 3열 카드 그리드 (내 업로드 - 게시물) */
+
+/* 1. 게시물 컨테이너: 3열(또는 원하는 열 수) 고정 및 너비 강제 */
+.my-upload-container .post-grid-container,
+.my-upload-container .post-grid {
+    display: grid;
+    /* 💡 3열 고정 시 (마이페이지 레이아웃에 맞춰 열 개수 조절) */
+    grid-template-columns: repeat(5, minmax(0, 1fr)); 
+    gap: 16px; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 2. 게시물 카드 너비 폭주 방지 */
+.my-upload-container .vertical-post-card {
+    width: 100%;           /* 그리드의 1fr 영역을 넘어가지 않도록 강제 */
+    min-width: 0;          /* 💡 Flex/Grid 환경에서 내부 텍스트가 길어져도 카드가 터지지 않게 하는 핵심 속성 */
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+    justify-content: flex-start !important;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 3. 제목 텍스트 한 줄 고정 (제목이 길면 카드가 늘어나는 현상 방지) */
+.my-upload-container .post-title-text {
+    margin: 0 0 1px 0 !important;
+    font-size: 15px;
+    color: #212529;
+    font-weight: 700;
+    text-align: left;
+    
+    /* 💡 가로 폭 초과 방지 3형제 */
+    display: block; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%; 
+}
+
+/* 4. 본문 텍스트 2줄 고정 (본문이 길면 카드가 늘어나는 현상 방지) */
+.my-upload-container .post-main-text {
+    margin: 0 !important;
+    font-size: 13px;
+    color: #6c757d;
+    line-height: 1.3 !important; 
+    font-weight: 400; 
+    text-align: left;
+    
+    /* 💡 가로/세로 폭 초과 방지 세팅 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    height: 34px;
+    width: 100%; 
+}
+
+.my-upload-container .post-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+}
+
+.my-upload-container .post-card {
+    border: 2px solid #000;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #fff;
+}
+
+.my-upload-container .post-author {
+    font-weight: bold;
+}
+
+.my-upload-container .post-body {
+    border: 1px solid #000;
+    padding: 10px;
+}
+
+.my-upload-container .post-detail-btn {
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 13px;
+}
+
+.my-upload-container .post-image-placeholder {
+    border: 1px solid #000;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.my-upload-container .post-footer {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+}

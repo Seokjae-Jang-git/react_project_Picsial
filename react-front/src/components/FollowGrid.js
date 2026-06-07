@@ -8,7 +8,7 @@ function FollowGrid({ sortOption, onFollowChange }) {
     const [photogs, setPhotogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate(); // 🚀 2. 초기화
-    const hashids = new Hashids(process.env.HASHIDS_SECRET, 8);
+    const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
     const sortLabel = {
         'followers': '팔로워 순',
@@ -104,7 +104,7 @@ function FollowGrid({ sortOption, onFollowChange }) {
         }
     };
 
-    if (isLoading) return <div className="follow-grid-loading">작가 데이터를 불러오는 중입니다...</div>;
+    // if (isLoading) return <div className="follow-grid-loading">작가 데이터를 불러오는 중입니다...</div>;
 
     return (
         <div className="follow-grid-container">
@@ -112,7 +112,7 @@ function FollowGrid({ sortOption, onFollowChange }) {
             
             <div className="photog-card-list">
                 {photogs.length === 0 ? (
-                    <div className="empty-photogs">조건에 맞는 작가가 없습니다.</div>
+                    <div className="empty-photogs"></div>
                 ) : (
                     photogs.map(photog => (
                         <div key={photog.USER_NO} className="photog-card">
@@ -178,7 +178,17 @@ function FollowGrid({ sortOption, onFollowChange }) {
                                     >
                                         {photog.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
                                     </button>
-                                    <button className="btn-message" onClick={() => alert('메시지 기능은 준비 중입니다.')}>
+                                    <button 
+                                        className="btn-message" 
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // 💡 상위 요소의 클릭 이벤트(프로필 이동 등)가 실행되는 것을 방지
+                                            
+                                            // 💡 '/message' 부분은 App.js에 등록된 Message.js의 실제 라우터 주소로 맞춰주세요!
+                                            navigate('/message', { 
+                                                state: { targetPartner: photog } // 클릭한 작가의 전체 데이터를 state에 담아서 넘깁니다.
+                                            });
+                                        }}
+                                    >
                                         메시지
                                     </button>
                                 </div>
