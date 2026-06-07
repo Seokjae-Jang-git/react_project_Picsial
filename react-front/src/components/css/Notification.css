@@ -1,0 +1,157 @@
+/* Notification.css - 내부 단독 스크롤 및 레이아웃 안정화 */
+
+.noti-page-wrapper {
+    background-color: #fafafa; 
+    /* 💡 화면 꽉 차게 고정하고 패딩 조절 */
+    height: calc(100vh - 80px); 
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 위쪽 정렬 */
+    padding: 30px 20px;
+    box-sizing: border-box;
+}
+
+.noti-container {
+    width: 800px; 
+    max-width: 100%;
+    /* 💡 컨테이너가 브라우저 높이를 넘지 않도록 최대 높이 제한 */
+    max-height: calc(100vh - 140px); 
+    background-color: #fff;
+    border: 1px solid #eaeaea;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    padding: 30px 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column; /* 세로 배치 */
+}
+
+/* 상단 타이틀 (고정) */
+.noti-container .noti-header-title {
+    text-align: center;
+    margin-bottom: 25px;
+    flex-shrink: 0; /* 높이 줄어듦 방지 */
+}
+.noti-container .noti-header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #222;
+    font-weight: bold;
+}
+
+/* 컨트롤 바 (고정) */
+.noti-container .noti-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-shrink: 0; /* 높이 줄어듦 방지 */
+}
+
+.noti-container .noti-filters {
+    display: flex;
+    gap: 10px;
+}
+
+.noti-container .noti-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    outline: none;
+    background-color: #fff;
+    cursor: pointer;
+    color: #495057;
+}
+
+.noti-container .btn-read-all {
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #495057;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.noti-container .btn-read-all:hover {
+    background-color: #f8f9fa;
+}
+
+/* ===================================================
+   📜 꿀팁: 알림 리스트 영역만 단독 스크롤 구현
+   =================================================== */
+.noti-container .noti-list-section {
+    flex: 1;             /* 남은 세로 공간을 다 차지함 */
+    overflow-y: auto;    /* 데이터가 넘치면 이 영역만 세로 스크롤 생성 */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 8px;  /* 스크롤바와 아이템 간격 확보 */
+}
+
+/* 스크롤바 디자인을 조금 더 부드럽고 얇게 커스텀 */
+.noti-container .noti-list-section::-webkit-scrollbar {
+    width: 6px;
+}
+.noti-container .noti-list-section::-webkit-scrollbar-thumb {
+    background-color: #dddddd;
+    border-radius: 4px;
+}
+.noti-container .noti-list-section::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.noti-container .noti-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #222; /* 와이어프레임 스타일 유지 */
+    background-color: #fff;
+    border-radius: 6px;
+    flex-shrink: 0; /* 스크롤 내부에서 아이템 찌그러짐 방지 */
+}
+
+.noti-container .noti-item.unread {
+    background-color: #fcfcfc;
+}
+
+.noti-container .noti-content-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.noti-container .noti-unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ff4d4f;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.noti-container .noti-text {
+    font-size: 15px;
+    color: #222;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+.noti-container .noti-time {
+    font-size: 14px;
+    color: #888;
+    white-space: nowrap;
+    margin-left: 20px;
+}
+
+.noti-container .noti-empty {
+    text-align: center;
+    padding: 60px 0;
+    color: #adb5bd;
+    font-size: 15px;
+    border: 1px dashed #eaeaea;
+    border-radius: 8px;
+}

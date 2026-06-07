@@ -258,7 +258,7 @@ function Message() {
         <div className="main-page-container">
             <Header />
 
-            <main className="main-body">
+            <main className="msg-body">
                 <div className="msg-page-wrapper">
                     <div className="msg-container">
                         

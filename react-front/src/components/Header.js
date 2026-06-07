@@ -109,7 +109,7 @@ function Header() {
                             마이페이지
                         </button>
                         <button className="header-user-btn" onClick={() => navigate('/message')}>메세지</button>
-                        <button className="header-user-btn" onClick={() => navigate('/notifications')}>알림</button>
+                        <button className="header-user-btn" onClick={() => navigate('/notification')}>알림</button>
                         <button className="header-auth-btn logout-btn" onClick={handleLogout}>로그아웃</button>
                     </>
                 ) : (

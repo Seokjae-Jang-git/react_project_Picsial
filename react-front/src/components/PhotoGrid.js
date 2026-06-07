@@ -8,7 +8,7 @@ function PhotoGrid({ photos }) {
     
     // 사진이 없을 경우 처리
     if (!photos || photos.length === 0) {
-        return <div className="no-photos">조건에 맞는 사진이 없습니다.</div>;
+        return <div className="no-photos"></div>;
     }
 
     return (

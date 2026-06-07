@@ -9,6 +9,20 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
+.login-logo-area {
+    display: flex;         /* flex 컨테이너로 설정 */
+    justify-content: center; /* 가로축 중앙 정렬 */
+    align-items: center;    /* 세로축 중앙 정렬 (필요 시) */
+    width: 100%;            /* 부모 너비가 충분해야 중앙 정렬이 보입니다 */
+    margin-bottom: 20px;
+}
+
+.login-logo-img {
+    height: 80px;       /* 적절한 로고 높이로 수정하세요 */
+    width: auto;        /* 비율 유지 */
+    cursor: pointer;    /* 클릭 가능 표시 */
+}
+
 .login-container h2 {
     text-align: center;
     margin-bottom: 25px;

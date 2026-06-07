@@ -65,7 +65,17 @@ function Login() {
 
     return (
         <div className="login-container">
-            <h2>Picsial 로그인</h2>
+            {/* <h2>Picsial 로그인</h2> */}
+            <div className="login-logo-area">
+                <img 
+                    src={`${process.env.REACT_APP_NAS_BASE_URL_LOGO}/logo_picsial.png`} 
+                    alt="Picsial Logo" 
+                    className="login-logo-img" 
+                    onClick={() => navigate('/')} 
+                    style={{ cursor: 'pointer' }} // 마우스 올렸을 때 포인터 표시
+                />
+            </div>
+            
             <form onSubmit={handleSubmit} className="login-form">
                 <div className="form-group">
                     <label>아이디</label>
