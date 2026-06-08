@@ -22,13 +22,8 @@ function formatTimeAgo(dateString) {
 // 💡 촬영 일자를 'yyyy-mm-dd hh:mi' 형식으로 변환
 function formatShootDate(dateString) {
     if (!dateString) return '정보 없음';
-
     let date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-        date = new Date(dateString.replace(/-/g, '/'));
-    }
-
+    if (isNaN(date.getTime())) date = new Date(dateString.replace(/-/g, '/'));
     if (isNaN(date.getTime())) return '정보 없음';
 
     const yyyy = date.getFullYear();
@@ -36,7 +31,6 @@ function formatShootDate(dateString) {
     const dd = String(date.getDate()).padStart(2, '0');
     const hh = String(date.getHours()).padStart(2, '0');
     const mi = String(date.getMinutes()).padStart(2, '0');
-
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
 
@@ -86,7 +80,6 @@ function PhotoDetail() {
                 setLikeCount(data.photo.LIKE_COUNT || 0);
                 setScrapCount(data.photo.SCRAP_COUNT || 0);
 
-                // 백엔드 상태 적용
                 setIsLiked(data.photo.IS_LIKED_BY_ME > 0); 
                 setIsScrapped(data.photo.IS_SCRAPPED_BY_ME > 0);
                 setIsFollowing(data.photo.IS_FOLLOWING_BY_ME > 0);
@@ -103,7 +96,6 @@ function PhotoDetail() {
 
     const handleLikeToggle = async () => {
         if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; }
-
         const newIsLiked = !isLiked;
         setIsLiked(newIsLiked);
         setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
@@ -121,7 +113,6 @@ function PhotoDetail() {
 
     const handleScrapToggle = async () => {
         if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; }
-
         const newIsScrapped = !isScrapped;
         setIsScrapped(newIsScrapped);
         setScrapCount(prev => newIsScrapped ? prev + 1 : prev - 1);
@@ -148,7 +139,6 @@ function PhotoDetail() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: commentInput, userNo: currentUserNo })
             });
-
             const data = await response.json();
             if (data.success) {
                 setCommentInput(''); 
@@ -169,28 +159,19 @@ function PhotoDetail() {
 
         const previousStatus = isFollowing;
         const targetUserNo = photo.USER_NO;
-
-        // 프론트엔드 즉각 업데이트
         setIsFollowing(!previousStatus);
 
         try {
             const response = await fetch('http://localhost:3010/photo/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    followerNo: currentUserNo,
-                    followingNo: targetUserNo
-                })
+                body: JSON.stringify({ followerNo: currentUserNo, followingNo: targetUserNo })
             });
             const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message);
-            }
+            if (!data.success) throw new Error(data.message);
         } catch (error) {
             console.error("팔로우 토글 에러:", error);
             alert("처리 중 오류가 발생했습니다.");
-            // 실패 시 롤백
             setIsFollowing(previousStatus);
         }
     };
@@ -202,25 +183,15 @@ function PhotoDetail() {
     return (
         <div className="detail-page-container">
             <Header />
-
             <main className="detail-body">
                 <div className="back-button-area">
-                    <button onClick={() => navigate(-1)} className="btn-back">
-                        &lt; 뒤로가기
-                    </button>
+                    <button onClick={() => navigate(-1)} className="btn-back">&lt; 뒤로가기</button>
                 </div>
-
                 <div className="detail-content-wrapper">
-                    
                     <div className="detail-left">
-                        <img
-                            src={photo.IMAGE_URL} alt={photo.TITLE} className="main-photo" 
-                            onClick={() => setIsModalOpen(true)}
-                        />
+                        <img src={photo.IMAGE_URL} alt={photo.TITLE} className="main-photo" onClick={() => setIsModalOpen(true)} />
                     </div>
-
                     <div className="detail-right">
-                        
                         <div className="info-box action-stats-container">
                             <div className="stat-item">
                                 <button className="icon-btn" onClick={handleLikeToggle}>
@@ -230,7 +201,7 @@ function PhotoDetail() {
                             </div>
                             <div className="stat-item">
                                 <button className="icon-btn" onClick={handleScrapToggle}>
-                                    <svg width="26" height="26" viewBox="0 0 24 24" fill={isScrapped ? "#333" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill={isScrapped ? "#333" : "none"} stroke="currentColor" strokeWidth="2">
                                         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                                     </svg>
                                 </button>
@@ -238,7 +209,7 @@ function PhotoDetail() {
                             </div>
                             <div className="stat-item">
                                 <div className="icon-view">
-                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
@@ -256,12 +227,10 @@ function PhotoDetail() {
                                         {displayedComments.map(comment => (
                                             <div key={comment.COMMENT_ID} className="comment-item">
                                                 <div className="comment-content-row">
-                                                    <span className="comment-photog">유저 {comment.USER_NO}</span>
+                                                    <span className="comment-photog">{comment.NICKNAME}</span>
                                                     <span className="comment-text">{comment.CONTENT}</span>
                                                 </div>
-                                                <div className="comment-date">
-                                                    {formatTimeAgo(comment.CREATED_AT)}
-                                                </div>
+                                                <div className="comment-date">{formatTimeAgo(comment.CREATED_AT)}</div>
                                             </div>
                                         ))}
                                         {comments.length > 3 && (
@@ -288,41 +257,8 @@ function PhotoDetail() {
                                 <p><strong>카테고리 :</strong> {photo.CATEGORY_NAME || '미분류'}</p>
                                 <p><strong>태그 :</strong> {photo.TAGS || '태그 없음'}</p>
                             </div>
-
-                            <div className="meta-exif-area">
-                                <div className="exif-grid">
-                                    <div className="exif-item exif-item-model">
-                                        <span className="exif-label">기종</span>
-                                        <span className="exif-value">{photo.CAMERA_MODEL || '-'}</span>
-                                    </div>
-                                    <div className="exif-item exif-item-focal">
-                                        <span className="exif-label">초점거리</span>
-                                        <span className="exif-value">{photo.FOCAL_LENGTH ? `${photo.FOCAL_LENGTH}mm` : '-'}</span>
-                                    </div>
-                                    <div className="exif-item exif-item-lens">
-                                        <span className="exif-label">렌즈</span>
-                                        <span className="exif-value">{photo.LENS || '-'}</span>
-                                    </div>
-                                    <div className="exif-item exif-item-aperture">
-                                        <span className="exif-label">조리개</span>
-                                        <span className="exif-value">{photo.APERTURE ? `f/${photo.APERTURE}` : '-'}</span>
-                                    </div>
-                                    <div className="exif-item exif-item-shutter">
-                                        <span className="exif-label">셔터스피드</span>
-                                        <span className="exif-value">
-                                            {photo.SHUTTER_SPEED 
-                                                ? `${parseFloat(photo.SHUTTER_SPEED).toFixed(4)}s` 
-                                                : '-'}
-                                        </span>
-                                    </div>
-                                    <div className="exif-item exif-item-iso">
-                                        <span className="exif-label">ISO</span>
-                                        <span className="exif-value">{photo.ISO || '-'}</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
+                        {/* 💡 복구된 프로필 섹션 (팔로우 상태 및 기능 반영) */}
                         <div className="info-box profile-box">
                             <div className="profile-image-placeholder">
                                 {photo.PROFILE_IMAGE_URL ? (
@@ -348,17 +284,14 @@ function PhotoDetail() {
                                 </button>
                             )}
                         </div>
-
                     </div>
                 </div>
             </main>
-            
             {isModalOpen && (
                 <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
                     <img src={photo.IMAGE_URL} alt="원본" className="modal-image" />
                 </div>
             )}
-
         </div>
     );
 }

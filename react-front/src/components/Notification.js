@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header'; // 헤더 컴포넌트 경로 확인
 import './css/Notification.css';
 
+import Hashids from 'hashids';
+const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
+
 function Notification() {
+    const navigate = useNavigate();
     const [myUserNo, setMyUserNo] = useState(null);
     const [notifications, setNotifications] = useState([]);
     
-    // 필터 및 정렬 상태 관리
+    // 필터 및 정렬 상태 관리 (scrap 타입 기본 대응 추가)
     const [filterType, setFilterType] = useState('all');
     const [sortOrder, setSortOrder] = useState('latest');
 
@@ -54,11 +59,55 @@ function Notification() {
             });
             const data = await response.json();
             if (data.success) {
-                // 프론트엔드 상태 즉각 업데이트 (빨간 점 제거)
+                // 1. 프론트엔드 상태 즉각 업데이트 (현재 화면의 빨간 점 전체 제거)
                 setNotifications(prev => prev.map(noti => ({ ...noti, IS_READ: 'Y' })));
+                
+                // 💡 2. [핵심 추가] 헤더 컴포넌트에게 뱃지 숫자를 새로고침하라고 방송 쏘기!
+                window.dispatchEvent(new Event('updateBadge'));
             }
         } catch (error) {
             console.error("모두 읽음 처리 에러:", error);
+        }
+    };
+
+    // 🚀 알림 클릭 핸들러 (읽음 처리 + 페이지 이동 완벽 연동)
+    const handleNotificationClick = async (noti) => {
+        // 1. 안 읽은 알림('N')이라면 백엔드에 읽음('Y') 처리 요청
+        if (noti.IS_READ === 'N') {
+            try {
+                await fetch(`http://localhost:3010/notification/${noti.NOTI_ID}/read`, {
+                    method: 'PUT'
+                });
+                
+                // 💡 DB 업데이트를 기다릴 필요 없이 화면(로컬 상태)의 빨간 점 즉시 제거
+                setNotifications(prevNotis => 
+                    prevNotis.map(n => 
+                        n.NOTI_ID === noti.NOTI_ID ? { ...n, IS_READ: 'Y' } : n
+                    )
+                );
+                window.dispatchEvent(new Event('updateBadge'));
+            } catch (error) {
+                console.error("알림 읽음 처리 실패:", error);
+            }
+        }
+
+        // 2. 알림 타입에 따라 해당 페이지로 이동
+        if (noti.TYPE_CODE === 'LIKE' || noti.TYPE_CODE === 'COMMENT' || noti.TYPE_CODE === 'SCRAP') {
+            // 사진/게시물 관련 알림
+            if (noti.PHOTO_ID) {
+                navigate(`/photo/${noti.PHOTO_ID}`); // 💡 실제 사진 상세 주소 적용
+            } else if (noti.POST_ID) {
+                navigate(`/post/${noti.POST_ID}`);   // 💡 실제 게시글 상세 주소 적용
+            }
+        } else if (noti.TYPE_CODE === 'FOLLOW') {
+            const hashedId = hashids.encode(noti.SENDER_NO);
+            // 💡 3. 변환된 해시 아이디로 라우팅
+            navigate(`/photog/${hashedId}`);
+        } else if (noti.TYPE_CODE === 'MESSAGE') {
+            // 메세지 알림일 경우 대화창으로 파트너 정보 넘기며 이동
+            navigate('/message', {
+                state: { targetPartner: { USER_NO: noti.SENDER_NO, NICKNAME: noti.SENDER_NICKNAME } }
+            });
         }
     };
 
@@ -102,6 +151,8 @@ function Notification() {
                                     <option value="comment">댓글</option>
                                     <option value="follow">팔로우</option>
                                     <option value="message">메세지</option>
+                                    {/* 💡 백엔드 연동에 맞춰 스크랩 필터 옵션 추가 */}
+                                    <option value="scrap">스크랩</option> 
                                 </select>
 
                                 <select 
@@ -124,7 +175,12 @@ function Notification() {
                                 <div className="noti-empty">새로운 알림이 없습니다.</div>
                             ) : (
                                 notifications.map(noti => (
-                                    <div key={noti.NOTI_ID} className={`noti-item ${noti.IS_READ === 'N' ? 'unread' : ''}`}>
+                                    <div 
+                                        key={noti.NOTI_ID} 
+                                        className={`noti-item ${noti.IS_READ === 'N' ? 'unread' : ''}`}
+                                        onClick={() => handleNotificationClick(noti)} // 💡 클릭 이벤트 바인딩
+                                        style={{ cursor: 'pointer' }}       // 💡 마우스 피드백 부여
+                                    >
                                         <div className="noti-content-area">
                                             {/* 읽지 않은 알림일 경우 빨간 동그라미 표시 */}
                                             {noti.IS_READ === 'N' && <div className="noti-unread-dot"></div>}

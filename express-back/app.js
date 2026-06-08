@@ -14,6 +14,7 @@ const photogRoutes = require('./routes/photog')
 const mypageRoutes = require('./routes/mypage')
 const messageRoutes = require('./routes/message')
 const notificationRoutes = require('./routes/notification')
+const searchRoutes = require('./routes/search')
 
 const db = require("./db");
 
@@ -36,6 +37,7 @@ app.use('/photog', photogRoutes);
 app.use('/mypage', mypageRoutes);
 app.use('/message', messageRoutes);
 app.use('/notification', notificationRoutes);
+app.use('/search', searchRoutes);
 
 
 async function startServer() {

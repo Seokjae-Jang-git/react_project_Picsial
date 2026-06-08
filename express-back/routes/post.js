@@ -14,6 +14,8 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 } // 1개당 10MB 제한
 });
 
+const base = process.env.NAS_ROOT_PATH;
+
 // ==========================================
 // [GET] /post - 게시물 전체 목록 조회 
 // ==========================================
@@ -229,7 +231,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/like - 좋아요 토글 
+// [POST] /post/:id/like - 좋아요 토글 (검토 완료 🟢)
 // ==========================================
 router.post('/:id/like', async (req, res) => {
     let connection;
@@ -244,6 +246,25 @@ router.post('/:id/like', async (req, res) => {
                 { userNo, postId }, { autoCommit: false }
             );
             await connection.execute(`UPDATE PS_POST SET LIKE_COUNT = LIKE_COUNT + 1 WHERE POST_ID = :postId`, { postId }, { autoCommit: false });
+
+            // 알림 추가 로직 (게시글 원작자 조회)
+            const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
+            const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+            if (ownerResult.rows.length > 0) {
+                const receiverNo = ownerResult.rows[0].USER_NO;
+
+                if (userNo !== receiverNo) {
+                    const notiSql = `
+                        INSERT INTO PS_NOTIFICATION (
+                            NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                        ) VALUES (
+                            PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :userNo, 1, NULL, :postId, 'N'
+                        )
+                    `;
+                    await connection.execute(notiSql, { receiverNo, userNo, postId }, { autoCommit: false });
+                }
+            }
         } else {
             await connection.execute(
                 `DELETE FROM PS_LIKE_TABLE WHERE USER_NO = :userNo AND POST_ID = :postId`,
@@ -264,7 +285,7 @@ router.post('/:id/like', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/scrap - 스크랩 토글
+// [POST] /post/:id/scrap - 스크랩 토글 및 알림 처리 (교정 완료 🟢)
 // ==========================================
 router.post('/:id/scrap', async (req, res) => {
     let connection;
@@ -274,18 +295,42 @@ router.post('/:id/scrap', async (req, res) => {
         connection = await db.getConnection();
 
         if (isScrapped) {
+            // 1. 스크랩 데이터 추가 💡 (시퀀스명을 PS_SCRAP_TABLE_SEQ로 정상 교정!)
             await connection.execute(
                 `INSERT INTO PS_SCRAP_TABLE (SCRAP_ID, USER_NO, POST_ID, CREATED_AT) VALUES (PS_SCRAP_TABLE_SEQ.NEXTVAL, :userNo, :postId, SYSDATE)`,
-                { userNo, postId }, { autoCommit: true }
+                { userNo, postId }, { autoCommit: false }
             );
+
+            // 2. 알림 추가 로직
+            const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
+            const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+            if (ownerResult.rows.length > 0) {
+                const receiverNo = ownerResult.rows[0].USER_NO;
+
+                if (userNo !== receiverNo) {
+                    const notiSql = `
+                        INSERT INTO PS_NOTIFICATION (
+                            NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                        ) VALUES (
+                            PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :userNo, 5, NULL, :postId, 'N'
+                        )
+                    `;
+                    await connection.execute(notiSql, { receiverNo, userNo, postId }, { autoCommit: false });
+                }
+            }
         } else {
+            // 3. 스크랩 취소 처리
             await connection.execute(
                 `DELETE FROM PS_SCRAP_TABLE WHERE USER_NO = :userNo AND POST_ID = :postId`,
-                { userNo, postId }, { autoCommit: true }
+                { userNo, postId }, { autoCommit: false }
             );
         }
+
+        await connection.commit();
         res.json({ success: true });
     } catch (error) {
+        if (connection) await connection.rollback();
         console.error("스크랩 처리 에러:", error);
         res.status(500).json({ success: false });
     } finally {
@@ -294,24 +339,58 @@ router.post('/:id/scrap', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/comment - 댓글 등록
+// [POST] /post/:id/comment - 댓글 등록 (하드코딩 완벽 제거 버전 🟢)
 // ==========================================
 router.post('/:id/comment', async (req, res) => {
     let connection;
     try {
         const postId = req.params.id;
-        const { content, userNo = 1 } = req.body;
+        
+        // 💡 1. userNo = 1 기본값 할당 제거
+        const { content, userNo } = req.body;
+
+        // 💡 2. 유저 번호 누락 시 에러 반환 (안전망)
+        if (!userNo) {
+            return res.status(401).json({ success: false, message: '로그인 정보가 없습니다. (userNo 누락)' });
+        }
+
+        if (!content || content.trim() === '') {
+            return res.status(400).json({ success: false, message: '댓글 내용을 입력해주세요.' });
+        }
+
         connection = await db.getConnection();
 
+        // 1. 댓글 등록
         await connection.execute(
             `INSERT INTO PS_COMMENT_TABLE (COMMENT_ID, USER_NO, POST_ID, CONTENT) 
              VALUES (PS_COMMENT_TABLE_SEQ.NEXTVAL, :userNo, :postId, :content)`,
             { userNo, postId, content },
-            { autoCommit: true }
+            { autoCommit: false }
         );
 
+        // 2. 알림 추가 로직
+        const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
+        const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        if (ownerResult.rows.length > 0) {
+            const receiverNo = ownerResult.rows[0].USER_NO;
+
+            if (userNo !== receiverNo) {
+                const notiSql = `
+                    INSERT INTO PS_NOTIFICATION (
+                        NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                    ) VALUES (
+                        PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :userNo, 2, NULL, :postId, 'N'
+                    )
+                `;
+                await connection.execute(notiSql, { receiverNo, userNo, postId }, { autoCommit: false });
+            }
+        }
+
+        await connection.commit();
         res.json({ success: true });
     } catch (error) {
+        if (connection) await connection.rollback();
         console.error("댓글 등록 에러:", error);
         res.status(500).json({ success: false, message: "댓글 등록에 실패했습니다." });
     } finally {
@@ -348,8 +427,10 @@ router.post('/upload', upload.fields([
         const categories = req.body.categories ? JSON.parse(req.body.categories) : [];
         const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
 
-        await sftp.mkdir('/picsial_images/post/image/', true);
-        await sftp.mkdir('/picsial_images/post/attachment/', true);
+        
+
+        await sftp.mkdir(`${process.env.NAS_ROOT_PATH}/post/image/`, true);
+        await sftp.mkdir(`${process.env.NAS_ROOT_PATH}/post/attachment/`, true);
 
         const insertPostSql = `
             INSERT INTO PS_POST (POST_ID, USER_NO, TITLE, CONTENT, VIEW_COUNT, LIKE_COUNT, IS_PUBLIC)
@@ -379,8 +460,8 @@ router.post('/upload', upload.fields([
                 const saveFileName = `image-${uniqueSuffix}${ext}`;
                 const thumbFileName = `thumb_${saveFileName}`;
                 
-                const remotePath = `/picsial_images/post/image/${saveFileName}`;
-                const thumbRemotePath = `/picsial_images/post/image/${thumbFileName}`;
+                const remotePath = `${process.env.NAS_ROOT_PATH}/post/image/${saveFileName}`;
+                const thumbRemotePath = `${process.env.NAS_ROOT_PATH}/post/image/${thumbFileName}`;
 
                 await sftp.put(file.buffer, remotePath, { mode: 0o644 });
 
@@ -418,7 +499,7 @@ router.post('/upload', upload.fields([
                 const ext = path.extname(originalName);
                 
                 const saveFileName = `attach-${uniqueSuffix}${ext}`;
-                const remotePath = `/picsial_images/post/attachment/${saveFileName}`;
+                const remotePath = `${process.env.NAS_ROOT_PATH}/post/attachment/${saveFileName}`;
 
                 await sftp.put(file.buffer, remotePath, { mode: 0o644 });
 

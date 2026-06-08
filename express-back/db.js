@@ -1,5 +1,6 @@
 const oracledb = require('oracledb');
 require("dotenv").config();
+process.env.NLS_LANG = process.env.NLS_LANG;
 
 const dbConfig = {
     user: process.env.db_user,

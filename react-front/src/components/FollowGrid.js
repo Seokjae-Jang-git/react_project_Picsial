@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import Hashids from 'hashids';
 import './css/FollowGrid.css';
 
-function FollowGrid({ sortOption, onFollowChange }) {
+function FollowGrid({ sortOption, onFollowChange, users }) {
     const [photogs, setPhotogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate(); // 🚀 2. 초기화
@@ -19,6 +19,12 @@ function FollowGrid({ sortOption, onFollowChange }) {
 
     // 💡 1. 작가 목록 및 데이터 불러오기
     useEffect(() => {
+        if (users && users.length > 0) {
+            setPhotogs(users);
+            setIsLoading(false);
+            return; 
+        }
+        
         const fetchphotogs = async () => {
             setIsLoading(true);
             const token = localStorage.getItem('jwtToken');
@@ -40,7 +46,7 @@ function FollowGrid({ sortOption, onFollowChange }) {
         };
 
         fetchphotogs();
-    }, [sortOption]);
+    }, [sortOption, users]);
 
     // 💡 2. 팔로우 / 팔로우 취소 토글 로직
     const handleFollowToggle = async (targetUserNo, currentStatus) => {

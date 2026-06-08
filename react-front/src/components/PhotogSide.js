@@ -56,6 +56,33 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
         }
     };
 
+    // 🚀 메세지 버튼 클릭 핸들러 추가
+    const handleMessageClick = () => {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) return alert("로그인이 필요합니다.");
+
+        try {
+            const decoded = jwtDecode(token);
+            // 본인 프로필에서 메세지 버튼을 누른 경우 방어
+            if (decoded.userNo === profile.USER_NO) {
+                return alert("자기 자신에게는 메시지를 보낼 수 없습니다.");
+            }
+
+            // 대화창(/message)으로 이동하면서 상대방 정보(targetPartner)를 함께 넘겨줍니다.
+            navigate('/message', {
+                state: {
+                    targetPartner: {
+                        USER_NO: profile.USER_NO,
+                        NICKNAME: profile.NICKNAME,
+                        PROFILE_IMAGE_URL: profile.PROFILE_IMAGE_URL // 프로필 사진도 넘겨주면 좋습니다
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("메세지 이동 에러:", error);
+        }
+    };
+
     return (
         <aside className="photog-sidebar">
             <div className="sidebar-top">
@@ -113,7 +140,7 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                     >
                         {profile.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
                     </button>
-                    <button className="btn-msg-photog" onClick={() => alert('메시지 기능 준비중')}>
+                    <button className="btn-msg-photog" onClick={handleMessageClick}>
                         메시지
                     </button>
                 </div>

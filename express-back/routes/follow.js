@@ -91,7 +91,7 @@ router.get('/photogs', async (req, res) => {
 });
 
 // ==========================================
-// 2. [POST] /follow/toggle - 팔로우 / 팔로우 취소 처리
+// 2. [POST] /follow/toggle - 팔로우 토글 (검토 결과: 완벽함 🟢)
 // ==========================================
 router.post('/toggle', async (req, res) => {
     let connection;
@@ -99,25 +99,32 @@ router.post('/toggle', async (req, res) => {
         const { followerNo, followingNo } = req.body;
         connection = await db.getConnection();
 
-        // 1. 현재 팔로우 상태인지 확인
         const checkSql = `SELECT FOLLOW_ID FROM PS_FOLLOW WHERE FOLLOWER_NO = :followerNo AND FOLLOWING_NO = :followingNo`;
         const checkResult = await connection.execute(checkSql, { followerNo, followingNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
         let action = '';
         if (checkResult.rows.length > 0) {
-            // 2-A. 이미 팔로우 중이면 -> DELETE (팔로우 취소)
             const deleteSql = `DELETE FROM PS_FOLLOW WHERE FOLLOWER_NO = :followerNo AND FOLLOWING_NO = :followingNo`;
             await connection.execute(deleteSql, { followerNo, followingNo }, { autoCommit: false });
             action = 'unfollowed';
         } else {
-            // 2-B. 팔로우 중이 아니면 -> INSERT (팔로우)
-            // 🚀 사용자가 요청한 약속대로 CREATED_AT (SYSDATE) 제외
             const insertSql = `
                 INSERT INTO PS_FOLLOW (FOLLOW_ID, FOLLOWER_NO, FOLLOWING_NO) 
                 VALUES (PS_FOLLOW_SEQ.NEXTVAL, :followerNo, :followingNo)
             `;
             await connection.execute(insertSql, { followerNo, followingNo }, { autoCommit: false });
             action = 'followed';
+
+            if (followerNo !== followingNo) {
+                const notiSql = `
+                    INSERT INTO PS_NOTIFICATION (
+                        NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                    ) VALUES (
+                        PS_NOTIFICATION_SEQ.NEXTVAL, :followingNo, :followerNo, 3, NULL, NULL, 'N'
+                    )
+                `;
+                await connection.execute(notiSql, { followingNo, followerNo }, { autoCommit: false });
+            }
         }
 
         await connection.commit();
@@ -280,6 +287,63 @@ router.get('/following', async (req, res) => {
     } finally {
         if (connection) {
             try { await connection.close(); } catch (e) { console.error(e); }
+        }
+    }
+});
+
+// ==========================================
+// [GET] /follow/recent-active - 대시보드용 최근 업데이트 팔로잉 3명 조회
+// ==========================================
+router.get('/recent-active', async (req, res) => {
+    let connection;
+    try {
+        const userNo = req.query.userNo;
+        const limit = parseInt(req.query.limit) || 3; 
+
+        if (!userNo) {
+            return res.status(400).json({ success: false, message: "유저 번호가 누락되었습니다." });
+        }
+
+        connection = await db.getConnection();
+
+        const sql = `
+            SELECT * FROM (
+                SELECT 
+                    U.USER_NO, 
+                    U.NICKNAME, 
+                    U.PROFILE_IMAGE_URL,
+                    (
+                        SELECT MAX(MAX_DATE) FROM (
+                            SELECT MAX(CREATED_AT) AS MAX_DATE FROM PS_PHOTO WHERE USER_NO = U.USER_NO
+                            UNION ALL
+                            SELECT MAX(CREATED_AT) AS MAX_DATE FROM PS_POST WHERE USER_NO = U.USER_NO
+                        )
+                    ) AS LAST_UPDATE_TIME
+                FROM PS_FOLLOW F
+                JOIN PS_USER_INFO U ON F.FOLLOWING_NO = U.USER_NO
+                WHERE F.FOLLOWER_NO = :userNo
+                ORDER BY LAST_UPDATE_TIME DESC NULLS LAST
+            ) 
+            WHERE ROWNUM <= :limit
+        `;
+
+        const result = await connection.execute(sql, { userNo, limit }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        const list = result.rows.map(user => ({
+            ...user,
+            PROFILE_IMAGE_URL: user.PROFILE_IMAGE_URL && user.PROFILE_IMAGE_URL.startsWith('http')
+                ? user.PROFILE_IMAGE_URL
+                : user.PROFILE_IMAGE_URL ? `${process.env.NAS_BASE_URL_PROFILE}/${user.PROFILE_IMAGE_URL}` : null
+        }));
+
+        res.json({ success: true, list });
+
+    } catch (error) {
+        console.error("최근 업데이트 팔로잉 조회 에러:", error.message);
+        res.status(500).json({ success: false, message: "팔로잉 로드에 실패했습니다." });
+    } finally {
+        if (connection) { 
+            try { await connection.close(); } catch (e) {} 
         }
     }
 });

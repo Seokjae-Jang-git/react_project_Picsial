@@ -117,7 +117,7 @@ router.get('/history', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /message/send - 메시지 전송
+// [POST] /message/send - 메시지 전송 (최종 완성본)
 // ==========================================
 router.post('/send', async (req, res) => {
     let connection;
@@ -127,15 +127,33 @@ router.post('/send', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // MESSAGE_ID는 시퀀스 사용, TITLE은 NULL 처리
+        // 1. 메세지 테이블에 먼저 데이터 꽂기 (순서 변경 / autoCommit은 false로 유지)
         const sql = `
             INSERT INTO PS_MESSAGE (MESSAGE_ID, SENDER_NO, RECEIVER_NO, TITLE, CONTENT, IS_READ)
             VALUES (PS_MESSAGE_SEQ.NEXTVAL, :senderNo, :receiverNo, NULL, :content, 'N')
         `;
+        await connection.execute(sql, { senderNo, receiverNo, content }, { autoCommit: false });
+
+        // 2. [알림 추가 로직] 메세지가 성공적으로 세션에 담긴 후 알림을 이어서 생성
+        if (senderNo !== receiverNo) {
+            const notiSql = `
+                INSERT INTO PS_NOTIFICATION (
+                    NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                ) VALUES (
+                    PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :senderNo, 4, NULL, NULL, 'N'
+                )
+            `;
+            await connection.execute(notiSql, { receiverNo, senderNo }, { autoCommit: false });
+        }
         
-        await connection.execute(sql, { senderNo, receiverNo, content }, { autoCommit: true });
+        // 3. 💡 메세지와 알림이 모두 에러 없이 여기까지 왔을 때 '최종 확정 도장'을 찍습니다.
+        await connection.commit();
         res.json({ success: true });
     } catch (error) {
+        // 중간에 하나라도 튕기면 전부 없었던 일로 깨끗하게 복구(롤백)합니다.
+        if (connection) {
+            try { await connection.rollback(); } catch (e) { console.error("롤백 실패:", e); }
+        }
         console.error("메시지 전송 에러:", error);
         res.status(500).json({ success: false });
     } finally {
@@ -283,6 +301,58 @@ router.delete('/block/unblock', async (req, res) => {
     } catch (error) {
         console.error("차단 해제 에러:", error.message);
         res.status(500).json({ success: false, message: "차단 해제 처리 중 에러 발생" });
+    } finally {
+        if (connection) { try { await connection.close(); } catch (e) {} }
+    }
+});
+
+// ==========================================
+// [GET] /message/recent - 대시보드용 최근 대화 상대 3명 조회
+// ==========================================
+router.get('/recent', async (req, res) => {
+    let connection;
+    try {
+        const userNo = req.query.userNo;
+        const limit = parseInt(req.query.limit) || 3;
+        if (!userNo) return res.status(400).json({ success: false, message: "유저 번호 누락" });
+
+        connection = await db.getConnection();
+
+        // 💡 최근 대화 나눈 상대를 구하고, 상대방이 나에게 보낸 읽지 않은(IS_READ='N') 메시지 개수를 합산하는 쿼리
+        const sql = `
+            SELECT * FROM (
+                SELECT 
+                    M.PARTNER_NO,
+                    U.NICKNAME,
+                    U.PROFILE_IMAGE_URL,
+                    (SELECT COUNT(*) FROM PS_MESSAGE WHERE SENDER_NO = M.PARTNER_NO AND RECEIVER_NO = :userNo AND IS_READ = 'N') AS UNREAD_COUNT
+                FROM (
+                    SELECT 
+                        CASE WHEN SENDER_NO = :userNo THEN RECEIVER_NO ELSE SENDER_NO END AS PARTNER_NO,
+                        MAX(CREATED_AT) AS MAX_TIME
+                    FROM PS_MESSAGE
+                    WHERE SENDER_NO = :userNo OR RECEIVER_NO = :userNo
+                    GROUP BY CASE WHEN SENDER_NO = :userNo THEN RECEIVER_NO ELSE SENDER_NO END
+                    ORDER BY MAX_TIME DESC
+                ) M
+                JOIN PS_USER_INFO U ON M.PARTNER_NO = U.USER_NO
+            ) WHERE ROWNUM <= :limit
+        `;
+
+        const result = await connection.execute(sql, { userNo, limit }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        // 프로필 이미지 주소 NAS 보안 조립
+        const list = result.rows.map(partner => ({
+            ...partner,
+            PROFILE_IMAGE_URL: partner.PROFILE_IMAGE_URL && partner.PROFILE_IMAGE_URL.startsWith('http')
+                ? partner.PROFILE_IMAGE_URL
+                : partner.PROFILE_IMAGE_URL ? `${process.env.NAS_BASE_URL_PROFILE}/${partner.PROFILE_IMAGE_URL}` : null
+        }));
+
+        res.json({ success: true, list });
+    } catch (error) {
+        console.error("최근 메시지 조회 에러:", error.message);
+        res.status(500).json({ success: false, message: "메시지 로드 실패" });
     } finally {
         if (connection) { try { await connection.close(); } catch (e) {} }
     }

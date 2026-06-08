@@ -22,6 +22,7 @@ import MyScrap from './components/MyScrap';
 import MyFollowing from './components/MyFollowing';
 import Message from './components/Message';
 import Notification from './components/Notification';
+import Search from './components/Search';
 
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
           <Route path="/photog/:hashedId" element={<Photog />} />
           <Route path="/message" element={<Message />} />
           <Route path="/notification" element={<Notification />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/mypage/:hashedId" element={<MyPage />} >
             <Route index element={<MyPageDash />} />
             <Route path="account" element={<MyAccount />} /> 

@@ -96,7 +96,7 @@ function Main() {
                         <button className="more-btn" onClick={()=>navigate('/photo')}>더보기 &gt;</button>
                     </div>
                     <div className="photo-grid">
-                        {photos.slice(0, 12).map((photo) => (
+                        {photos.slice(0, 15).map((photo) => (
                             // 🚀 PhotoGrid.js의 photo-card-wrapper 구조를 완벽하게 적용
                             <div 
                                 key={photo.PHOTO_ID} 

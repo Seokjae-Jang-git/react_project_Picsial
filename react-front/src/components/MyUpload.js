@@ -224,29 +224,25 @@ function MyUpload() {
         <div className="my-upload-container">
             
             {/* [상단 영역] 사진 / 게시물 전환 라디오 버튼 */}
-            <div className="tab-radio-group">
-                <label className={`tab-label ${uploadType === 'photo' ? 'active' : ''}`}>
+            <div className="type-radio-group">
+                <label className="radio-tab-label">
                     <input 
                         type="radio" 
-                        name="uploadType" 
                         value="photo" 
                         checked={uploadType === 'photo'} 
-                        onChange={() => setUploadType('photo')}
-                        style={{ display: 'none' }} 
+                        onChange={(e) => setUploadType(e.target.value)} 
                     />
-                    사진
+                    <span className="radio-tab-btn">사진</span>
                 </label>
                 
-                <label className={`tab-label ${uploadType === 'post' ? 'active' : ''}`}>
+                <label className="radio-tab-label">
                     <input 
                         type="radio" 
-                        name="uploadType" 
                         value="post" 
                         checked={uploadType === 'post'} 
-                        onChange={() => setUploadType('post')}
-                        style={{ display: 'none' }} 
+                        onChange={(e) => setUploadType(e.target.value)} 
                     />
-                    게시물
+                    <span className="radio-tab-btn">게시물</span>
                 </label>
             </div>
 

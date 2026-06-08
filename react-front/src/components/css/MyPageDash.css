@@ -148,3 +148,108 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* ==========================================================================
+   🚀 상단 4열 구조 배치 (Grid 틀만 유지)
+   ========================================================================== */
+.dash-top-panels {
+    display: grid;
+    grid-template-columns: 0.6fr 0.5fr 0.5fr 1.3fr;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* [공통] 최소한의 배경색과 테두리 라운딩 규칙만 공통화 */
+.dash-panel {
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   💡 각 패널별 독자적 수동 수정 구역 (여기서 값을 변경하시면 됩니다!)
+   ========================================================================== */
+
+/* 1. 내 프로필 전용 보드 */
+.profile-board {
+    padding: 16px 20px;
+    min-height: 240px; /* 프로필 내용 두께에 맞춘 전용 높이 */
+    cursor: pointer;  
+}
+
+/* 2. 내 팔로잉 전용 보드 */
+.following-board {
+    padding: 16px 20px;
+    min-height: 240px;
+}
+
+/* 3. 메시지 전용 보드 */
+.message-board {
+    padding: 16px 20px;
+    min-height: 240px;
+}
+
+/* 4. 🌟 알림 전용 보드 (내용이 길고 많으므로 여기서 단독 조절!) */
+.noti-board {
+    padding: 16px 18px;  /* 알림 텍스트 공간 확보를 위해 패딩 미세 조정 */
+    min-height: 240px;   /* 💡 5개 알림이 깔끔하게 수용되도록 높이를 임의 지정하거나 삭제 가능 */
+    
+    /* 만약 알림 양에 따라 박스가 유동적으로 자동 확장되길 원하시면 
+       아래 주석을 풀고 min-height를 지우시면 됩니다. */
+    /* height: auto; */ 
+}
+
+
+/* ==========================================================================
+   내부 컴포넌트 세부 정렬 (기존 레이아웃 보존)
+   ========================================================================== */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f3f5;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.panel-header h4 { margin: 0; font-size: 15px; font-weight: 700; color: #212529; }
+
+.profile-content { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+ul.profile-text-info { list-style: none; padding: 0; margin: 0; flex: 1; }
+ul.profile-text-info li { margin-bottom: 8px; font-size: 13.5px; color: #495057; word-break: break-all; }
+ul.profile-text-info .label, .profile-intro-box .label { font-weight: 700; color: #868e96; margin-right: 8px; display: inline-block; min-width: 40px; }
+
+.dash-avatar.large-avatar, .dash-avatar-placeholder.large-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; background-color: #f1f3f5; flex-shrink: 0; }
+.profile-intro-box { padding-top: 12px; }
+.intro-text { margin: 4px 0 0 0; font-size: 13px; color: #495057; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.list-content { display: flex; flex-direction: column; gap: 14px; }
+.recent-user-item { display: flex; align-items: center; gap: 12px; }
+.user-avatar-wrapper { position: relative; width: 38px; height: 38px; flex-shrink: 0; }
+.user-thumb-img, .user-thumb-placeholder { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background-color: #f1f3f5; }
+.unread-dot { position: absolute; top: -1px; right: -1px; width: 10px; height: 10px; background-color: #ff3b30; border: 2px solid #ffffff; border-radius: 50%; }
+.user-nickname { font-size: 14px; font-weight: 600; color: #212529; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 알림 세부 아이템 간격 제어 */
+.noti-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 알림 줄 간격 수동 조절 스위치 */
+}
+.recent-noti-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px; /* 알림 내부 패딩 수동 조절 스위치 */
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    gap: 10px;
+}
+.noti-text { margin: 0; font-size: 12.5px; color: #343a40; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.noti-tag { font-weight: 700; color: #495057; }
+.noti-time { font-size: 11px; color: #adb5bd; white-space: nowrap; }
+.empty-panel-text { font-size: 13px; color: #868e96; text-align: center; padding-top: 30px; margin: 0; }

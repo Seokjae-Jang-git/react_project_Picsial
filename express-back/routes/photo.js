@@ -13,8 +13,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // [함수] SFTP NAS 파일 전송 
 async function uploadToNAS(fileBuffer, thumbBuffer, originalFileName, thumbFileName) {
     const sftp = new SftpClient();
-    const originalRemotePath = `/picsial_images/${originalFileName}`;
-    const thumbRemotePath = `/picsial_images/${thumbFileName}`;
+    const originalRemotePath = `${process.env.NAS_ROOT_PATH}/${originalFileName}`;
+    const thumbRemotePath = `${process.env.NAS_ROOT_PATH}/${thumbFileName}`;
     
     try {
         await sftp.connect({
@@ -324,12 +324,20 @@ router.get('/:id', async (req, res) => {
             }
         }
 
-        // 2. 댓글 목록 조회
+        // ==========================================================
+        // 2. 댓글 목록 조회 (닉네임 가져오도록 JOIN 보강 완료 🟢)
+        // ==========================================================
         const commentSql = `
-            SELECT COMMENT_ID, USER_NO, CONTENT, TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_AT
-            FROM PS_COMMENT_TABLE
-            WHERE PHOTO_ID = :photoId
-            ORDER BY COMMENT_ID DESC
+            SELECT 
+                C.COMMENT_ID, 
+                C.USER_NO, 
+                C.CONTENT, 
+                TO_CHAR(C.CREATED_AT, 'YYYY-MM-DD HH24:MI') AS CREATED_AT,
+                UI.NICKNAME -- 💡 유저 테이블에서 닉네임을 함께 가져옵니다.
+            FROM PS_COMMENT_TABLE C
+            JOIN PS_USER_INFO UI ON C.USER_NO = UI.USER_NO
+            WHERE C.PHOTO_ID = :photoId
+            ORDER BY C.COMMENT_ID DESC
         `;
         const commentResult = await connection.execute(commentSql, { photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -351,32 +359,55 @@ router.get('/:id', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /photo/:id/like - 좋아요 토글
+// [POST] /photo/:id/like - 좋아요 토글 (최종 완성본)
 // ==========================================
 router.post('/:id/like', async (req, res) => {
     let connection;
     try {
         const photoId = req.params.id;
-        const { isLiked, userNo } = req.body; 
+        const { isLiked, userNo } = req.body; // 💡 여기서 userNo를 받아옵니다.
         connection = await db.getConnection();
 
         if (isLiked) {
-            // 💡 사진 좋아요: POST_ID는 NULL(기본값 또는 생략) 처리하고 PHOTO_ID에 값을 넣습니다.
+            // 1. 좋아요 처리
             await connection.execute(
                 `INSERT INTO PS_LIKE_TABLE (LIKE_ID, USER_NO, PHOTO_ID, CREATED_AT) VALUES (PS_LIKE_TABLE_SEQ.NEXTVAL, :userNo, :photoId, SYSDATE)`,
                 { userNo, photoId }, { autoCommit: false }
             );
             await connection.execute(`UPDATE PS_PHOTO SET LIKE_COUNT = LIKE_COUNT + 1 WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: false });
+
+            // 💡 [알림 추가 로직] 좋아요를 누른 상태(isLiked === true)일 때만 알림을 생성합니다.
+            const ownerSql = `SELECT USER_NO FROM PS_PHOTO WHERE PHOTO_ID = :photoId`;
+            const ownerResult = await connection.execute(ownerSql, { photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+            if (ownerResult.rows.length > 0) {
+                const receiverNo = ownerResult.rows[0].USER_NO;
+
+                // 💡 senderNo 대신 위에서 정의된 userNo를 사용합니다.
+                if (userNo !== receiverNo) {
+                    const notiSql = `
+                        INSERT INTO PS_NOTIFICATION (
+                            NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                        ) VALUES (
+                            PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :userNo, 1, :photoId, NULL, 'N'
+                        )
+                    `;
+                    // 💡 바인딩 객체도 userNo로 매칭해줍니다.
+                    await connection.execute(notiSql, { receiverNo, userNo, photoId }, { autoCommit: false });
+                }
+            }
         } else {
-            // 💡 좋아요 취소
+            // 2. 좋아요 취소 처리
             await connection.execute(
                 `DELETE FROM PS_LIKE_TABLE WHERE USER_NO = :userNo AND PHOTO_ID = :photoId`,
                 { userNo, photoId }, { autoCommit: false }
             );
             await connection.execute(`UPDATE PS_PHOTO SET LIKE_COUNT = GREATEST(LIKE_COUNT - 1, 0) WHERE PHOTO_ID = :photoId`, { photoId }, { autoCommit: false });
+            
+            // 💡 좋아요를 취소할 때는 알림을 생성하지 않고 자연스럽게 넘어갑니다.
         }
         
-        await connection.commit();
+        await connection.commit(); // 트랜잭션 전체 확정 (좋아요 + 알림 일괄 성공)
         res.json({ success: true });
     } catch (error) {
         if (connection) await connection.rollback();
@@ -388,36 +419,62 @@ router.post('/:id/like', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /photo/:id/scrap - 스크랩 토글 처리
+// [POST] /photo/:id/scrap - 스크랩 토글 처리 (알림 추가 버전)
 // ==========================================
 router.post('/:id/scrap', async (req, res) => {
     let connection;
     const photoId = req.params.id;
-    // 프론트에서 isScrapped(채울지 말지)와 유저번호를 받습니다.
     const { isScrapped, userNo } = req.body; 
+    const finalUserNo = userNo || 1; // 기본값 방어 코드
 
     try {
         connection = await db.getConnection();
         
         if (isScrapped) {
-            // 💡 스크랩 설정: PS_SCRAP_TABLE에 새로운 레코드 INSERT
+            // 1. 스크랩 설정
             const insertSql = `
                 INSERT INTO PS_SCRAP_TABLE (SCRAP_ID, USER_NO, PHOTO_ID)
-                VALUES (PS_SCRAP_TABLE_SEQ.NEXTVAL, :userNo, :photoId)
+                VALUES (PS_SCRAP_TABLE_SEQ.NEXTVAL, :finalUserNo, :photoId)
             `;
-            await connection.execute(insertSql, { userNo: userNo || 1, photoId: photoId });
+            // 💡 안전하게 autoCommit: false 설정
+            await connection.execute(insertSql, { finalUserNo, photoId }, { autoCommit: false });
+
+            // 💡 [알림 추가 로직] 사진의 원작자(RECEIVER_NO) 알아내기
+            const ownerSql = `SELECT USER_NO FROM PS_PHOTO WHERE PHOTO_ID = :photoId`;
+            const ownerResult = await connection.execute(ownerSql, { photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+            if (ownerResult.rows.length > 0) {
+                const receiverNo = ownerResult.rows[0].USER_NO;
+
+                // 💡 본인이 본인 글을 스크랩한 게 아닐 때만 5번(SCRAP) 알림 생성!
+                if (finalUserNo !== receiverNo) {
+                    const notiSql = `
+                        INSERT INTO PS_NOTIFICATION (
+                            NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                        ) VALUES (
+                            PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :finalUserNo, 5, :photoId, NULL, 'N'
+                        )
+                    `;
+                    await connection.execute(notiSql, { receiverNo, finalUserNo, photoId }, { autoCommit: false });
+                }
+            }
         } else {
-            // 💡 스크랩 취소: PS_SCRAP_TABLE에서 해당 레코드 DELETE
+            // 2. 스크랩 취소
             const deleteSql = `
                 DELETE FROM PS_SCRAP_TABLE 
-                WHERE USER_NO = :userNo AND PHOTO_ID = :photoId
+                WHERE USER_NO = :finalUserNo AND PHOTO_ID = :photoId
             `;
-            await connection.execute(deleteSql, { userNo: userNo || 1, photoId: photoId });
+            await connection.execute(deleteSql, { finalUserNo, photoId }, { autoCommit: false });
+            
+            // 💡 스크랩 취소 시에는 알림을 생성하지 않습니다.
         }
 
+        // 스크랩 행위와 알림 저장을 하나의 트랜잭션으로 일괄 커밋
         await connection.commit();
         res.json({ success: true, message: "스크랩 업데이트 완료" });
     } catch (error) {
+        // 💡 에러 발생 시 안전하게 롤백
+        if (connection) await connection.rollback();
         console.error("스크랩 업데이트 에러:", error);
         res.status(500).json({ success: false, message: "서버 오류" });
     } finally {
@@ -428,12 +485,20 @@ router.post('/:id/scrap', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /photo/:id/comment - 댓글 등록 API (신규 추가)
+// [POST] /photo/:id/comment - 댓글 등록 API (하드코딩 완벽 제거 버전)
 // ==========================================
 router.post('/:id/comment', async (req, res) => {
     let connection;
     const photoId = req.params.id;
-    const { content, userNo } = req.body; // 프론트에서 보낸 댓글 내용과 유저 번호
+    const { content, userNo } = req.body; 
+
+    // 💡 1. 1번으로 강제 할당하던 로직 삭제!
+    // const finalUserNo = userNo || 1; (이 줄을 지워버립니다)
+
+    // 💡 2. 유저 번호가 안 넘어오면 에러로 튕겨내도록 유효성 검사 추가
+    if (!userNo) {
+        return res.status(401).json({ success: false, message: '로그인 정보가 없습니다. (userNo 누락)' });
+    }
 
     if (!content || content.trim() === '') {
         return res.status(400).json({ success: false, message: '댓글 내용을 입력해주세요.' });
@@ -442,22 +507,36 @@ router.post('/:id/comment', async (req, res) => {
     try {
         connection = await db.getConnection();
 
-        // 💡 질문자님이 설계하신 시퀀스를 사용하여 댓글 INSERT
+        // 💡 3. insertSql과 notiSql의 :finalUserNo 부분을 전부 :userNo로 변경
         const insertSql = `
             INSERT INTO PS_COMMENT_TABLE (COMMENT_ID, USER_NO, PHOTO_ID, CONTENT)
             VALUES (PS_COMMENT_TABLE_SEQ.NEXTVAL, :userNo, :photoId, :content)
         `;
-        
-        await connection.execute(insertSql, {
-            userNo: userNo || 1, // 로그인 연동 전까지는 1번 유저로 테스트
-            photoId: photoId,
-            content: content
-        });
+        await connection.execute(insertSql, { userNo, photoId, content }, { autoCommit: false });
+
+        const ownerSql = `SELECT USER_NO FROM PS_PHOTO WHERE PHOTO_ID = :photoId`;
+        const ownerResult = await connection.execute(ownerSql, { photoId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+        if (ownerResult.rows.length > 0) {
+            const receiverNo = ownerResult.rows[0].USER_NO;
+
+            if (userNo !== receiverNo) {
+                const notiSql = `
+                    INSERT INTO PS_NOTIFICATION (
+                        NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                    ) VALUES (
+                        PS_NOTIFICATION_SEQ.NEXTVAL, :receiverNo, :userNo, 2, :photoId, NULL, 'N'
+                    )
+                `;
+                await connection.execute(notiSql, { receiverNo, userNo, photoId }, { autoCommit: false });
+            }
+        }
 
         await connection.commit();
         res.json({ success: true, message: "댓글이 성공적으로 등록되었습니다." });
 
     } catch (error) {
+        if (connection) await connection.rollback();
         console.error("댓글 등록 에러:", error);
         res.status(500).json({ success: false, message: "서버 오류" });
     } finally {
@@ -468,7 +547,7 @@ router.post('/:id/comment', async (req, res) => {
 });
 
 // ==========================================
-// 2. [POST] /photo/toggle - 팔로우 / 팔로우 취소 처리
+// 2. [POST] /photo/toggle - 팔로우 / 팔로우 취소 처리 (중복 코드 정돈 버전)
 // ==========================================
 router.post('/toggle', async (req, res) => {
     let connection;
@@ -488,13 +567,24 @@ router.post('/toggle', async (req, res) => {
             action = 'unfollowed';
         } else {
             // 2-B. 팔로우 중이 아니면 -> INSERT (팔로우)
-            // 🚀 사용자가 요청한 약속대로 CREATED_AT (SYSDATE) 제외
             const insertSql = `
                 INSERT INTO PS_FOLLOW (FOLLOW_ID, FOLLOWER_NO, FOLLOWING_NO) 
                 VALUES (PS_FOLLOW_SEQ.NEXTVAL, :followerNo, :followingNo)
             `;
             await connection.execute(insertSql, { followerNo, followingNo }, { autoCommit: false });
             action = 'followed';
+
+            // [알림 추가 로직] 본인이 본인을 팔로우하는 게 아닐 때만 알림 전송
+            if (followerNo !== followingNo) {
+                const notiSql = `
+                    INSERT INTO PS_NOTIFICATION (
+                        NOTI_ID, RECEIVER_NO, SENDER_NO, TYPE_ID, PHOTO_ID, POST_ID, IS_READ
+                    ) VALUES (
+                        PS_NOTIFICATION_SEQ.NEXTVAL, :followingNo, :followerNo, 3, NULL, NULL, 'N'
+                    )
+                `;
+                await connection.execute(notiSql, { followingNo, followerNo }, { autoCommit: false });
+            }
         }
 
         await connection.commit();

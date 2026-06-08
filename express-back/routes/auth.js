@@ -185,7 +185,7 @@ router.post('/login', async (req, res) => {
         // 토큰의 페이로드(Payload)에는 유저 아이디 문자열 대신 고유 식별 번호인 userNo를 심어 관리합니다.
         const token = jwt.sign(
             { userNo: user.USER_NO, userId: user.USER_ID, nickname: user.NICKNAME },
-            process.env.JWT_SECRET || 'picsial_secret_key',
+            process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 

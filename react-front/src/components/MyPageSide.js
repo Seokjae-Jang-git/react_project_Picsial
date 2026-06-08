@@ -84,7 +84,7 @@ const MyPageSide = ({ myUserNo, hashedId, refreshTrigger }) => {
                 <NavLink to={`/message`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
                     메세지
                 </NavLink>
-                <NavLink to={`/mypage/${hashedId}/notifications`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
+                <NavLink to={`/notification`} className={({ isActive }) => isActive ? "mypage-side__link active" : "mypage-side__link"}>
                     알림
                 </NavLink>
             </nav>

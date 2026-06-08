@@ -13,8 +13,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 // [함수] SFTP NAS 파일 전송 
 async function uploadToNAS(fileBuffer, thumbBuffer, originalFileName, thumbFileName) {
     const sftp = new SftpClient();
-    const originalRemotePath = `/picsial_images/${originalFileName}`;
-    const thumbRemotePath = `/picsial_images/${thumbFileName}`;
+    const originalRemotePath = `${process.env.NAS_ROOT_PATH}/${originalFileName}`;
+    const thumbRemotePath = `${process.env.NAS_ROOT_PATH}${thumbFileName}`;
     
     try {
         await sftp.connect({

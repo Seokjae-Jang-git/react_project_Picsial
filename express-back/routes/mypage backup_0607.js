@@ -39,7 +39,6 @@ const uploadProfile = multer({
 });
 
 // 마이페이지 메인 데이터 및 사이드바 프로필 통합 조회 API
-// 호출 경로: GET http://localhost:3010/mypage?userNo=1
 router.get('/', async (req, res) => {
     let connection;
     try {
@@ -395,7 +394,7 @@ router.put('/account/profile', uploadProfileMem.single('profileImage'), async (r
             const filename = `profile_${Date.now()}_${Math.round(Math.random() * 1E9)}${ext}`;
             
             // 보안을 위해 SFTP 원격 경로도 .env에서 관리 (없으면 Fallback)
-            const remoteDir = process.env.SFTP_PROFILE_DIR || '/picsial_images/profile';
+            const remoteDir = process.env.SFTP_PROFILE_DIR;
             const remotePath = `${remoteDir}/${filename}`;
 
             const sftp = new SftpClient();
@@ -422,8 +421,7 @@ router.put('/account/profile', uploadProfileMem.single('profileImage'), async (r
             sql += `, PROFILE_IMAGE_URL = :profileImage`;
             binds.profileImage = filename;
             
-            // 프론트엔드 응답용 조립 (http://lunahomeserver.../profile/파일명.jpg)
-            const baseUrl = process.env.NAS_BASE_URL_PROFILE || 'http://lunahomeserver.synology.me:8085/profile';
+            const baseUrl = process.env.NAS_BASE_URL_PROFILE;
             newImageUrl = `${baseUrl}/${filename}`;
         }
 

@@ -2,11 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/PostGrid.css';
 
-function PostGrid({ selectedCategory, sortOption }) {
+// 💡 1. 부모(Search.js)가 준 posts를 받아오되, 내부 상태 이름과 겹치지 않게 initialPosts로 별칭을 줍니다.
+function PostGrid({ selectedCategory, sortOption, posts: initialPosts }) {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // 🌟 [핵심 추가] 검색 페이지에서 필터링된 결과(initialPosts)가 넘어왔다면?
+        if (initialPosts) {
+            // 💡 백엔드 검색 API의 단일 THUMB_URL을 카드가 요구하는 THUMB_LIST 배열로 안전하게 가공해줍니다.
+            const normalizedPosts = initialPosts.map(post => ({
+                ...post,
+                THUMB_LIST: post.THUMB_LIST || (post.THUMB_URL ? [post.THUMB_URL] : [])
+            }));
+            
+            setPosts(normalizedPosts);
+            setLoading(false);
+            return; // 🚀 자체 fetch가 실행되지 않도록 여기서 차단!
+        }
+
         const fetchPosts = async () => {
             setLoading(true);
             try {
@@ -29,7 +43,7 @@ function PostGrid({ selectedCategory, sortOption }) {
         };
 
         fetchPosts();
-    }, [selectedCategory, sortOption]);
+    }, [selectedCategory, sortOption, initialPosts]); // 💡 initialPosts가 바뀔 때도 감시하도록 추가
 
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
@@ -57,7 +71,7 @@ function PostGrid({ selectedCategory, sortOption }) {
 }
 
 /* ==========================================================================
-   💡 개별 게시물 카드 컴포넌트 
+   💡 개별 게시물 카드 컴포넌트 (기존 코드 100% 보존)
    ========================================================================== */
 function PostCard({ post, formatTimeAgo }) {
     const navigate = useNavigate(); 
@@ -98,7 +112,7 @@ function PostCard({ post, formatTimeAgo }) {
                 <div className="yt-photog-meta">
                     <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
                     <span className="post-time-ago-yt">
-                        {post.CREATED_AT ? post.CREATED_AT.split('T')[0] : ''} {/* 날짜 포맷은 기존 쓰시던 함수로 맞춰주세요 */}
+                        {post.CREATED_AT ? post.CREATED_AT.split('T')[0] : ''}
                     </span>
                 </div>
             </div>
@@ -124,14 +138,6 @@ function PostCard({ post, formatTimeAgo }) {
                             src={thumbs[currentImgIdx]} 
                             alt={`${post.TITLE} - ${currentImgIdx + 1}`} 
                             referrerPolicy="no-referrer"
-                            
-                            // 🚨 2. 진짜 에러 주소를 확인하기 위해 방어막을 잠시 주석 처리합니다!
-                            /*
-                            onError={(e) => {
-                                e.target.onerror = null; 
-                                e.target.src = 'https://dummyimage.com/500x500/cccccc/ffffff&text=No+Image';
-                            }}
-                            */
                         />
                     ) : (
                         <span>사진 없음</span>
