@@ -3,7 +3,7 @@
 
 /* 2. Picsial 아이덴티티 컬러 전역 변수 정의 */
 :root {
-  --primary-color: #3A86FF;   /* 픽셜 블루 (메인) */
+  --primary-color: #44a7a8;   /* 픽셜 블루 (메인) */
   --secondary-color: #FF006E; /* 픽셜 핑크 (좋아요/알림 포인트) */
   --text-color: #212529;      /* 다크 가독성 그레이 */
   --bg-color: #FFFFFF;        /* 메인 배경 화이트 */

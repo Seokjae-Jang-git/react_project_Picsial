@@ -32,7 +32,7 @@
 }
 
 .post-upload-page-container .btn-back:hover {
-    color: #3A86FF;
+    color: #44a7a8;
 }
 
 .post-upload-page-container .upload-type-selector {
@@ -104,8 +104,8 @@
 }
 
 .post-upload-page-container .photo-add-btn:hover { 
-    border-color: #3A86FF; 
-    color: #3A86FF; 
+    border-color: #44a7a8; 
+    color: #44a7a8; 
 }
 
 .post-upload-page-container .thumbnail-item {
@@ -125,7 +125,7 @@
 }
 
 .post-upload-page-container .thumbnail-item.active {
-    border-color: #3A86FF;
+    border-color: #44a7a8;
 }
 
 .post-upload-page-container .btn-delete-thumb {
@@ -243,7 +243,7 @@
 
 .post-upload-page-container .form-input:focus {
     outline: none;
-    border-color: #3A86FF;
+    border-color: #44a7a8;
 }
 
 /* 설명창(글쓰기) 텍스트 영역 */
@@ -301,7 +301,7 @@
     transition: all 0.2s ease;
 }
 
-.post-upload-page-container .btn-cat-action.add { width: 42px; color: #3A86FF; border-color: #3A86FF; }
+.post-upload-page-container .btn-cat-action.add { width: 42px; color: #44a7a8; border-color: #44a7a8; }
 .post-upload-page-container .btn-cat-action.remove { width: 42px; color: #ff4d4f; border-color: #ff4d4f; }
 
 .post-upload-page-container .btn-cat-action:hover {
@@ -321,7 +321,7 @@
 }
 
 .post-upload-page-container .tag-badge {
-    background: #3A86FF;
+    background: #44a7a8;
     color: white;
     padding: 4px 10px;
     border-radius: 15px;
@@ -352,7 +352,7 @@
    5. 최종 제출 업로드 버튼
    ========================================================================== */
 .post-upload-page-container .btn-upload-submit {
-    background: #3A86FF;
+    background: #44a7a8;
     color: white !important;
     border: none;
     padding: 14px;
@@ -365,5 +365,5 @@
 }
 
 .post-upload-page-container .btn-upload-submit:hover {
-    background: #256FFF;
+    background: #44a6a8cf;
 }

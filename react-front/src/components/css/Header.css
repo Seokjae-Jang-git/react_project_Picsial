@@ -4,7 +4,7 @@
 
 /* 기본 테마 변수 안전장치 (기존 전역 변수가 있다면 그것을 따릅니다) */
 :root {
-    --primary-color: #3a86ff;
+    --primary-color: #44a7a8;
     --text-color: #212529;
     --border-color: #e9ecef;
     --gray-bg: #f8f9fa;
@@ -191,7 +191,7 @@
 /* 로그인 버튼 스타일 강화 */
 .picsial-header .login-btn {
     background-color: var(--primary-color); /* 테마 컬러 사용 */
-    color: #000000;
+    color: #ffffff;
     padding: 8px 24px;                      /* 좌우 패딩을 늘려 버튼을 더 길게 */
     border-radius: 20px;
     font-weight: 700;                       /* 더 굵게 */
@@ -202,7 +202,7 @@
 }
 
 .picsial-header .login-btn:hover {
-    background-color: #256FFF;              /* 호버 시 더 진한 색으로 */
+    background-color: #44a6a8cf;              /* 호버 시 더 진한 색으로 */
     color: white;
     transform: translateY(-1px);            /* 마우스 올리면 살짝 위로 올라가는 효과 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);

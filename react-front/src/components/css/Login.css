@@ -26,7 +26,7 @@
 .login-container h2 {
     text-align: center;
     margin-bottom: 25px;
-    color: #333;
+    color: #44a7a8;
 }
 
 /* SignUp.css와 동일한 폼 그룹 스타일 */
@@ -39,7 +39,7 @@
     margin-bottom: 8px;
     font-weight: 600;
     font-size: 14px;
-    color: #555;
+    color: #44a7a8;
 }
 
 .form-control {
@@ -55,7 +55,7 @@
 .login-submit-btn {
     width: 100%;
     padding: 12px;
-    background-color: #333;
+    background-color: #44a7a8;
     color: white;
     border: none;
     border-radius: 4px;
@@ -66,7 +66,7 @@
 }
 
 .login-submit-btn:hover {
-    background-color: #555;
+    background-color: #44a6a8cf;
 }
 
 /* 하단 액션 버튼 그룹 */

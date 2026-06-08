@@ -98,8 +98,8 @@
 }
 
 .mypage-side__link.active {
-    background-color: #222222;
+    background-color: #44a7a8;
     color: #ffffff;
-    border-color: #222222;
+    border-color: #44a7a8;
     font-weight: 500;
 }
