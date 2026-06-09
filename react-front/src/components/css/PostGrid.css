@@ -1,6 +1,3 @@
-/* src/css/PostGrid.css */
-
-/* 그리드 컨테이너 (5열 유지) */
 .post-grid-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -9,50 +6,43 @@
     box-sizing: border-box;
 }
 
-/* 세로형 게시물 카드 */
 .vertical-post-card {
     background: #fff;
     border: 1px solid #e9ecef;
     border-radius: 12px;
-    padding: 12px !important; /* 상하좌우 여백 축소 */
+    padding: 12px !important; 
     display: flex;
     flex-direction: column;
-    gap: 0 !important; /* 💡 Flex 기본 간격을 완전히 삭제! (가장 중요) */
-    justify-content: flex-start !important; /* 빈 공간을 무시하고 위로 바짝 끌어올림 */
+    gap: 0 !important; 
+    justify-content: flex-start !important; 
     box-sizing: border-box;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 카드 마우스 호버 효과 */
 .vertical-post-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     cursor: pointer;
 }
 
-/* =========================================================
-   게시물 그리드 카드 상단 프로필 헤더 (PostDetail.js 스타일 통일)
-   ========================================================= */
-
 .post-photog-header-yt {
     display: flex;
     align-items: center;
-    gap: 10px; /* 💡 사진과 텍스트 그룹(닉네임+날짜) 사이의 간격 */
+    gap: 10px; 
 }
 
 .yt-photog-avatar {
-    width: 28px;  /* 그리드 카드에 맞게 크기 조절 (필요시 수정) */
+    width: 28px;  
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid #eee; /* 아주 연한 테두리로 디테일 추가 */
+    border: 1px solid #eee; 
 }
 
-/* 💡 닉네임과 날짜를 묶어주는 컨테이너 */
 .yt-photog-meta {
     display: flex;
     align-items: center;
-    gap: 8px; /* 💡 닉네임과 날짜 사이의 간격! 원하시던 딱 붙은 정렬이 여기서 완성됩니다. */
+    gap: 8px; 
 }
 
 .photog-name {
@@ -67,7 +57,6 @@
     font-weight: 400;
 }
 
-/* 🚨 [신규 추가] 바로 이 녀석이 범인이었습니다! 숨겨진 중간 래퍼의 여백 파괴 */
 .post-card-content {
     margin: 0 !important;
     padding: 0 !important;
@@ -76,45 +65,40 @@
     gap: 0 !important;
 }
 
-/* 본문 텍스트 박스 */
 .post-text-box {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 0 !important; 
-    margin-bottom: 6px !important; /* 💡 8px -> 6px로 좁혀서 사진과 더 밀착 */
+    margin-bottom: 6px !important; 
 }
 
-/* 제목 텍스트 */
 .post-main-text {
     margin: 0 !important;
-    font-size: 13px; /* 제목보다 살짝 작게 */
-    color: #6c757d; /* 부드러운 회색조로 본문 느낌 부여 */
+    font-size: 13px; 
+    color: #6c757d; 
     line-height: 1.3 !important; 
     font-weight: 400; 
     text-align: left;
-    
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* 최대 2줄 */
+    -webkit-line-clamp: 2; 
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 34px; /* 2줄 크기에 딱 맞춤 */
+    height: 34px; 
 }
 
-/* 💡 [신규 추가] 게시물 제목 스타일 (1줄 제한으로 깔끔하게 고정) */
 .post-title-text {
     margin: 0 0 1px 0 !important;
     font-size: 15px;
     color: #212529;
-    font-weight: 700; /* 진하게 강조 */
+    font-weight: 700; 
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* 한 줄 넘어가면 ... 처리 */
+    text-overflow: ellipsis; 
     width: 100%;
 }
 
-/* 💡 미디어(사진) 영역 - 기존 190px에서 약 130% 수준인 250px로 시원하게 대폭 확대! */
 .post-card-media {
     position: relative;
     width: 100%;
@@ -125,7 +109,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 6px !important; /* 💡 사진과 하단 아이콘 사이의 뻥 뚫린 간격을 강제로 6px로 좁힘 */
+    margin-bottom: 6px !important; 
 }
 
 .media-placeholder {
@@ -143,7 +127,6 @@
     object-fit: cover;
 }
 
-/* 슬라이드 화살표 */
 .slide-arrow {
     position: absolute;
     top: 50%;
@@ -169,18 +152,16 @@
 .slide-arrow.left { left: 8px; }
 .slide-arrow.right { right: 8px; }
 
-/* 💡 하단 통계 바 컨테이너 - 구분선 삭제 및 위쪽 밀착 */
 .post-card-bottom {
     display: flex;
     justify-content: center; 
     align-items: center;
     gap: 16px;
     border-top: none; 
-    margin-top: 0 !important; /* 💡 위쪽 마진 0 */
-    padding-top: 0 !important; /* 💡 위쪽 패딩 0 */
+    margin-top: 0 !important; 
+    padding-top: 0 !important; 
 }
 
-/* 개별 아이콘 + 숫자 묶음 (호버 제거 유지) */
 .bottom-item {
     display: flex;
     align-items: center;

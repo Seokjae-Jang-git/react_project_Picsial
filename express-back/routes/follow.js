@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const oracledb = require('oracledb');
-const db = require('../db'); // DB 연결 모듈 경로 (프로젝트에 맞게 수정)
+const db = require('../db'); 
 
 // ==========================================
 // 1. [GET] /follow/photogs - 추천 작가 목록 및 통계/사진 가져오기
@@ -46,7 +46,6 @@ router.get('/photogs', async (req, res) => {
         
         const photogResult = await connection.execute(photogSql, { userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
         
-        // 💡 1단계: 프로필 이미지 URL 조립 (rows를 map으로 처리)
         const processedPhotogs = await Promise.all(photogResult.rows.map(async (user) => {
             let finalProfileUrl = user.PROFILE_IMAGE_URL;
             if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
@@ -56,7 +55,6 @@ router.get('/photogs', async (req, res) => {
                 }
             }
 
-            // 💡 2단계: 각 작가별 대표 사진 5장 가져오기 (비동기 루프 처리)
             const photoSql = `
                 SELECT PHOTO_ID, THUMB_URL
                 FROM (SELECT PHOTO_ID, THUMB_URL FROM PS_PHOTO WHERE USER_NO = :photogNo ORDER BY LIKE_COUNT DESC)
@@ -91,7 +89,7 @@ router.get('/photogs', async (req, res) => {
 });
 
 // ==========================================
-// 2. [POST] /follow/toggle - 팔로우 토글 (검토 결과: 완벽함 🟢)
+// 2. [POST] /follow/toggle - 팔로우 토글
 // ==========================================
 router.post('/toggle', async (req, res) => {
     let connection;
@@ -144,7 +142,7 @@ router.post('/toggle', async (req, res) => {
 });
 
 // ==========================================
-// 3. [GET] /follow/list - 사이드바용 내 팔로잉 리스트 가져오기 (최신 업데이트 순 정렬 적용)
+// 3. [GET] /follow/list - 사이드바용 내 팔로잉 리스트 가져오기
 // ==========================================
 router.get('/list', async (req, res) => {
     let connection;
@@ -152,7 +150,6 @@ router.get('/list', async (req, res) => {
         const userNo = Number(req.query.userNo);
         connection = await db.getConnection();
 
-        // 💡 핵심: 사진(PS_PHOTO)과 게시물(PS_POST)의 작성일을 합쳐 가장 최신 날짜(LATEST_ACTIVITY)를 뽑아낸 뒤 정렬
         const listSql = `
             SELECT 
                 U.USER_NO, 
@@ -175,11 +172,9 @@ router.get('/list', async (req, res) => {
         
         const listResult = await connection.execute(listSql, { userNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-        // 💡 [수정] 여러 명의 팔로잉 유저 배열(rows)을 순회하며 각각의 프로필 URL을 조립합니다.
         const processedList = listResult.rows.map(user => {
             let finalProfileUrl = user.PROFILE_IMAGE_URL;
             
-            // 프로필 이미지가 존재하고, 아직 http로 시작하는 풀 주소가 아니라면 조립!
             if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
                 const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
                 if (profileBaseUrl) {
@@ -187,14 +182,12 @@ router.get('/list', async (req, res) => {
                 }
             }
 
-            // 원본 데이터에 조립된 URL을 덮어씌워서 반환합니다.
             return {
                 ...user,
                 PROFILE_IMAGE_URL: finalProfileUrl
             };
         });
         
-        // 💡 조립이 완료된 processedList를 프론트엔드로 응답합니다.
         res.json({ success: true, followingList: processedList });
 
     } catch (error) {
@@ -208,7 +201,7 @@ router.get('/list', async (req, res) => {
 });
 
 // ==========================================
-// [GET] /follow/following - 내가 팔로잉 중인 작가 목록 및 통계 조회 (6가지 정렬 및 오타 수정 완료)
+// [GET] /follow/following - 내가 팔로잉 중인 작가 목록 및 통계 조회
 // ==========================================
 router.get('/following', async (req, res) => {
     let connection;
@@ -222,7 +215,6 @@ router.get('/following', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 정렬 조건문 구성
         let orderByClause = '';
         if (sortOption === 'followers') {
             orderByClause = 'ORDER BY FOLLOWER_COUNT DESC, U.USER_NO DESC';
@@ -237,10 +229,9 @@ router.get('/following', async (req, res) => {
         } else if (sortOption === 'updated') {
             orderByClause = 'ORDER BY LAST_UPDATE DESC NULLS LAST, U.USER_NO DESC';
         } else {
-            orderByClause = 'ORDER BY F_MAIN.FOLLOW_ID DESC'; // 기본값: 최근 팔로우한 순
+            orderByClause = 'ORDER BY F_MAIN.FOLLOW_ID DESC'; 
         }
 
-        // 💡 핵심 수정: 서브쿼리 안의 && 를 오라클 표준 AND 로 교체 완료!
         const sql = `
             SELECT 
                 U.USER_NO, U.NICKNAME, U.PROFILE_IMAGE_URL, U.INTRO,

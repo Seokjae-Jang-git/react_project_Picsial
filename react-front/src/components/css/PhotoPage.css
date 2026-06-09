@@ -1,39 +1,27 @@
 .photo-page-container {
     width: 100%;
-    height: 100vh; /* 전체 화면 높이를 강제 고정 */
+    height: 100vh; 
     display: flex;
     flex-direction: column;
-    overflow: hidden; /* 페이지 전체 스크롤은 막음 */
+    overflow: hidden; 
 }
 
-/* 사이드바와 본문 영역을 수평으로 나란히 배치하는 공간 */
 .photo-page-body {
     display: flex;
-    flex-grow: 1; /* 헤더를 제외한 나머지 높이를 꽉 채움 */
-    overflow: hidden; /* 자식들의 독립된 스크롤을 위해 숨김 처리 */
+    flex-grow: 1; 
+    overflow: hidden; 
 }
 
-/* 우측 사진 콘텐츠 영역 */
 .photo-content-area {
     flex-grow: 1;
     background-color: #fff;
     overflow-y: auto;
     height: 100%;
     transition: all 0.3s ease; 
-    /* transition: none;  */
-    
-    
-    /* 🔥 [핵심 수정] 필터가 펼쳐졌을 때 (기본 상태):
-       우측 가상 패딩을 0으로 만들어, 사이드바를 제외한 나머지 하얀색 영역 전체를 
-       100% 온전하게 photogrid 영역으로 사용합니다. 
-       이 상태에서 PhotoGrid의 margin: 0 auto가 작동하므로 '남은 영역의 정중앙'에 오게 됩니다. */
     padding-right: 0; 
     box-sizing: border-box;
 }
 
-/* 🔥 [대칭 교정] 사이드바가 접혔을 때 (sidebar-collapsed 클래스가 붙었을 때) */
 .photo-page-body.sidebar-collapsed .photo-content-area {
-    /* 사이드바가 65px로 줄었으므로, 우측 가상 패딩도 똑같이 65px로 줄여 밸런스를 맞춥니다. */
     padding-right: 65px; 
 }
-

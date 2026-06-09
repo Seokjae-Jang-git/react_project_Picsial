@@ -1,8 +1,5 @@
-/* FollowGrid.css - .follow-grid-container 기반 독립적 스타일링 */
-
 .follow-grid-container {
     width: 100%;
-    /* 🚀 PhotoGrid.css와 완벽하게 동일한 여백(24px) 적용 */
     padding: 24px; 
     box-sizing: border-box;
 }
@@ -12,14 +9,13 @@
     flex-direction: column;
 }
 
-/* 카드 디자인도 사진 페이지와 맞게 테두리를 살짝 옅게 조정 */
 .follow-grid-container .photog-card {
     display: flex;
-    border: 1px solid #f0f0f0; /* 테두리 연하게 */
+    border: 1px solid #f0f0f0; 
     border-radius: 12px;
     background-color: #fff;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02); /* 그림자 약하게 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
     margin-bottom: 20px;
 }
 
@@ -69,31 +65,28 @@
     overflow: hidden;
 }
 
-/* 전체 통계 컨테이너 여백 축소 */
 .follow-grid-container .photog-stats {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* 💡 행과 행 사이의 간격을 6px로 아주 타이트하게 조절 */
+    gap: 6px; 
     margin-bottom: 14px;
     font-size: 13px;
     width: 100%;
 }
 
-/* 각 줄의 가로 배치 설정 */
 .follow-grid-container .stat-row {
     display: flex;
-    justify-content: center; /* 가운데 정렬로 예쁘게 모아줌 */
+    justify-content: center; 
     align-items: center;
     color: #555;
     white-space: nowrap;
 }
 
-/* 글자와 숫자 묶음 (예: "팔로워 2") */
 .follow-grid-container .stat-group {
     display: flex;
     align-items: center;
-    gap: 6px; /* 글자와 숫자 사이 간격 */
-    min-width: 55px; /* '/'를 기준으로 좌우 대칭이 맞도록 최소 너비 고정 */
+    gap: 6px; 
+    min-width: 55px; 
     justify-content: center;
 }
 
@@ -101,19 +94,17 @@
     color: #222;
 }
 
-/* 중간 구분자 '/' 스타일 */
 .follow-grid-container .stat-divider {
-    margin: 0 10px; /* 구분자 양옆 간격 */
+    margin: 0 10px; 
     color: #cccccc;
     font-size: 11px;
 }
 
-/* 업데이트 행 전용 스타일 (상단 점선 및 양끝 정렬) */
 .follow-grid-container .stat-row.update-time {
-    justify-content: space-between; /* 업데이트 날짜는 양끝으로 벌림 */
-    border-top: 1px dashed #e1e1e1; /* 💡 점선 구분선 유지 */
-    padding-top: 8px; /* 점선과 글자 사이 간격 */
-    margin-top: 4px; /* 윗 줄과의 간격 */
+    justify-content: space-between; 
+    border-top: 1px dashed #e1e1e1; 
+    padding-top: 8px; 
+    margin-top: 4px; 
 }
 
 .follow-grid-container .photog-actions {
@@ -157,16 +148,15 @@
     flex: 1;
     padding: 24px;
     display: flex;
-    gap: 16px; /* 🚀 간격을 살짝 줄여서 사진이 더 커지도록 유도 */
+    gap: 16px; 
     justify-content: flex-start;
-    overflow: hidden; /* 가로 스크롤 제거 (사진이 알아서 줄어들고 늘어남) */
+    overflow: hidden; 
     align-items: center;
 }
 
 .follow-grid-container .rep-photo-wrapper {
-    /* 🚀 max-width를 삭제하고 flex: 1을 주어 남는 여백 없이 꽉 채우게 만듭니다 */
     flex: 1; 
-    min-width: 0; /* Flexbox 안에서 찌그러짐 방지 */
+    min-width: 0; 
     aspect-ratio: 1 / 1; 
     height: auto;
     border-radius: 8px;
@@ -183,7 +173,7 @@
 }
 
 .follow-grid-container .rep-photo-wrapper:hover {
-    transform: translateY(-4px); /* 마우스 오버 시 살짝 떠오르는 효과 */
+    transform: translateY(-4px); 
 }
 
 .follow-grid-container .no-photos {

@@ -11,23 +11,18 @@
     gap: 20px;
 }
 
-/* [콘텐츠 영역] 3열 카드 그리드 (내 업로드 - 게시물) */
-
-/* 1. 게시물 컨테이너: 3열(또는 원하는 열 수) 고정 및 너비 강제 */
 .mypage-dash .post-grid-container,
 .mypage-dash .post-grid {
     display: grid;
-    /* 💡 3열 고정 시 (마이페이지 레이아웃에 맞춰 열 개수 조절) */
     grid-template-columns: repeat(5, minmax(0, 1fr)); 
     gap: 16px; 
     width: 100%;
     box-sizing: border-box;
 }
 
-/* 2. 게시물 카드 너비 폭주 방지 */
 .mypage-dash .vertical-post-card {
-    width: 100%;           /* 그리드의 1fr 영역을 넘어가지 않도록 강제 */
-    min-width: 0;          /* 💡 Flex/Grid 환경에서 내부 텍스트가 길어져도 카드가 터지지 않게 하는 핵심 속성 */
+    width: 100%;           
+    min-width: 0;          
     background: #fff;
     border: 1px solid #e9ecef;
     border-radius: 12px;
@@ -40,15 +35,12 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* 3. 제목 텍스트 한 줄 고정 (제목이 길면 카드가 늘어나는 현상 방지) */
 .mypage-dash .post-title-text {
     margin: 0 0 1px 0 !important;
     font-size: 15px;
     color: #212529;
     font-weight: 700;
     text-align: left;
-    
-    /* 💡 가로 폭 초과 방지 3형제 */
     display: block; 
     white-space: nowrap;
     overflow: hidden;
@@ -56,7 +48,6 @@
     width: 100%; 
 }
 
-/* 4. 본문 텍스트 2줄 고정 (본문이 길면 카드가 늘어나는 현상 방지) */
 .mypage-dash .post-main-text {
     margin: 0 !important;
     font-size: 13px;
@@ -64,8 +55,6 @@
     line-height: 1.3 !important; 
     font-weight: 400; 
     text-align: left;
-    
-    /* 💡 가로/세로 폭 초과 방지 세팅 */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -140,7 +129,7 @@
 
 .mypage-dash__post-main-text {
     margin: 0 0 4px 0;
-    font-size: 13px; /* 14px -> 13px 축소 */
+    font-size: 13px; 
     line-height: 1.4;
     color: #495057;
     display: -webkit-box;
@@ -149,9 +138,6 @@
     overflow: hidden;
 }
 
-/* ==========================================================================
-   🚀 상단 4열 구조 배치 (Grid 틀만 유지)
-   ========================================================================== */
 .dash-top-panels {
     display: grid;
     grid-template-columns: 0.6fr 0.5fr 0.5fr 1.3fr;
@@ -160,7 +146,6 @@
     box-sizing: border-box;
 }
 
-/* [공통] 최소한의 배경색과 테두리 라운딩 규칙만 공통화 */
 .dash-panel {
     background-color: #ffffff;
     border: 1px solid #e9ecef;
@@ -171,43 +156,27 @@
     cursor: pointer;
 }
 
-/* ==========================================================================
-   💡 각 패널별 독자적 수동 수정 구역 (여기서 값을 변경하시면 됩니다!)
-   ========================================================================== */
-
-/* 1. 내 프로필 전용 보드 */
 .profile-board {
     padding: 16px 20px;
-    min-height: 240px; /* 프로필 내용 두께에 맞춘 전용 높이 */
+    min-height: 240px; 
     cursor: pointer;  
 }
 
-/* 2. 내 팔로잉 전용 보드 */
 .following-board {
     padding: 16px 20px;
     min-height: 240px;
 }
 
-/* 3. 메시지 전용 보드 */
 .message-board {
     padding: 16px 20px;
     min-height: 240px;
 }
 
-/* 4. 🌟 알림 전용 보드 (내용이 길고 많으므로 여기서 단독 조절!) */
 .noti-board {
-    padding: 16px 18px;  /* 알림 텍스트 공간 확보를 위해 패딩 미세 조정 */
-    min-height: 240px;   /* 💡 5개 알림이 깔끔하게 수용되도록 높이를 임의 지정하거나 삭제 가능 */
-    
-    /* 만약 알림 양에 따라 박스가 유동적으로 자동 확장되길 원하시면 
-       아래 주석을 풀고 min-height를 지우시면 됩니다. */
-    /* height: auto; */ 
+    padding: 16px 18px;  
+    min-height: 240px;   
 }
 
-
-/* ==========================================================================
-   내부 컴포넌트 세부 정렬 (기존 레이아웃 보존)
-   ========================================================================== */
 .panel-header {
     display: flex;
     justify-content: space-between;
@@ -234,17 +203,16 @@ ul.profile-text-info .label, .profile-intro-box .label { font-weight: 700; color
 .unread-dot { position: absolute; top: -1px; right: -1px; width: 10px; height: 10px; background-color: #ff3b30; border: 2px solid #ffffff; border-radius: 50%; }
 .user-nickname { font-size: 14px; font-weight: 600; color: #212529; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 알림 세부 아이템 간격 제어 */
 .noti-content {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* 알림 줄 간격 수동 조절 스위치 */
+    gap: 8px; 
 }
 .recent-noti-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 10px; /* 알림 내부 패딩 수동 조절 스위치 */
+    padding: 6px 10px; 
     background-color: #f8f9fa;
     border-radius: 8px;
     gap: 10px;

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import './css/Login.css';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import Hashids from 'hashids'; // 💡 인스턴스 설정 반영
+import Hashids from 'hashids'; 
 
 const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
@@ -44,7 +44,6 @@ function Login() {
                     const myUserNo = decoded.userNo;
 
                     if (myUserNo) {
-                        // 💡 확정된 인스턴스로 암호화
                         const hashedId = hashids.encode(myUserNo);
                         navigate(`/`);
                     } else {
@@ -65,14 +64,13 @@ function Login() {
 
     return (
         <div className="login-container">
-            {/* <h2>Picsial 로그인</h2> */}
             <div className="login-logo-area">
                 <img 
                     src={`${process.env.REACT_APP_NAS_BASE_URL_LOGO}/logo_picsial.png`} 
                     alt="Picsial Logo" 
                     className="login-logo-img" 
                     onClick={() => navigate('/')} 
-                    style={{ cursor: 'pointer' }} // 마우스 올렸을 때 포인터 표시
+                    style={{ cursor: 'pointer' }} 
                 />
             </div>
             

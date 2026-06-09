@@ -21,15 +21,12 @@ const DelAccount = () => {
             const response = await fetch(`http://localhost:3010/auth/delete-account`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                // 💡 JWT 토큰을 사용하는 경우 헤더에 Authorization을 추가하셔도 좋습니다.
-                // 여기서는 직관적으로 userNo와 reason을 바디로 보냅니다.
                 body: JSON.stringify({ userNo: myUserNo, reason }) 
             });
 
             const data = await response.json();
             if (data.success) {
                 alert('계정이 성공적으로 삭제되었습니다.');
-                // 💡 로컬 스토리지나 쿠키에 저장된 JWT 토큰/유저 정보 삭제 (예시)
                 localStorage.removeItem('token'); 
                 navigate('/login');
             } else {

@@ -8,10 +8,10 @@ function Menu() {
     <Drawer
       variant="permanent"
       sx={{
-        width: 240, // 너비 설정
+        width: 240, 
         flexShrink: 0,
         '& .MuiDrawer-paper': {
-          width: 240, // Drawer 내부의 너비 설정
+          width: 240, 
           boxSizing: 'border-box',
         },
       }}

@@ -10,7 +10,7 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const navigate = useNavigate();
-  const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
+    const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
     useEffect(() => {
         if (pageType === 'following') {
@@ -97,7 +97,6 @@ function Sidebar({ pageType = 'photo', selectedCategory, setSelectedCategory, so
                                 </div>
                             </div>
 
-                            {/* 팔로잉 리스트 영역 */}
                             <div className="sort-section">
                                 <h3 className="sidebar-title">팔로잉 목록</h3>
                                 <div className="following-user-list">

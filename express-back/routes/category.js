@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const oracledb = require('oracledb');
-const db = require('../db'); // 기존 db.js 경로 확인
+const db = require('../db'); 
 
 // ==========================================
 // [GET] /PHOTO 카테고리 전체 목록 조회 (가나다순, '기타'는 맨 아래 고정)
@@ -11,7 +11,6 @@ router.get('/photo', async (req, res) => {
     try {
         connection = await db.getConnection();
 
-        // 💡 쿼리 수정: CASE WHEN을 사용하여 '기타'는 2순위, 나머지는 1순위로 둔 뒤 가나다(ASC) 정렬합니다.
         const sql = `
             SELECT CATEGORY_ID, CATEGORY_NAME 
             FROM PS_CATEGORY_PHOTO 
@@ -46,7 +45,6 @@ router.get('/post', async (req, res) => {
     try {
         connection = await db.getConnection();
 
-        // 💡 핵심: 조회 테이블을 PS_CATEGORY_POST로 변경
         const sql = `
             SELECT CATEGORY_ID, CATEGORY_NAME 
             FROM PS_CATEGORY_POST 

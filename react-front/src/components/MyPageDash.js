@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import './css/MyPageDash.css';
 
@@ -10,8 +10,7 @@ const MyPageDash = () => {
     const [myPosts, setMyPosts] = useState([]);
     const [myProfile, setMyProfile] = useState({});
     
-    // 🚀 대시보드 리스트 상태
-    const [recentFollowings, setRecentFollowings] = useState([]); // 신규: 내 팔로잉
+    const [recentFollowings, setRecentFollowings] = useState([]); 
     const [recentMessages, setRecentMessages] = useState([]);
     const [recentNotis, setRecentNotis] = useState([]);
 
@@ -20,7 +19,6 @@ const MyPageDash = () => {
             if (!myUserNo) return;
 
             try {
-                // 기존 데이터 로드 (사진, 게시물, 프로필, 메시지, 알림)
                 const photoRes = await fetch(`http://localhost:3010/mypage/photos?userNo=${myUserNo}&limit=6`);
                 if (photoRes.ok) setMyPhotos((await photoRes.json()).list);
 
@@ -36,8 +34,6 @@ const MyPageDash = () => {
                 const notiRes = await fetch(`http://localhost:3010/notification/recent?userNo=${myUserNo}&limit=4`);
                 if (notiRes.ok) setRecentNotis((await notiRes.json()).list);
 
-                // 🚀 신규: 내 팔로잉 (업데이트 순) 데이터 3명 로드
-                // 💡 [확인 필요] 백엔드에 이 주소와 일치하는 라우터를 만들어주셔야 합니다!
                 const followRes = await fetch(`http://localhost:3010/follow/recent-active?userNo=${myUserNo}&limit=3`);
                 if (followRes.ok) {
                     const followData = await followRes.json();
@@ -51,27 +47,25 @@ const MyPageDash = () => {
         fetchData();
     }, [myUserNo]);
 
-    // 💡 기존 함수를 지우고 이 코드로 교체하세요! (상대 시간 자동 계산)
-const formatTimeAgo = (dateString) => {
-    if (!dateString) return '';
-    const postDate = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - postDate;
-    
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHrs = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHrs / 24);
-    
-    if (diffMins < 1) return '방금 전';
-    if (diffMins < 60) return `${diffMins}분 전`;
-    if (diffHrs < 24) return `${diffHrs}시간 전`;
-    if (diffDays < 7) return `${diffDays}일 전`;
-    
-    return postDate.toLocaleDateString('ko-KR');
-};
+    const formatTimeAgo = (dateString) => {
+        if (!dateString) return '';
+        const postDate = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - postDate;
+        
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHrs = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        
+        if (diffMins < 1) return '방금 전';
+        if (diffMins < 60) return `${diffMins}분 전`;
+        if (diffHrs < 24) return `${diffHrs}시간 전`;
+        if (diffDays < 7) return `${diffDays}일 전`;
+        
+        return postDate.toLocaleDateString('ko-KR');
+    };
 
     const getSnippet = (text, maxLength = 45) => {
-        // ... 기존 코드 유지
         if (!text) return '';
         return text.length <= maxLength ? text : text.substring(0, maxLength) + '...';
     };
@@ -79,10 +73,8 @@ const formatTimeAgo = (dateString) => {
     return (
         <div className="mypage-dash">
             
-            {/* 🚀 상단 4열 패널 영역 (MyPageDash.js 내부 수정구역) */}
             <div className="dash-top-panels">
                 
-                {/* 1. 내 프로필 패널 (profile-board로 개별 제어) */}
                 <div className="dash-panel profile-board" onClick={() => navigate(`/mypage/${hashedId}/account`)}>
                     <div className="panel-header">
                         <h4>내 프로필</h4>
@@ -109,7 +101,6 @@ const formatTimeAgo = (dateString) => {
                     </div>
                 </div>
 
-                {/* 2. 내 팔로잉 패널 (following-board로 개별 제어) */}
                 <div className="dash-panel following-board" onClick={() => navigate(`/mypage/${hashedId}/followings`)}>
                     <div className="panel-header">
                         <h4>내 팔로잉</h4>
@@ -130,7 +121,6 @@ const formatTimeAgo = (dateString) => {
                     </div>
                 </div>
 
-                {/* 3. 메세지 패널 (message-board로 개별 제어) */}
                 <div className="dash-panel message-board" onClick={() => navigate('/message')}>
                     <div className="panel-header">
                         <h4>메세지</h4>
@@ -152,8 +142,6 @@ const formatTimeAgo = (dateString) => {
                     </div>
                 </div>
 
-                {/* 4. 알림 패널 (★오늘의 주인공! noti-board로 독자적 크기 제어) */}
-                {/* MyPageDash.js 내부 - 알림 보드 구역 최종본 */}
                 <div className="dash-panel noti-board" onClick={() => navigate('/notification')}>
                     <div className="panel-header">
                         <h4>알림</h4>
@@ -162,7 +150,6 @@ const formatTimeAgo = (dateString) => {
                         {recentNotis.length > 0 ? (
                             recentNotis.map((noti, idx) => (
                                 <div key={idx} className="recent-noti-item">
-                                    {/* 💡 중복되던 소괄호 태그를 지우고 백엔드의 완성형 문장을 다이렉트로 출력합니다. */}
                                     <p className="noti-text">
                                         {noti.MESSAGE}
                                     </p>
@@ -177,8 +164,6 @@ const formatTimeAgo = (dateString) => {
 
             </div>
 
-
-            {/* 내 사진 영역 */}
             <section className="mypage-dash__section">
                 <div className="mypage-dash__section-header">
                     <h4>내 사진</h4>
@@ -221,7 +206,6 @@ const formatTimeAgo = (dateString) => {
                 </div>
             </section>
 
-            {/* 내 게시물 영역 */}
             <section className="mypage-dash__section">
                 <div className="mypage-dash__section-header">
                     <h4 className="mypage-dash__section-title">내 게시물</h4>
@@ -248,7 +232,6 @@ const formatTimeAgo = (dateString) => {
                                     </div>
                                 </div>
                                 <div className="post-card-bottom">
-                                    {/* 기존 하단 좋아요 통계 동일 유지 */}
                                 </div>
                             </div>
                         );

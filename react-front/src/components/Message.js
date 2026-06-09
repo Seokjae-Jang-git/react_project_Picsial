@@ -18,7 +18,6 @@ function Message() {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     
-    // 💡 차단 목록 관리를 위한 신규 State 추가
     const [blockedList, setBlockedList] = useState([]);
     
     const [selectedPartner, setSelectedPartner] = useState(null);
@@ -28,7 +27,6 @@ function Message() {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        // 1. 토큰에서 내 정보 가져오기
         const token = localStorage.getItem('jwtToken');
         if (token) {
             try {
@@ -38,18 +36,16 @@ function Message() {
                 console.error("토큰 에러:", error);
             }
         }
-    }, []); // 마운트 시 1번 실행
+    }, []); 
 
     useEffect(() => {
-        // 2. myUserNo가 세팅된 직후, 넘어온 파트너 정보가 있으면 바로 대화창 오픈!
         if (myUserNo && location.state?.targetPartner) {
             const partner = location.state.targetPartner;
             fetchMessages(partner);
             
-            // 기록 삭제
             window.history.replaceState({}, document.title);
         }
-    }, [myUserNo]); // myUserNo가 값이 들어오는 순간 감지하여 실행
+    }, [myUserNo]); 
 
     const fetchPartnerList = async () => {
         if (!myUserNo) return;
@@ -64,7 +60,6 @@ function Message() {
         }
     };
 
-    // 💡 차단 목록을 백엔드에서 불러오는 함수
     const fetchBlockedList = async () => {
         if (!myUserNo) return;
         try {
@@ -82,7 +77,6 @@ function Message() {
         fetchPartnerList();
     }, [myUserNo]);
 
-    // 💡 대화 추가(검색창) 버튼 클릭 시 차단 목록도 실시간 동기화
     useEffect(() => {
         if (isSearching) {
             fetchBlockedList();
@@ -164,7 +158,6 @@ function Message() {
         }
     };
 
-    // 💡 차단 등록 핸들러
     const handleBlockUser = async (partner) => {
         const isConfirmed = window.confirm(
             `${partner.NICKNAME}님을 정말 차단하시겠습니까?\n차단하면 상대방과의 대화 목록 및 내역이 모두 숨겨집니다.`
@@ -184,7 +177,7 @@ function Message() {
                 alert(`${partner.NICKNAME}님이 차단되었습니다.`);
                 setSelectedPartner(null);
                 fetchPartnerList();
-                fetchBlockedList(); // 차단 목록 갱신
+                fetchBlockedList(); 
             } else {
                 alert(data.message || "차단 처리 중 오류가 발생했습니다.");
             }
@@ -193,7 +186,6 @@ function Message() {
         }
     };
 
-    // 💡 차단 해제 핸들러 (신규 추가)
     const handleUnblockUser = async (blockedNo, nickname) => {
         const isConfirmed = window.confirm(`${nickname}님의 차단을 해제하시겠습니까?`);
         if (!isConfirmed || !myUserNo) return;
@@ -208,8 +200,8 @@ function Message() {
 
             if (data.success) {
                 alert(`${nickname}님의 차단이 해제되었습니다.`);
-                fetchBlockedList(); // 차단 목록 리프레시
-                fetchPartnerList(); // 메인 채팅창 파트너 목록 리프레시 (다시 노출되도록 보정)
+                fetchBlockedList(); 
+                fetchPartnerList(); 
             } else {
                 alert(data.message || "차단 해제 중 오류가 발생했습니다.");
             }
@@ -262,7 +254,6 @@ function Message() {
                 <div className="msg-page-wrapper">
                     <div className="msg-container">
                         
-                        {/* 🟦 왼쪽 패널 */}
                         <div className="msg-left-pane">
                             <div className="msg-left-header">
                                 <h2>메세지</h2>
@@ -300,7 +291,6 @@ function Message() {
                                 )) : <div className="empty-text">진행 중인 다른 대화가 없습니다.</div>}
                             </div>
 
-                            {/* 🟦 하단 대화 추가 / 차단 목록 관리 동적 슬라이드 창 */}
                             <div className="msg-search-area">
                                 {isSearching ? (
                                     <div className="search-box">
@@ -315,7 +305,6 @@ function Message() {
                                             <button className="btn-search-action" onClick={handleSearch}>검색</button>
                                         </div>
                                         
-                                        {/* 🔍 검색 결과 렌더링 */}
                                         {searchResults.length > 0 && (
                                             <div className="search-results">
                                                 {searchResults.map(user => (
@@ -327,7 +316,6 @@ function Message() {
                                             </div>
                                         )}
 
-                                        {/* 🚫 차단 관리 목록 영역 (신규 렌더링 파트) */}
                                         <div className="block-management-section">
                                             <div className="block-list-title">차단한 유저 관리 ({blockedList.length})</div>
                                             {blockedList.length > 0 ? (
@@ -361,7 +349,6 @@ function Message() {
                             </div>
                         </div>
 
-                        {/* 🟦 오른쪽 패널 */}
                         <div className="msg-right-pane">
                             {selectedPartner ? (
                                 <>

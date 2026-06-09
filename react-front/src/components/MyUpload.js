@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-// 💡 useLocation 훅 임포트 추가
 import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
 import './css/MyUpload.css';
 
-// 💡 서브 컴포넌트 (변경 사항 없음)
 function PostCard({ post, formatTimeAgo }) {
     const navigate = useNavigate(); 
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
@@ -57,7 +55,6 @@ function PostCard({ post, formatTimeAgo }) {
                 </div>
             </div>
 
-            {/* 미디어 슬라이더 영역 */}
             <div className="post-card-media">
                 {thumbs.length > 1 && (
                     <button className="slide-arrow left" onClick={handlePrev}>&lt;</button>
@@ -114,15 +111,11 @@ function PostCard({ post, formatTimeAgo }) {
     );
 }
 
-// ==========================================================================
-// 메인 컴포넌트
-// ==========================================================================
 function MyUpload() {
     const navigate = useNavigate(); 
-    const location = useLocation(); // 💡 라우터 state를 읽기 위한 훅 추가
+    const location = useLocation(); 
     const { myUserNo } = useOutletContext(); 
 
-    // 💡 location.state에 넘어온 쪽지(activeTab)가 있으면 그것을, 없으면 기본값 'photo'를 세팅합니다.
     const [uploadType, setUploadType] = useState(location.state?.activeTab || 'photo');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [sortOrder, setSortOrder] = useState('latest');
@@ -131,7 +124,6 @@ function MyUpload() {
     const [photoList, setPhotoList] = useState([]);
     const [postList, setPostList] = useState([]);
 
-    // 날짜 포맷 함수
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
         const postDate = new Date(dateString);
@@ -145,7 +137,6 @@ function MyUpload() {
         return postDate.toLocaleDateString('ko-KR');
     };
 
-    // [API 1] 사진 조회 호출
     const fetchMyPhotos = async (userNo, category = '', sort = 'latest') => {
         try {
             const response = await fetch(
@@ -158,7 +149,6 @@ function MyUpload() {
         }
     };
 
-    // [API 2] 게시물 조회 호출
     const fetchMyPosts = async (userNo, category = '', sort = 'latest') => {
         try {
             const response = await fetch(
@@ -171,7 +161,6 @@ function MyUpload() {
         }
     };
 
-    // [API 3] 사진 카테고리 목록 조회
     const fetchPhotoCategories = async () => {
         try {
             const response = await fetch('http://localhost:3010/mypage/photo');
@@ -182,7 +171,6 @@ function MyUpload() {
         }
     };
 
-    // [API 4] 게시물 카테고리 목록 조회
     const fetchPostCategories = async () => {
         try {
             const response = await fetch('http://localhost:3010/mypage/post');
@@ -193,14 +181,12 @@ function MyUpload() {
         }
     };
 
-    // 💡 네비게이션으로 진입했을 때 state가 바뀌는 것을 감지하여 즉시 탭을 전환하는 안전장치
     useEffect(() => {
         if (location.state?.activeTab) {
             setUploadType(location.state.activeTab);
         }
     }, [location.state]);
 
-    // 탭 전환 감지 이펙트
     useEffect(() => {
         setSelectedCategory(''); 
         if (uploadType === 'photo') {
@@ -210,7 +196,6 @@ function MyUpload() {
         }
     }, [uploadType]);
 
-    // 조건별 데이터 로드 통합 제어
     useEffect(() => {
         if (!myUserNo) return;
         if (uploadType === 'photo') {
@@ -223,7 +208,6 @@ function MyUpload() {
     return (
         <div className="my-upload-container">
             
-            {/* [상단 영역] 사진 / 게시물 전환 라디오 버튼 */}
             <div className="type-radio-group">
                 <label className="radio-tab-label">
                     <input 
@@ -246,14 +230,13 @@ function MyUpload() {
                 </label>
             </div>
 
-            {/* [필터 영역] 카테고리 선택 및 정렬 드롭다운 */}
             <div className="filter-select-group">
                 <select 
                     className="filter-select"
                     value={selectedCategory} 
                     onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                    <option value="">카테고리</option>
+                    <option value="">전체</option>
                     {categories.map((cat) => (
                         <option key={cat.CATEGORY_ID} value={cat.CATEGORY_ID}>
                             {cat.CATEGORY_NAME}
@@ -275,9 +258,7 @@ function MyUpload() {
                 </select>
             </div>
 
-            {/* [콘텐츠 영역] 상태에 따른 조건부 그리드 렌더링 */}
             {uploadType === 'photo' ? (
-                /* 6열 이미지 그리드 뷰 (내 업로드 - 사진) */
                 <div className="photo-grid">
                     {photoList.length > 0 ? (
                         photoList.map((photo) => (
@@ -327,7 +308,6 @@ function MyUpload() {
                     )}
                 </div>
             ) : (
-                /* 3열 카드 그리드 뷰 (내 업로드 - 게시물) */
                 <div className="post-grid-container">
                     {postList.length > 0 ? (
                         postList.map((post) => (

@@ -1,37 +1,27 @@
-/* ==========================================================================
-   [MyAccount] 내 계정 페이지 스타일 (상/하 분할 레이아웃 개편)
-   ========================================================================== */
-
-/* 💡 최상위 컨테이너 (Grid -> Flex Column으로 변경) */
 .my-account-container {
     display: flex;
     flex-direction: column;
     width: fit-content;
 }
 
-/* 💡 1행 (프로필 + 계정 삭제) */
 .my-account-container .account-top-row {
     display: flex;
     gap: 24px;
     width: 100%;
 }
 
-/* 💡 프로필 박스 크기 제한 (내부 인풋 크기에 맞춰 박스 크기를 줄임) */
 .my-account-container .profile-section {
-    flex: 0 0 600px; /* 너비를 600px로 고정하여 프로필 사진을 왼쪽으로 당겨옴 */
+    flex: 0 0 600px; 
 }
 
-/* 💡 계정 삭제 박스 (남는 우측 공간을 모두 채워 카테고리 우측 끝선과 동일하게 맞춤) */
 .my-account-container .delete-section {
     flex: 0 0 300px;
 }
 
-/* 💡 2행 (카테고리 전체 너비) */
 .my-account-container .account-bottom-row {
     width: 100%;
 }
 
-/* --- 공통 섹션 스타일 --- */
 .my-account-container .account-section {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -55,7 +45,6 @@
     font-weight: bold;
 }
 
-/* --- 폼 스타일 (내 프로필) --- */
 .my-account-container .form-group {
     margin-bottom: 16px;
     display: flex;
@@ -100,7 +89,6 @@
     color: #111;
 }
 
-/* --- 프로필 폼 상단 분할 --- */
 .my-account-container .profile-form-top {
     display: flex;
     justify-content: space-between;
@@ -140,7 +128,6 @@
     margin-top: 16px;
 }
 
-/* 프로필 이미지 */
 .my-account-container .profile-image-preview {
     width: 100px;
     height: 100px;
@@ -169,18 +156,17 @@
     text-align: center;
 }
 
-/* 💡 내 소개 텍스트 박스 & 글자 수 카운터 (래퍼 수정) */
 .my-account-container .intro-group {
     margin-top: 10px;
 }
 
 .my-account-container .textarea-wrapper {
     position: relative; 
-    width: 460px; /* 💡 래퍼 자체를 460px로 축소하여 카운터가 박스 안으로 들어오게 유도 */
+    width: 460px; 
 }
 
 .my-account-container .textarea-wrapper textarea {
-    width: 100%; /* 💡 래퍼에 100% 맞춰짐 */
+    width: 100%; 
     height: 130px;
     padding: 14px 14px 35px 14px;
     box-sizing: border-box;
@@ -197,7 +183,6 @@
     margin: 0;
 }
 
-/* --- 카테고리 --- */
 .my-account-container .category-group {
     display: flex;
     align-items: flex-start;
@@ -234,7 +219,6 @@
     margin-right: 6px;
 }
 
-/* --- 버튼 공통 --- */
 .my-account-container .edit-btn, 
 .my-account-container .cancel-btn, 
 .my-account-container .save-btn, 
@@ -263,15 +247,13 @@
 .my-account-container .save-btn { background-color: #222; color: #fff; }
 .my-account-container .save-btn:hover { background-color: #000; }
 
-/* 계정 삭제 */
 .my-account-container .delete-desc {
     font-size: 13px;
     color: #666;
-    line-height: 1.5;      /* 💡 줄 간격을 줘서 두 줄이 답답해 보이지 않게 처리 */
+    line-height: 1.5;      
     margin-bottom: 6px;
 }
 
-/* 마지막 문구와 버튼 사이의 간격만 조금 더 넓게 */
 .my-account-container .delete-desc:last-of-type {
     margin-bottom: 20px;
 }

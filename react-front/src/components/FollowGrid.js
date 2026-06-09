@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🚀 1. 네비게이트 임포트
+import { useNavigate } from 'react-router-dom'; 
 import { jwtDecode } from 'jwt-decode';
 import Hashids from 'hashids';
 import './css/FollowGrid.css';
@@ -7,7 +7,7 @@ import './css/FollowGrid.css';
 function FollowGrid({ sortOption, onFollowChange, users }) {
     const [photogs, setPhotogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const navigate = useNavigate(); // 🚀 2. 초기화
+    const navigate = useNavigate(); 
     const hashids = new Hashids(process.env.REACT_APP_HASHIDS_SECRET, 8);
 
     const sortLabel = {
@@ -17,7 +17,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
         'scraps': '스크랩 순'
     };
 
-    // 💡 1. 작가 목록 및 데이터 불러오기
     useEffect(() => {
         if (users && users.length > 0) {
             setPhotogs(users);
@@ -48,7 +47,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
         fetchphotogs();
     }, [sortOption, users]);
 
-    // 💡 2. 팔로우 / 팔로우 취소 토글 로직
     const handleFollowToggle = async (targetUserNo, currentStatus) => {
         const token = localStorage.getItem('jwtToken');
         if (!token) return alert("로그인이 필요합니다.");
@@ -56,15 +54,12 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
         try {
             const decoded = jwtDecode(token);
             
-            // 🚀 1. 프론트엔드 UI 즉각 업데이트: 버튼 색상 변경 + 팔로워 숫자 증감!
             setPhotogs(prev => prev.map(photog => {
                 if (photog.USER_NO === targetUserNo) {
                     const isCurrentlyFollowing = currentStatus === 'Y';
                     return { 
                         ...photog, 
-                        // 상태 뒤집기
                         IS_FOLLOWING: isCurrentlyFollowing ? 'N' : 'Y',
-                        // 팔로우 취소면 -1, 새로 팔로우면 +1
                         FOLLOWER_COUNT: isCurrentlyFollowing 
                             ? Math.max(0, photog.FOLLOWER_COUNT - 1) 
                             : photog.FOLLOWER_COUNT + 1
@@ -73,7 +68,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                 return photog;
             }));
 
-            // 백엔드에 토글 요청
             const response = await fetch('http://localhost:3010/follow/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -85,10 +79,8 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
             const data = await response.json();
 
             if (data.success) {
-                // DB 업데이트 성공 시 사이드바에 신호탄 쏘기
                 if (onFollowChange) onFollowChange();
             } else {
-                // 🚀 2. 실패 시 롤백 로직: 원래 상태와 숫자로 원상복구
                 alert("처리 중 오류가 발생했습니다.");
                 setPhotogs(prev => prev.map(photog => {
                     if (photog.USER_NO === targetUserNo) {
@@ -96,7 +88,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                         return { 
                             ...photog, 
                             IS_FOLLOWING: currentStatus,
-                            // 올렸던 건 다시 내리고, 내렸던 건 다시 올림
                             FOLLOWER_COUNT: isCurrentlyFollowing
                                 ? photog.FOLLOWER_COUNT + 1
                                 : Math.max(0, photog.FOLLOWER_COUNT - 1)
@@ -110,12 +101,8 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
         }
     };
 
-    // if (isLoading) return <div className="follow-grid-loading">작가 데이터를 불러오는 중입니다...</div>;
-
     return (
         <div className="follow-grid-container">
-            {/* 🚀 4. 요청하신 상단 '추천 작가 목록' 헤더 삭제 완료 */}
-            
             <div className="photog-card-list">
                 {photogs.length === 0 ? (
                     <div className="empty-photogs"></div>
@@ -126,7 +113,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                             <div className="photog-info-section">
                                 <div className="photog-profile-top"
                                     onClick={() => {
-                                        // USER_NO(예: 15)를 암호화(예: 'aB8x9Zkq')하여 주소로 사용
                                         const hashedId = hashids.encode(photog.USER_NO);
                                         navigate(`/photog/${hashedId}`);
                                     }}>
@@ -148,7 +134,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                                 </div>
 
                                 <div className="photog-stats">
-                                    {/* 첫 번째 줄: 팔로워 / 팔로잉 */}
                                     <div className="stat-row">
                                         <div className="stat-group">
                                             <span>팔로워</span> <strong>{photog.FOLLOWER_COUNT || 0}</strong>
@@ -159,7 +144,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                                         </div>
                                     </div>
 
-                                    {/* 두 번째 줄: 좋아요 / 스크랩 */}
                                     <div className="stat-row">
                                         <div className="stat-group">
                                             <span>좋아요</span> <strong>{photog.TOTAL_LIKES || 0}</strong>
@@ -170,7 +154,6 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                                         </div>
                                     </div>
 
-                                    {/* 세 번째 줄: 구분선 및 업데이트 */}
                                     <div className="stat-row update-time">
                                         <span>업데이트</span>
                                         <span>{photog.LAST_UPDATE ? photog.LAST_UPDATE : '기록 없음'}</span>
@@ -187,11 +170,9 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                                     <button 
                                         className="btn-message" 
                                         onClick={(e) => {
-                                            e.stopPropagation(); // 💡 상위 요소의 클릭 이벤트(프로필 이동 등)가 실행되는 것을 방지
-                                            
-                                            // 💡 '/message' 부분은 App.js에 등록된 Message.js의 실제 라우터 주소로 맞춰주세요!
+                                            e.stopPropagation(); 
                                             navigate('/message', { 
-                                                state: { targetPartner: photog } // 클릭한 작가의 전체 데이터를 state에 담아서 넘깁니다.
+                                                state: { targetPartner: photog } 
                                             });
                                         }}
                                     >
@@ -206,7 +187,7 @@ function FollowGrid({ sortOption, onFollowChange, users }) {
                                         <div 
                                             key={photo.PHOTO_ID} 
                                             className="rep-photo-wrapper"
-                                            onClick={() => navigate(`/photo/${photo.PHOTO_ID}`)} // 🚀 3. 상세 페이지로 이동
+                                            onClick={() => navigate(`/photo/${photo.PHOTO_ID}`)} 
                                         >
                                             <img 
                                                 src={photo.THUMB_URL} 

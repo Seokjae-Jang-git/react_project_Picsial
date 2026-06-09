@@ -16,7 +16,6 @@ function Main() {
         const loggedIn = !!token;
         setIsLoggedIn(loggedIn);
 
-        // 💡 1. 백엔드에서 사진 데이터 가져오기
         const fetchPhotos = async () => {
             try {
                 const response = await fetch('http://localhost:3010/photo?sort=likes');
@@ -33,10 +32,8 @@ function Main() {
             }
         };
 
-        // 💡 2. 백엔드에서 게시물 데이터 가져오기 (신규 추가!)
         const fetchPosts = async () => {
             try {
-                // 메인 화면이니까 최신순(기본값)으로 6개만 가져오도록 호출합니다.
                 const response = await fetch('http://localhost:3010/post?sort=likes');
                 if (!response.ok) {
                     throw new Error(`HTTP 에러! 상태코드: ${response.status}`);
@@ -52,44 +49,40 @@ function Main() {
         };
 
         fetchPhotos();
-        fetchPosts(); // 게시물 API 호출 실행
+        fetchPosts(); 
 
     }, []);
 
-    // 날짜 포맷 변환 함수 (예: 2026. 06. 03)
     const formatDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toLocaleDateString('ko-KR');
     };
 
-    // 💡 1. 날짜 포맷 함수 (몇 시간 전 / YYYY.MM.DD)
-        const formatTimeAgo = (dateString) => {
-            if (!dateString) return '';
-            const postDate = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - postDate;
-            const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-            
-            if (diffHrs < 24 && diffHrs > 0) {
-                return `${diffHrs}시간 전`;
-            }
-            return postDate.toLocaleDateString('ko-KR');
-        };
+    const formatTimeAgo = (dateString) => {
+        if (!dateString) return '';
+        const postDate = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - postDate;
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+        
+        if (diffHrs < 24 && diffHrs > 0) {
+            return `${diffHrs}시간 전`;
+        }
+        return postDate.toLocaleDateString('ko-KR');
+    };
 
-        // 💡 2. 본문 내용 잘라내기 함수
-        const getSnippet = (text, maxLength = 45) => {
-            if (!text) return '';
-            if (text.length <= maxLength) return text;
-            return text.substring(0, maxLength) + '...';
-        };
+    const getSnippet = (text, maxLength = 45) => {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    };
 
     return (
         <div className="main-page-container">
             <Header />
 
             <main className="main-body">
-                {/* 1. 사진 섹션 */}
                 <section className="content-section">
                     <div className="section-header">
                         <h2 className="section-title">사진</h2>
@@ -97,7 +90,6 @@ function Main() {
                     </div>
                     <div className="photo-grid">
                         {photos.slice(0, 15).map((photo) => (
-                            // 🚀 PhotoGrid.js의 photo-card-wrapper 구조를 완벽하게 적용
                             <div 
                                 key={photo.PHOTO_ID} 
                                 className="photo-card-wrapper"
@@ -137,7 +129,7 @@ function Main() {
                                     <div className="stat-item">
                                         <span className="grid-icon">
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                                             </svg>
                                         </span>
                                         {photo.COMMENT_COUNT || 0}
@@ -148,20 +140,17 @@ function Main() {
                     </div>
                 </section>
 
-                {/* 2. 게시물 섹션 (PostGrid UI 완벽 이식) */}
                 <section className="content-section">
                     <div className="section-header">
                         <h2 className="section-title">게시물</h2>
                         <button className="more-btn" onClick={() => navigate('/post')}>더보기 &gt;</button>
                     </div>
                     
-                    {/* 🚀 PostGrid.css에 정의된 .post-grid-container 클래스 재활용 */}
                     <div className="post-grid-container">
                         
                         {posts.slice(0, 5).map((post) => {
-                            // 💡 슬라이더를 위한 썸네일 배열 안전장치
                             const thumbs = post.THUMB_LIST || [post.THUMB_URL].filter(Boolean);
-                            const currentImgIdx = 0; // 메인 화면에서는 슬라이더 액션 없이 첫 사진만 보여주도록 고정(단순화)
+                            const currentImgIdx = 0; 
 
                             return (
                                 <div 
@@ -170,7 +159,6 @@ function Main() {
                                     onClick={() => navigate(`/post/${post.POST_ID}`)}
                                 >
                                     <div className="post-photog-header-yt">
-                                        {/* 💡 프로필 이미지 유무에 따른 동적 렌더링 */}
                                         {post.PROFILE_IMAGE_URL ? (
                                             <img 
                                                 src={post.PROFILE_IMAGE_URL} 
@@ -185,7 +173,6 @@ function Main() {
                                         
                                         <div className="yt-photog-meta">
                                             <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
-                                            {/* 🚀 요구사항: 닉네임 우측으로 간격이 확실하게 확보된 시간 배치 */}
                                             <span className="post-time-ago-yt">{formatTimeAgo(post.CREATED_AT)}</span>
                                         </div>
                                     </div>
@@ -199,7 +186,6 @@ function Main() {
                                         </div>
                                     </div>
 
-                                    {/* 미디어(사진) 영역 */}
                                     <div className="post-card-media">
                                         <div className="media-placeholder">
                                             {thumbs.length > 0 ? (
@@ -214,7 +200,6 @@ function Main() {
                                         </div>
                                     </div>
 
-                                    {/* 하단 통계 바 */}
                                     <div className="post-card-bottom">
                                         <div className="bottom-item" title="조회수">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>

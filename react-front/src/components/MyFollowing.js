@@ -54,7 +54,7 @@ function MyFollowing() {
                 return photog;
             }));
 
-            const response = await fetch('http://localhost:3010/photo/toggle', {
+            const response = await fetch('http://localhost:3010/follow/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -112,7 +112,6 @@ function MyFollowing() {
                     followingList.map(photog => (
                         <div key={photog.USER_NO} className="my-following-card">
                             
-                            {/* 💡 우측 사진 영역을 없애고, 정보 섹션이 카드를 꽉 채우도록 변경 */}
                             <div className="my-following-info-section">
                                 <div className="my-following-profile-top"
                                     onClick={() => {
@@ -170,7 +169,14 @@ function MyFollowing() {
                                     >
                                         {photog.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
                                     </button>
-                                    <button className="my-following-btn-message" onClick={() => alert('메시지 기능은 준비 중입니다.')}>
+                                    <button 
+                                        className="my-following-btn-message" 
+                                        onClick={() => {
+                                            navigate('/message', { 
+                                                state: { targetPartner: photog } 
+                                            });
+                                        }}
+                                    >
                                         메시지
                                     </button>
                                 </div>

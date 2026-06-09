@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './css/LocationSearch.css'; // 전용 CSS 연결
+import './css/LocationSearch.css'; 
 
 function LocationSearch({ value, onChange }) {
     const [query, setQuery] = useState(value || '');
@@ -7,12 +7,10 @@ function LocationSearch({ value, onChange }) {
     const [isOpen, setIsOpen] = useState(false);
     const wrapperRef = useRef(null);
 
-    // 부모 컴포넌트에서 값이 바뀌면 동기화
     useEffect(() => {
         setQuery(value || '');
     }, [value]);
 
-    // 바깥 영역 클릭 시 드롭다운 닫기
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -23,7 +21,6 @@ function LocationSearch({ value, onChange }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // 💡 입력값이 바뀔 때마다 OpenStreetMap API 호출 (Debounce 적용)
     useEffect(() => {
         const fetchPlaces = async () => {
             if (query.trim().length < 2) {
@@ -31,7 +28,6 @@ function LocationSearch({ value, onChange }) {
                 return;
             }
             try {
-                // 무료 글로벌 지도 API (API 키 필요 없음)
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1`);
                 const data = await response.json();
                 setResults(data);
@@ -40,7 +36,6 @@ function LocationSearch({ value, onChange }) {
             }
         };
 
-        // 타이핑할 때마다 API를 쏘는 것을 방지 (0.5초 대기 후 호출)
         const timeoutId = setTimeout(() => {
             if (isOpen) fetchPlaces();
         }, 500);
@@ -50,7 +45,7 @@ function LocationSearch({ value, onChange }) {
 
     const handleSelect = (placeName) => {
         setQuery(placeName);
-        onChange(placeName); // 부모(Upload.js)의 상태 업데이트
+        onChange(placeName); 
         setIsOpen(false);
     };
 
@@ -65,8 +60,8 @@ function LocationSearch({ value, onChange }) {
                     value={query}
                     onChange={(e) => {
                         const val = e.target.value;
-                        setQuery(val);      // 1. 자기 자신의 상태 업데이트
-                        onChange(val);      // 2. 🚀 핵심: 부모 컴포넌트(Upload_Photo.js)의 상태도 실시간 업데이트
+                        setQuery(val);      
+                        onChange(val);      
                         setIsOpen(true);
                     }}
                     onFocus={() => setIsOpen(true)}
@@ -80,7 +75,6 @@ function LocationSearch({ value, onChange }) {
                 )}
             </div>
 
-            {/* 자동완성 드롭다운 */}
             {isOpen && results.length > 0 && (
                 <ul className="location-dropdown">
                     {results.map((place) => (

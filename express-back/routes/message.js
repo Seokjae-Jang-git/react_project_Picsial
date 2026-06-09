@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const oracledb = require('oracledb');
-const db = require('../db'); // DB 연결 모듈 경로에 맞게 수정해주세요.
+const db = require('../db'); 
 
 // ==========================================
 // [GET] /message/partners - 대화 상대 목록 (차단 유저 원천 제외 및 안 읽은 수 포함)
@@ -14,11 +14,11 @@ router.get('/partners', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 핵심 튜닝: 내가 차단한 사람(BLOCKER_NO)과 나를 차단한 사람(BLOCKED_NO) 모두 목록에서 완전히 제외(NOT IN)합니다.
         const sql = `
             SELECT 
                 U.USER_NO, U.NICKNAME, U.PROFILE_IMAGE_URL,
                 CASE WHEN EXISTS (SELECT 1 FROM PS_FOLLOW F WHERE F.FOLLOWER_NO = :userNo AND F.FOLLOWING_NO = U.USER_NO) THEN 'Y' ELSE 'N' END AS IS_FOLLOWING,
+                -- 💡 여기에 AND 를 추가하여 문법 오류를 해결했습니다!
                 (SELECT COUNT(*) FROM PS_MESSAGE M WHERE M.SENDER_NO = U.USER_NO AND M.RECEIVER_NO = :userNo AND M.IS_READ = 'N') AS UNREAD_COUNT
             FROM PS_USER_INFO U
             WHERE U.USER_NO IN (
@@ -61,7 +61,6 @@ router.post('/read', async (req, res) => {
         const { myUserNo, partnerNo } = req.body;
         connection = await db.getConnection();
         
-        // 상대방(partnerNo)이 나(myUserNo)에게 보낸 메시지를 모두 읽음('Y') 처리
         const sql = `UPDATE PS_MESSAGE SET IS_READ = 'Y' WHERE SENDER_NO = :partnerNo AND RECEIVER_NO = :myUserNo AND IS_READ = 'N'`;
         await connection.execute(sql, { partnerNo, myUserNo }, { autoCommit: true });
         
@@ -85,7 +84,6 @@ router.get('/history', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 혹시나 주소창 유추 등으로 차단된 상대의 대화 내역을 보려고 할 때를 대비한 방어 쿼리
         const blockCheckSql = `
             SELECT COUNT(*) AS IS_BLOCKED FROM PS_BLOCK 
             WHERE (BLOCKER_NO = :userNo AND BLOCKED_NO = :partnerNo)
@@ -94,7 +92,6 @@ router.get('/history', async (req, res) => {
         const blockCheck = await connection.execute(blockCheckSql, { userNo, partnerNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
         
         if (blockCheck.rows[0].IS_BLOCKED > 0) {
-            // 차단 관계라면 빈 배열을 반환하여 대화 내용을 숨깁니다.
             return res.json({ success: true, messages: [], isBlockedRelationship: true });
         }
 
@@ -127,14 +124,12 @@ router.post('/send', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 1. 메세지 테이블에 먼저 데이터 꽂기 (순서 변경 / autoCommit은 false로 유지)
         const sql = `
             INSERT INTO PS_MESSAGE (MESSAGE_ID, SENDER_NO, RECEIVER_NO, TITLE, CONTENT, IS_READ)
             VALUES (PS_MESSAGE_SEQ.NEXTVAL, :senderNo, :receiverNo, NULL, :content, 'N')
         `;
         await connection.execute(sql, { senderNo, receiverNo, content }, { autoCommit: false });
 
-        // 2. [알림 추가 로직] 메세지가 성공적으로 세션에 담긴 후 알림을 이어서 생성
         if (senderNo !== receiverNo) {
             const notiSql = `
                 INSERT INTO PS_NOTIFICATION (
@@ -146,11 +141,9 @@ router.post('/send', async (req, res) => {
             await connection.execute(notiSql, { receiverNo, senderNo }, { autoCommit: false });
         }
         
-        // 3. 💡 메세지와 알림이 모두 에러 없이 여기까지 왔을 때 '최종 확정 도장'을 찍습니다.
         await connection.commit();
         res.json({ success: true });
     } catch (error) {
-        // 중간에 하나라도 튕기면 전부 없었던 일로 깨끗하게 복구(롤백)합니다.
         if (connection) {
             try { await connection.rollback(); } catch (e) { console.error("롤백 실패:", e); }
         }
@@ -178,7 +171,6 @@ router.get('/search', async (req, res) => {
         `;
         const result = await connection.execute(sql, { nickname }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
         
-        // 💡 누락되었던 NAS URL 가공 로직 추가
         const processedUsers = result.rows.map(user => {
             let finalUrl = user.PROFILE_IMAGE_URL;
             if (finalUrl && !finalUrl.startsWith('http')) {
@@ -209,7 +201,6 @@ router.post('/block', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 이미 차단된 관계인지 선제적 확인
         const checkSql = `SELECT COUNT(*) AS CNT FROM PS_BLOCK WHERE BLOCKER_NO = :blockerNo AND BLOCKED_NO = :blockedNo`;
         const checkResult = await connection.execute(checkSql, { blockerNo, blockedNo }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -217,7 +208,6 @@ router.post('/block', async (req, res) => {
             return res.status(400).json({ success: false, message: "이미 차단된 유저입니다." });
         }
 
-        // 💡 차단 데이터 INSERT 수행 (시퀀스 및 SYSDATE + 9/24 기본값 작동)
         const insertSql = `
             INSERT INTO PS_BLOCK (BLOCK_ID, BLOCKER_NO, BLOCKED_NO)
             VALUES (PS_BLOCK_SEQ.NEXTVAL, :blockerNo, :blockedNo)
@@ -244,7 +234,6 @@ router.get('/block/list', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 내가 차단한 상대방의 정보(USER_NO, NICKNAME, PROFILE_IMAGE_URL)를 가져옵니다.
         const sql = `
             SELECT B.BLOCK_ID, U.USER_NO, U.NICKNAME, U.PROFILE_IMAGE_URL
             FROM PS_BLOCK B
@@ -285,7 +274,6 @@ router.delete('/block/unblock', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 차단 테이블(PS_BLOCK)에서 해당 차단 쌍을 삭제(DELETE)합니다.
         const sql = `
             DELETE FROM PS_BLOCK 
             WHERE BLOCKER_NO = :blockerNo AND BLOCKED_NO = :blockedNo
@@ -318,7 +306,6 @@ router.get('/recent', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 💡 최근 대화 나눈 상대를 구하고, 상대방이 나에게 보낸 읽지 않은(IS_READ='N') 메시지 개수를 합산하는 쿼리
         const sql = `
             SELECT * FROM (
                 SELECT 
@@ -341,7 +328,6 @@ router.get('/recent', async (req, res) => {
 
         const result = await connection.execute(sql, { userNo, limit }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-        // 프로필 이미지 주소 NAS 보안 조립
         const list = result.rows.map(partner => ({
             ...partner,
             PROFILE_IMAGE_URL: partner.PROFILE_IMAGE_URL && partner.PROFILE_IMAGE_URL.startsWith('http')

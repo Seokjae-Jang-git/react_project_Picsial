@@ -1,4 +1,3 @@
-/* SignUp.css와 일관된 컨테이너 스타일 */
 .login-container {
     max-width: 400px;
     margin: 50px auto;
@@ -10,17 +9,17 @@
 }
 
 .login-logo-area {
-    display: flex;         /* flex 컨테이너로 설정 */
-    justify-content: center; /* 가로축 중앙 정렬 */
-    align-items: center;    /* 세로축 중앙 정렬 (필요 시) */
-    width: 100%;            /* 부모 너비가 충분해야 중앙 정렬이 보입니다 */
+    display: flex;         
+    justify-content: center; 
+    align-items: center;    
+    width: 100%;            
     margin-bottom: 20px;
 }
 
 .login-logo-img {
-    height: 80px;       /* 적절한 로고 높이로 수정하세요 */
-    width: auto;        /* 비율 유지 */
-    cursor: pointer;    /* 클릭 가능 표시 */
+    height: 80px;       
+    width: auto;        
+    cursor: pointer;    
 }
 
 .login-container h2 {
@@ -29,7 +28,6 @@
     color: #44a7a8;
 }
 
-/* SignUp.css와 동일한 폼 그룹 스타일 */
 .form-group {
     margin-bottom: 20px;
 }
@@ -47,11 +45,10 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+    box-sizing: border-box; 
     font-size: 14px;
 }
 
-/* 로그인 버튼 */
 .login-submit-btn {
     width: 100%;
     padding: 12px;
@@ -69,7 +66,6 @@
     background-color: #44a6a8cf;
 }
 
-/* 하단 액션 버튼 그룹 */
 .auth-actions {
     text-align: center;
     margin-top: 20px;

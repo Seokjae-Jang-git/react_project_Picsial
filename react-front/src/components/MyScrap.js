@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate, useLocation } from 'react-router-dom';
-// 💡 CSS는 업로드 페이지와 구조가 100% 동일하므로 MyUpload.css를 그대로 재사용하거나 복사해서 쓰시면 됩니다.
 import './css/MyUpload.css'; 
 
-// 💡 공유해주신 PostCard 컴포넌트 (동일하게 유지)
 function PostCard({ post, formatTimeAgo }) {
     const navigate = useNavigate(); 
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
@@ -104,7 +102,7 @@ function PostCard({ post, formatTimeAgo }) {
 
                 <div className="bottom-item" title="댓글">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                     </svg>
                     <span>{post.COMMENT_COUNT || 0}</span>
                 </div>
@@ -113,9 +111,6 @@ function PostCard({ post, formatTimeAgo }) {
     );
 }
 
-// ==========================================================================
-// 메인 컴포넌트: MyScrap
-// ==========================================================================
 function MyScrap() {
     const navigate = useNavigate(); 
     const location = useLocation(); 
@@ -123,7 +118,6 @@ function MyScrap() {
 
     const [uploadType, setUploadType] = useState(location.state?.activeTab || 'photo');
     const [selectedCategory, setSelectedCategory] = useState('');
-    // 💡 스크랩 페이지이므로 기본 정렬을 'scrap_latest'로 설정합니다.
     const [sortOrder, setSortOrder] = useState('scrap_latest');
     const [categories, setCategories] = useState([]);
     
@@ -143,7 +137,6 @@ function MyScrap() {
         return postDate.toLocaleDateString('ko-KR');
     };
 
-    // 💡 [API 1] 내가 스크랩한 사진 목록 호출
     const fetchMyScrapPhotos = async (userNo, category = '', sort = 'scrap_latest') => {
         try {
             const response = await fetch(
@@ -156,7 +149,6 @@ function MyScrap() {
         }
     };
 
-    // 💡 [API 2] 내가 스크랩한 게시물 목록 호출
     const fetchMyScrapPosts = async (userNo, category = '', sort = 'scrap_latest') => {
         try {
             const response = await fetch(
@@ -169,7 +161,6 @@ function MyScrap() {
         }
     };
 
-    // [API 3] 사진 카테고리
     const fetchPhotoCategories = async () => {
         try {
             const response = await fetch('http://localhost:3010/mypage/photo');
@@ -180,7 +171,6 @@ function MyScrap() {
         }
     };
 
-    // [API 4] 게시물 카테고리
     const fetchPostCategories = async () => {
         try {
             const response = await fetch('http://localhost:3010/mypage/post');
@@ -191,14 +181,12 @@ function MyScrap() {
         }
     };
 
-    // 대시보드 쪽지 감지
     useEffect(() => {
         if (location.state?.activeTab) {
             setUploadType(location.state.activeTab);
         }
     }, [location.state]);
 
-    // 탭 전환 감지
     useEffect(() => {
         setSelectedCategory(''); 
         if (uploadType === 'photo') {
@@ -208,7 +196,6 @@ function MyScrap() {
         }
     }, [uploadType]);
 
-    // 조건별 데이터 로드
     useEffect(() => {
         if (!myUserNo) return;
         if (uploadType === 'photo') {
@@ -219,10 +206,8 @@ function MyScrap() {
     }, [uploadType, selectedCategory, sortOrder, myUserNo]);
 
     return (
-        // 💡 CSS 클래스명은 스타일 유지를 위해 my-upload-container를 재사용합니다.
         <div className="my-upload-container">
             
-            {/* [상단 영역] 사진 / 게시물 전환 라디오 버튼 */}
             <div className="type-radio-group">
                 <label className="radio-tab-label">
                     <input 
@@ -251,7 +236,7 @@ function MyScrap() {
                     value={selectedCategory} 
                     onChange={(e) => setSelectedCategory(e.target.value)}
                 >
-                    <option value="">카테고리</option>
+                    <option value="">전체</option>
                     {categories.map((cat) => (
                         <option key={cat.CATEGORY_ID} value={cat.CATEGORY_ID}>
                             {cat.CATEGORY_NAME}
@@ -264,7 +249,6 @@ function MyScrap() {
                     value={sortOrder} 
                     onChange={(e) => setSortOrder(e.target.value)}
                 >
-                    {/* 💡 스크랩 전용 정렬 옵션 추가 */}
                     <option value="scrap_latest">스크랩 최신순</option>
                     <option value="scrap_oldest">스크랩 오래된순</option>
                     <option value="latest">작성 최신순</option>

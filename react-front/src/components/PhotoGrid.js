@@ -1,12 +1,10 @@
-// PhotoGrid.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 💡 1. 페이지 이동을 위한 훅 임포트
+import { useNavigate } from 'react-router-dom'; 
 import './css/PhotoGrid.css';
 
 function PhotoGrid({ photos }) {
-    const navigate = useNavigate(); // 💡 2. navigate 함수 초기화
+    const navigate = useNavigate(); 
     
-    // 사진이 없을 경우 처리
     if (!photos || photos.length === 0) {
         return <div className="no-photos"></div>;
     }
@@ -19,7 +17,6 @@ function PhotoGrid({ photos }) {
                     className="photo-card-wrapper"
                     onClick={() => navigate(`/photo/${photo.PHOTO_ID}`)}
                 >
-                    {/* 1. 이미지: THUMB_URL을 사용하여 성능 최적화 */}
                     <img 
                         src={photo.THUMB_URL || photo.IMAGE_URL} 
                         alt={photo.TITLE || 'Picsial 사진'} 
@@ -29,7 +26,6 @@ function PhotoGrid({ photos }) {
                     />
                     
                     <div className="stats-overlay">
-                        {/* 여기를 감싸는 별도 div가 없어도 overlay가 직접 row로 배치되게 설정할 겁니다 */}
                         <div className="stat-item">
                             <span className="grid-icon">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -64,9 +60,7 @@ function PhotoGrid({ photos }) {
                 </div>
             ))}
         </div>
-
     );
 }
 
-// 💡 부모가 렌더링되어도 photos 데이터가 안 바뀌면 재렌더링 방지
 export default React.memo(PhotoGrid);

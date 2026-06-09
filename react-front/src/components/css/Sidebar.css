@@ -1,12 +1,8 @@
-/* =======================================================
-   사이드바 기본 컨테이너 (열려있을 때: 240px)
-   ======================================================= */
 .photo-sidebar {
     width: 240px;
     min-width: 240px;
     height: 100%;
     background-color: #fff;
-    /* border-right: 1px solid var(--border-color); */
     padding: 24px 16px;
     box-sizing: border-box;
     display: flex;
@@ -17,7 +13,6 @@
     overflow-x: hidden;
 }
 
-/* 사이드바가 접혔을 때 (65px) */
 .photo-sidebar.collapsed {
     width: 65px;
     min-width: 65px;
@@ -25,7 +20,6 @@
     align-items: center;
 }
 
-/* 상단 타이틀 & 토글 버튼 */
 .sidebar-top {
     display: flex;
     justify-content: space-between;
@@ -63,9 +57,6 @@
     color: var(--primary-color);
 }
 
-/* =======================================================
-   그리드 레이아웃 (카테고리 및 정렬 2열 배치)
-   ======================================================= */
 .category-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -87,9 +78,6 @@
     width: 100%;
 }
 
-/* =======================================================
-   라디오 버튼 스타일 아이템 (박스 느낌 제거)
-   ======================================================= */
 .filter-item {
     padding: 6px 8px;
     background-color: transparent;
@@ -99,7 +87,6 @@
     font-weight: 500;
     color: #495057;
     cursor: pointer;
-    
     display: flex;
     align-items: center;
     gap: 8px;
@@ -113,7 +100,6 @@
     color: var(--text-color);
 }
 
-/* 기본 빈 라디오 동그라미 스타일 */
 .radio-circle {
     width: 16px;
     height: 16px;
@@ -121,28 +107,23 @@
     border-radius: 50%;
     background-color: #fff;
     box-sizing: border-box;
-    
-    /* 🔥 해결책 1: absolute 대신 Flexbox를 써서 1px의 오차도 없는 완벽한 정중앙 정렬 */
     display: flex;
     justify-content: center;
     align-items: center;
-    
     flex-shrink: 0;
     transition: all 0.15s ease;
 }
 
-/* 🔥 해결책 2: 활성화 전에도 가상 요소(점)를 미리 만들어두되, 크기를 0으로 숨겨둠 */
 .radio-circle::after {
     content: '';
     width: 8px;
     height: 8px;
-    background-color: var(--primary-color, #007bff); /* 색상이 없으면 파란색 기본값 적용 */
+    background-color: var(--primary-color, #007bff); 
     border-radius: 50%;
-    transform: scale(0); /* 평소엔 크기가 0이라 안 보임 */
-    transition: transform 0.15s ease-out; /* 생길 때와 사라질 때 모두 부드럽게 트랜지션 적용 */
+    transform: scale(0); 
+    transition: transform 0.15s ease-out; 
 }
 
-/* 활성화(Active) 상태 스타일 */
 .filter-item.active {
     background-color: transparent;
     border-color: transparent;
@@ -150,19 +131,13 @@
     font-weight: 600;
 }
 
-/* 활성화 시 외곽 원 색상 변경 */
 .filter-item.active .radio-circle {
     border-color: var(--primary-color, #007bff);
 }
 
-/* 🔥 활성화 시 내부에 숨겨둔 점을 원래 크기(scale(1))로 부드럽게 키움 */
 .filter-item.active .radio-circle::after {
     transform: scale(1);
 }
-
-/* =======================================================
-   [신규 추가] 팔로잉 목록 전용 스타일 분리
-   ======================================================= */
 
 .following-user-list {
     display: flex;
@@ -171,13 +146,11 @@
     margin-top: 15px;
 }
 
-/* 팔로잉 개별 아이템 정렬 및 커서 처리 */
 .filter-item.following-item {
     padding-left: 5px;
     cursor: pointer;
 }
 
-/* 팔로잉 작가 프로필 이미지 */
 .following-img {
     width: 28px;
     height: 28px;
@@ -186,20 +159,17 @@
     object-fit: cover;
 }
 
-/* 팔로잉 작가 닉네임 */
 .following-nickname {
     font-size: 14px;
     font-weight: 500;
 }
 
-/* 팔로우한 작가가 없을 때의 알림 텍스트 */
 .empty-following {
     font-size: 13px;
     color: #888;
     padding: 10px 5px;
 }
 
-/* 정렬 타이틀 위쪽 간격 확보 */
 .sort-title-margin {
     margin-top: 10px;
 }

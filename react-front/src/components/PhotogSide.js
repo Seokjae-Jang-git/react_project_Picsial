@@ -1,13 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 🚀 뒤로가기를 위해 추가
+import { useNavigate } from 'react-router-dom'; 
 import { jwtDecode } from 'jwt-decode';
-// import './css/Sidebar.css'; 
 import './css/PhotogSide.css'; 
 
 function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, setSortOption }) {
-    const navigate = useNavigate(); // 🚀 브라우저 히스토리 라우팅을 위해 초기화
+    const navigate = useNavigate(); 
 
-    // 🚀 파라미터 없이 profile 객체에서 바로 값을 꺼내 씁니다
     const handleFollowToggle = async () => {
         const token = localStorage.getItem('jwtToken');
         if (!token) return alert("로그인이 필요합니다.");
@@ -15,12 +13,10 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
         try {
             const decoded = jwtDecode(token);
             
-            // profile 객체에서 필요한 값 추출
             const targetUserNo = profile.USER_NO;
             const currentStatus = profile.IS_FOLLOWING;
             const isCurrentlyFollowing = currentStatus === 'Y';
 
-            // 🚀 1. 프론트엔드 UI 즉각 업데이트 (단일 객체 업데이트)
             setProfile(prev => ({
                 ...prev,
                 IS_FOLLOWING: isCurrentlyFollowing ? 'N' : 'Y',
@@ -29,7 +25,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                     : prev.FOLLOWER_COUNT + 1
             }));
 
-            // 백엔드에 토글 요청
             const response = await fetch('http://localhost:3010/follow/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -41,7 +36,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
             const data = await response.json();
 
             if (!data.success) {
-                // 🚀 2. 실패 시 롤백 (단일 객체 원상복구)
                 alert("처리 중 오류가 발생했습니다.");
                 setProfile(prev => ({
                     ...prev,
@@ -56,25 +50,22 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
         }
     };
 
-    // 🚀 메세지 버튼 클릭 핸들러 추가
     const handleMessageClick = () => {
         const token = localStorage.getItem('jwtToken');
         if (!token) return alert("로그인이 필요합니다.");
 
         try {
             const decoded = jwtDecode(token);
-            // 본인 프로필에서 메세지 버튼을 누른 경우 방어
             if (decoded.userNo === profile.USER_NO) {
                 return alert("자기 자신에게는 메시지를 보낼 수 없습니다.");
             }
 
-            // 대화창(/message)으로 이동하면서 상대방 정보(targetPartner)를 함께 넘겨줍니다.
             navigate('/message', {
                 state: {
                     targetPartner: {
                         USER_NO: profile.USER_NO,
                         NICKNAME: profile.NICKNAME,
-                        PROFILE_IMAGE_URL: profile.PROFILE_IMAGE_URL // 프로필 사진도 넘겨주면 좋습니다
+                        PROFILE_IMAGE_URL: profile.PROFILE_IMAGE_URL 
                     }
                 }
             });
@@ -86,11 +77,9 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
     return (
         <aside className="photog-sidebar">
             <div className="sidebar-top">
-                {/* 🚀 바닐라 JS의 window.history.back() 대신 리액트의 navigate(-1) 권장 */}
                 <button className="photog-back-btn" onClick={() => navigate(-1)}>&lt; 뒤로가기</button>
             </div>
 
-            {/* 1. 프로필 영역 (CSS 클래스 적용) */}
             <div className="photog-profile-section">
                 {profile.PROFILE_IMAGE_URL ? (
                     <img 
@@ -106,7 +95,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                 <h3 className="photog-nickname">{profile.NICKNAME}</h3>
                 
                 <div className="photog-stats">
-                    {/* 첫 번째 줄: 팔로워 00  팔로잉 00 */}
                     <div className="stat-row">
                         <div className="stat-group">
                             <span>팔로워</span> <strong>{profile.FOLLOWER_COUNT || 0}</strong>
@@ -116,7 +104,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                         </div>
                     </div>
 
-                    {/* 두 번째 줄: 좋아요 00  스크랩 00 */}
                     <div className="stat-row">
                         <div className="stat-group">
                             <span>좋아요</span> <strong>{profile.TOTAL_LIKES || 0}</strong>
@@ -126,7 +113,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                         </div>
                     </div>
 
-                    {/* 세 번째 줄: 구분선 및 업데이트 */}
                     <div className="stat-row update-time">
                         <span>업데이트</span>
                         <span>{profile.LAST_UPDATE ? profile.LAST_UPDATE : '기록 없음'}</span>
@@ -136,7 +122,7 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                 <div className="photog-actions">
                     <button 
                         className={`btn-follow-photog ${profile.IS_FOLLOWING === 'Y' ? 'followed' : 'unfollowed'}`}
-                        onClick={handleFollowToggle} // 🚀 파라미터 없이 바로 호출
+                        onClick={handleFollowToggle} 
                     >
                         {profile.IS_FOLLOWING === 'Y' ? '팔로우 취소' : '팔로우'}
                     </button>
@@ -146,7 +132,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                 </div>
             </div>
 
-            {/* 2. 보기 타입 필터 (사진/게시물) */}
             <div className="sort-section">
                 <h3 className="sidebar-title">필터</h3>
                 <div className="sort-grid">
@@ -159,11 +144,9 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                 </div>
             </div>
 
-            {/* 3. 정렬 옵션 */}
             <div className="sort-section">
                 <h3 className="sidebar-title">정렬</h3>
                 <div className="sort-grid">
-                    {/* 1열 */}
                     <div className={`filter-item ${sortOption === 'latest' ? 'active' : ''}`} onClick={() => setSortOption('latest')}>
                         <div className="radio-circle"></div>최신 순
                     </div>
@@ -171,7 +154,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                         <div className="radio-circle"></div>오래된 순
                     </div>
 
-                    {/* 2열 */}
                     <div className={`filter-item ${sortOption === 'likes' ? 'active' : ''}`} onClick={() => setSortOption('likes')}>
                         <div className="radio-circle"></div>좋아요 순
                     </div>
@@ -179,7 +161,6 @@ function PhotogSide({ profile, setProfile, viewType, setViewType, sortOption, se
                         <div className="radio-circle"></div>조회수 순
                     </div>
 
-                    {/* 3열 */}
                     <div className={`filter-item ${sortOption === 'scraps' ? 'active' : ''}`} onClick={() => setSortOption('scraps')}>
                         <div className="radio-circle"></div>스크랩 순
                     </div>

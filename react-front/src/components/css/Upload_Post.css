@@ -1,8 +1,3 @@
-/* ==========================================================================
-   📝 게시물 업로드 전용 CSS (최상단 컨테이너로 완벽 격리)
-   ========================================================================== */
-
-/* 1. 페이지 레이아웃 및 상단 바 */
 .post-upload-page-container {
     min-height: 100vh;
     background-color: #f8f9fa;
@@ -50,9 +45,6 @@
     margin-bottom: 20px;
 }
 
-/* ==========================================================================
-   2. 대시보드 메인 박스 및 왼쪽 콘텐츠 영역 (사진/첨부파일 영역)
-   ========================================================================== */
 .post-upload-page-container .upload-content-wrapper {
     display: flex;
     gap: 30px;
@@ -83,7 +75,6 @@
     color: #212529;
 }
 
-/* 이미지 리스트 그리드 (사진 업로드와 동일한 점선 스타일 공유) */
 .post-upload-page-container .photo-list-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -153,7 +144,6 @@
     transform: scale(1.1);
 }
 
-/* 첨부파일 섹션 관련 미세 조정 */
 .post-upload-page-container .attachment-section {
     margin-top: 20px;
 }
@@ -172,9 +162,6 @@
     margin-bottom: 10px;
 }
 
-/* ==========================================================================
-   3. 오른쪽 입력 폼 영역 (세로 간격 밀도 최적화 코어)
-   ========================================================================== */
 .post-upload-page-container .upload-right {
     flex: 1;
     max-width: 400px;
@@ -186,7 +173,6 @@
     gap: 12px;
 }
 
-/* 공개여부 토글 행 조정 */
 .post-upload-page-container .public-toggle {
     display: flex;
     align-items: center; 
@@ -218,7 +204,6 @@
     gap: 6px;
 }
 
-/* 입력창 그룹 정돈 */
 .post-upload-page-container .input-counter-group {
     display: flex;
     flex-direction: column;
@@ -238,7 +223,7 @@
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.2s;
-    box-sizing: border-box; /* 패딩 삐져나옴 방지 */
+    box-sizing: border-box; 
 }
 
 .post-upload-page-container .form-input:focus {
@@ -246,9 +231,7 @@
     border-color: #44a7a8;
 }
 
-/* 설명창(글쓰기) 텍스트 영역 */
 .post-upload-page-container .form-textarea {
-    /* 글쓰기 본문이므로 기본적으로 조금 더 넓게 설정 */
     min-height: 150px; 
     resize: none;
     padding-bottom: 26px !important; 
@@ -264,9 +247,6 @@
     pointer-events: none;
 }
 
-/* ==========================================================================
-   4. 다중 카테고리 / 장소 / 태그 셋업
-   ========================================================================== */
 .post-upload-page-container .category-multi-group {
     display: flex;
     flex-direction: column;
@@ -285,7 +265,6 @@
     margin-bottom: 0 !important;
 }
 
-/* 파일찾기 및 카테고리 추가/삭제 공용 버튼 스타일 */
 .post-upload-page-container .btn-cat-action {
     height: 42px;
     border-radius: 6px;
@@ -308,7 +287,6 @@
     background-color: #f8f9fa;
 }
 
-/* 태그 리스트 컴포넌트 */
 .post-upload-page-container .tag-input-container {
     width: 100%;
 }
@@ -348,9 +326,6 @@
     line-height: 1.5;
 }
 
-/* ==========================================================================
-   5. 최종 제출 업로드 버튼
-   ========================================================================== */
 .post-upload-page-container .btn-upload-submit {
     background: #44a7a8;
     color: white !important;

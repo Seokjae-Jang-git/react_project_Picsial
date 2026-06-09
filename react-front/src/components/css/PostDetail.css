@@ -1,6 +1,3 @@
-/* ==========================================================================
-   💡 전체 프레임 (PhotoDetail과 동일한 배경색과 너비)
-   ========================================================================== */
 .post-detail-container {
     width: 100%;
     min-height: 100vh;
@@ -10,7 +7,7 @@
 }
 
 .post-detail-container .detail-body {
-    max-width: 870px; /* 🚀 사용자님이 지정하신 콤팩트 너비 */
+    max-width: 870px; 
     margin: 0 auto;
     padding: 30px 20px; 
     width: 100%;
@@ -21,7 +18,6 @@
     margin-bottom: 20px;
 }
 
-/* 둥글고 그림자 진 뒤로가기 버튼 */
 .post-detail-container .btn-back {
     padding: 10px 20px;
     background: #ffffff;
@@ -45,25 +41,15 @@
     width: 100%;
 }
 
-/* ==========================================================================
-   💡 좌측 영역 (flex: 4 비율)
-   ========================================================================== */
 .post-detail-container .detail-left {
     flex: 4; 
-    /* 🚀 핵심 1: 본문이 길어져도 박스 크기를 늘리지 못하게 막습니다. */
     min-width: 0; 
-    
-    /* (옵션) 🚀 핵심 2: 만약 비율(flex) 대신 고정 픽셀로 박고 싶다면 
-       flex 값을 지우고 아래 width를 사용하세요. */
-    /* width: 500px; */ 
-    
     display: flex;
     flex-direction: column;
     gap: 20px;
     align-items: stretch;
 }
 
-/* 테두리를 없애고 라운드(16px)와 그림자 효과 적용 */
 .post-detail-container .post-text-content-box,
 .post-detail-container .post-image-slider-box {
     background: #ffffff;
@@ -75,7 +61,6 @@
     box-sizing: border-box;
 }
 
-/* 유튜브 프로필 아바타 + 닉네임 메타 조합 헤더 */
 .post-detail-container .post-photog-header-yt {
     display: flex;
     align-items: center;
@@ -126,9 +111,6 @@
     white-space: pre-wrap;
 }
 
-/* ==========================================================================
-   💡 사진 슬라이더 영역 (잃어버린 HTML 복구 후 완벽 정상화)
-   ========================================================================== */
 .post-detail-container .post-image-slider-box {
     background: #ffffff;
     border-radius: 16px;
@@ -136,8 +118,6 @@
     padding: 24px;
     width: 100%;
     box-sizing: border-box;
-    
-    /* 🚀 화살표를 가두는 절대 기준점 정상 작동! */
     position: relative; 
     display: flex;
     align-items: center;
@@ -159,12 +139,10 @@
     border-radius: 8px;
 }
 
-/* 🚀 화살표 버튼 (정확히 정중앙에 안착) */
 .post-detail-container .slider-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid #e9ecef;
     font-size: 20px;
@@ -195,24 +173,14 @@
     right: 20px;
 }
 
-/* ==========================================================================
-   💡 우측 통합 영역 (flex: 3 비율)
-   ========================================================================== */
 .post-detail-container .detail-right {
     flex: 3; 
-    /* 🚀 핵심 1: 댓글이나 파일명이 아무리 길어도 박스를 밀어내지 못하게 방어합니다. */
     min-width: 0; 
-    
-    /* (옵션) 🚀 핵심 2: 우측을 절대 변하지 않는 고정 크기로 만들고 싶다면 
-       flex 값을 지우고 아래 width를 사용하세요. */
-    /* width: 340px; */
-
     display: flex;
     flex-direction: column;
     gap: 20px; 
 }
 
-/* 우측 카드 박스 기저 레이아웃 */
 .post-detail-container .info-box {
     background: #ffffff;
     border-radius: 16px;
@@ -222,7 +190,6 @@
     box-sizing: border-box;
 }
 
-/* 1. 통계 단추 상자 (가운데 정렬, 40px 간격 시원하게 배치) */
 .post-detail-container .action-stats-container {
     display: flex;
     justify-content: center;
@@ -259,7 +226,6 @@
     color: #333;
 }
 
-/* 2. 카테고리 & 태그 정보 상자 */
 .post-detail-container .metadata-display-box {
     display: flex;
     flex-direction: column;
@@ -288,7 +254,6 @@
     color: #495057;
 }
 
-/* 3. 댓글 피드 (입력창 등 라운드 20px 처리) */
 .post-detail-container .comment-box {
     display: flex;
     flex-direction: column;
@@ -332,7 +297,6 @@
     margin-top: 4px;
 }
 
-/* 더보기 버튼 */
 .post-detail-container .btn-more-comments {
     display: block;
     margin: 15px auto 5px auto;
@@ -347,12 +311,12 @@
     transition: all 0.2s ease;
     width: fit-content;
 }
+
 .post-detail-container .btn-more-comments:hover {
     background: #e4e6e9;
     color: #333;
 }
 
-/* 입력창 */
 .post-detail-container .comment-input-area {
     display: flex;
     gap: 10px;

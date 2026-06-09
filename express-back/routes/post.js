@@ -7,11 +7,10 @@ const path = require('path');
 const SftpClient = require('ssh2-sftp-client'); 
 const sharp = require('sharp'); 
 
-// 로컬에 저장하지 않고 메모리 버퍼(Buffer)로 파일을 받도록 변경
 const storage = multer.memoryStorage();
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 } // 1개당 10MB 제한
+    limits: { fileSize: 10 * 1024 * 1024 } 
 });
 
 const base = process.env.NAS_ROOT_PATH;
@@ -95,10 +94,9 @@ router.get('/', async (req, res) => {
                 }
             }
 
-            // 3. 최종 조립된 데이터를 반환
             return {
                 ...post,
-                PROFILE_IMAGE_URL: finalProfileUrl, // 완성된 주소로 덮어쓰기
+                PROFILE_IMAGE_URL: finalProfileUrl, 
                 CATEGORIES: post.CATEGORIES ? post.CATEGORIES.split(', ') : [],
                 TAGS: post.TAGS ? post.TAGS.split(', ') : [],
                 THUMB_LIST: fullThumbUrls
@@ -124,10 +122,8 @@ router.get('/:id', async (req, res) => {
         const userNo = req.query.userNo ? Number(req.query.userNo) : 0; 
         connection = await db.getConnection();
 
-        // 1. 조회수 증가
         await connection.execute(`UPDATE PS_POST SET VIEW_COUNT = VIEW_COUNT + 1 WHERE POST_ID = :postId`, { postId }, { autoCommit: true });
 
-        // 2. 게시물 본문 데이터 조회
         const postSql = `
             SELECT 
                 P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
@@ -169,7 +165,6 @@ router.get('/:id', async (req, res) => {
 
         const postData = postResult.rows[0];
         
-        // 💡 [추가] 게시물 작성자의 프로필 이미지 URL 조립
         if (postData.PROFILE_IMAGE_URL && !postData.PROFILE_IMAGE_URL.startsWith('http')) {
             const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
             if (profileBaseUrl) {
@@ -177,18 +172,15 @@ router.get('/:id', async (req, res) => {
             }
         }
 
-        // 이미지 URL 결합 처리
         const imgList = postData.ALL_IMAGES ? postData.ALL_IMAGES.split(',') : [];
         const fullImageUrls = imgList.map(fileName => {
             if (fileName.startsWith('http')) return fileName;
             return `${process.env.NAS_BASE_URL_POS_IMG}/${fileName}`;
         });
 
-        // 💡 [해결책] 프론트엔드가 어떤 이름으로 사진을 그리든 무조건 동작하게 양쪽 모두 바인딩합니다.
         postData.IMAGE_LIST = fullImageUrls;
         postData.THUMB_LIST = fullImageUrls;
 
-        // 3. 댓글 데이터 조회
         const commentSql = `
             SELECT C.COMMENT_ID, C.USER_NO, C.CONTENT, C.CREATED_AT, UI.NICKNAME
             FROM PS_COMMENT_TABLE C
@@ -198,7 +190,6 @@ router.get('/:id', async (req, res) => {
         `;
         const commentResult = await connection.execute(commentSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-        // 4. 첨부파일 데이터 조회 및 NAS 다운로드 URL 조립
         const fileSql = `
             SELECT FILE_ID, FILE_URL, ORIGINAL_NAME, FILE_SIZE, SORT_ORDER
             FROM PS_POST_FILE
@@ -231,7 +222,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/like - 좋아요 토글 (검토 완료 🟢)
+// [POST] /post/:id/like - 좋아요 토글 
 // ==========================================
 router.post('/:id/like', async (req, res) => {
     let connection;
@@ -247,7 +238,6 @@ router.post('/:id/like', async (req, res) => {
             );
             await connection.execute(`UPDATE PS_POST SET LIKE_COUNT = LIKE_COUNT + 1 WHERE POST_ID = :postId`, { postId }, { autoCommit: false });
 
-            // 알림 추가 로직 (게시글 원작자 조회)
             const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
             const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -285,7 +275,7 @@ router.post('/:id/like', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/scrap - 스크랩 토글 및 알림 처리 (교정 완료 🟢)
+// [POST] /post/:id/scrap - 스크랩 토글 및 알림 처리 
 // ==========================================
 router.post('/:id/scrap', async (req, res) => {
     let connection;
@@ -295,13 +285,11 @@ router.post('/:id/scrap', async (req, res) => {
         connection = await db.getConnection();
 
         if (isScrapped) {
-            // 1. 스크랩 데이터 추가 💡 (시퀀스명을 PS_SCRAP_TABLE_SEQ로 정상 교정!)
             await connection.execute(
                 `INSERT INTO PS_SCRAP_TABLE (SCRAP_ID, USER_NO, POST_ID, CREATED_AT) VALUES (PS_SCRAP_TABLE_SEQ.NEXTVAL, :userNo, :postId, SYSDATE)`,
                 { userNo, postId }, { autoCommit: false }
             );
 
-            // 2. 알림 추가 로직
             const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
             const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -320,7 +308,6 @@ router.post('/:id/scrap', async (req, res) => {
                 }
             }
         } else {
-            // 3. 스크랩 취소 처리
             await connection.execute(
                 `DELETE FROM PS_SCRAP_TABLE WHERE USER_NO = :userNo AND POST_ID = :postId`,
                 { userNo, postId }, { autoCommit: false }
@@ -339,17 +326,14 @@ router.post('/:id/scrap', async (req, res) => {
 });
 
 // ==========================================
-// [POST] /post/:id/comment - 댓글 등록 (하드코딩 완벽 제거 버전 🟢)
+// [POST] /post/:id/comment - 댓글 등록 
 // ==========================================
 router.post('/:id/comment', async (req, res) => {
     let connection;
     try {
         const postId = req.params.id;
-        
-        // 💡 1. userNo = 1 기본값 할당 제거
         const { content, userNo } = req.body;
 
-        // 💡 2. 유저 번호 누락 시 에러 반환 (안전망)
         if (!userNo) {
             return res.status(401).json({ success: false, message: '로그인 정보가 없습니다. (userNo 누락)' });
         }
@@ -360,7 +344,6 @@ router.post('/:id/comment', async (req, res) => {
 
         connection = await db.getConnection();
 
-        // 1. 댓글 등록
         await connection.execute(
             `INSERT INTO PS_COMMENT_TABLE (COMMENT_ID, USER_NO, POST_ID, CONTENT) 
              VALUES (PS_COMMENT_TABLE_SEQ.NEXTVAL, :userNo, :postId, :content)`,
@@ -368,7 +351,6 @@ router.post('/:id/comment', async (req, res) => {
             { autoCommit: false }
         );
 
-        // 2. 알림 추가 로직
         const ownerSql = `SELECT USER_NO FROM PS_POST WHERE POST_ID = :postId`;
         const ownerResult = await connection.execute(ownerSql, { postId }, { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
@@ -427,8 +409,6 @@ router.post('/upload', upload.fields([
         const categories = req.body.categories ? JSON.parse(req.body.categories) : [];
         const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
 
-        
-
         await sftp.mkdir(`${process.env.NAS_ROOT_PATH}/post/image/`, true);
         await sftp.mkdir(`${process.env.NAS_ROOT_PATH}/post/attachment/`, true);
 
@@ -444,15 +424,11 @@ router.post('/upload', upload.fields([
         
         const newPostId = postResult.outBinds.newPostId[0];
 
-        // ==========================================
-        // 1. 이미지 파일 처리 영역
-        // ==========================================
         if (req.files['images'] && req.files['images'].length > 0) {
             const images = req.files['images'];
             for (let i = 0; i < images.length; i++) {
                 const file = images[i];
                 
-                // 💡 한글 파일명 깨짐 방지 처리를 가장 상단에서 진행합니다.
                 const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                 const ext = path.extname(originalName);
@@ -471,7 +447,6 @@ router.post('/upload', upload.fields([
 
                 await sftp.put(thumbBuffer, thumbRemotePath, { mode: 0o644 });
 
-                // 🚀 약속대로 CREATED_AT 및 SYSDATE 제외
                 const imgSql = `
                     INSERT INTO PS_POST_IMAGE (IMAGE_ID, POST_ID, IMAGE_URL, THUMB_URL, SORT_ORDER)
                     VALUES (PS_POST_IMAGE_SEQ.NEXTVAL, :postId, :imgUrl, :thumbUrl, :sortOrder)
@@ -485,15 +460,11 @@ router.post('/upload', upload.fields([
             }
         }
 
-        // ==========================================
-        // 2. 첨부파일 처리 영역
-        // ==========================================
         if (req.files['attachments'] && req.files['attachments'].length > 0) {
             const files = req.files['attachments'];
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 
-                // 💡 한글 파일명 깨짐 방지 처리를 가장 상단에서 진행하여 변수 에러를 막습니다.
                 const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                 const ext = path.extname(originalName);
@@ -505,13 +476,11 @@ router.post('/upload', upload.fields([
 
                 const fileSize = file.size;
 
-                // 🚀 약속대로 CREATED_AT 및 SYSDATE 제외
                 const fileSql = `
                     INSERT INTO PS_POST_FILE (FILE_ID, POST_ID, FILE_URL, ORIGINAL_NAME, FILE_SIZE, SORT_ORDER)
                     VALUES (PS_POST_FILE_SEQ.NEXTVAL, :postId, :fileUrl, :originalName, :fileSize, :sortOrder)
                 `;
                 
-                // 여기서 originalName이 정상적으로 바인딩됩니다.
                 await connection.execute(fileSql, { 
                     postId: newPostId, 
                     fileUrl: saveFileName,

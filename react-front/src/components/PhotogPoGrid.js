@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/PhotogPoGrid.css';
 
@@ -60,14 +60,13 @@ function PhotogPostCard({ post, formatTimeAgo }) {
     const navigate = useNavigate(); 
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
     
-    // DB에서 받아오는 이미지 리스트 파싱 처리 (문자열 배열이거나 JSON 구조인 경우 방어코드)
     let thumbs = [];
     if (Array.isArray(post.THUMB_LIST)) {
         thumbs = post.THUMB_LIST;
     } else if (typeof post.THUMB_LIST === 'string') {
         try { thumbs = JSON.parse(post.THUMB_LIST); } catch(e) { thumbs = []; }
     } else if (post.THUMB_URL) {
-        thumbs = [post.THUMB_URL]; // 단일 이미지 대응
+        thumbs = [post.THUMB_URL]; 
     }
 
     const getSnippet = (text, maxLength = 60) => {
@@ -88,18 +87,15 @@ function PhotogPostCard({ post, formatTimeAgo }) {
 
     return (
         <div className="photog-post-card" onClick={() => navigate(`/post/${post.POST_ID}`)}>
-            {/* 상단 텍스트 메타 정보 */}
             <div className="photog-post-top">
                 <span className="photog-post-time">{formatTimeAgo(post.CREATED_AT)}</span>
             </div>
 
-            {/* 고정 크기 텍스트 영역 */}
             <div className="photog-post-content">
                 <h4 className="photog-post-title">{post.TITLE}</h4>
                 <p className="photog-post-snippet">{getSnippet(post.CONTENT)}</p>
             </div>
 
-            {/* 미디어 슬라이더 영역 */}
             <div className="photog-post-media">
                 {thumbs.length > 1 && (
                     <button className="photog-slide-arrow left" onClick={handlePrev}>&lt;</button>
@@ -122,7 +118,6 @@ function PhotogPostCard({ post, formatTimeAgo }) {
                 )}
             </div>
 
-            {/* 하단 통계 수치 바 */}
             <div className="photog-post-bottom">
                 <div className="photog-bottom-item" title="조회수">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>

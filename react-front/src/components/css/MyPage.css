@@ -1,46 +1,38 @@
-/* css/MyPage.css */
-
-/* 1. 전체 페이지 구조를 Follow 페이지와 동일하게 설정 */
 .mypage-root {
     width: 100%;
-    height: 100vh; /* 화면 높이 고정 */
+    height: 100vh; 
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: #ffffff; /* 사진 페이지와 배경색 통일 */
+    background-color: #ffffff; 
 }
 
-/* 2. 헤더를 제외한 나머지 영역 (사이드바 + 대시보드) */
 .mypage-wrapper {
     display: flex;
-    flex-grow: 1; /* 남은 공간 꽉 채움 */
+    flex-grow: 1; 
     overflow: hidden;
     width: 100%;
-    /* 내부 여백과 구조 통일 */
     padding: 20px 40px; 
     gap: 30px;
     box-sizing: border-box;
 }
 
-/* 💡 [추가] 왼쪽 사이드바 영역 고정 박스 */
 .mypage-wrapper .mypage-side-box {
-    width: 250px;       /* 👈 일정한 사이드바 폭 고정 (디자인에 맞춰 240px~260px 사이 조정 가능) */
-    flex-shrink: 0;     /* 👈 핵심: 우측 콘텐츠가 길어지거나 늘어나도 절대 찌러지지 않게 방어 */
+    width: 250px;       
+    flex-shrink: 0;     
     box-sizing: border-box;
 }
 
-/* 3. 우측 대시보드 영역 (독립 스크롤 활성화) */
 .mypage-content-area {
     flex-grow: 1;
     height: 100%;
-    overflow-y: auto; /* 본문 내용이 길어지면 여기서만 스크롤 */
+    overflow-y: auto; 
     padding-bottom: 40px;
     box-sizing: border-box;
 }
 
 .photo-grid {
     display: grid;
-    /* 🔥 변경: 5열에서 6열로 늘려 사진을 더 작고 많이 배치합니다. */
     grid-template-columns: repeat(6, 1fr);
-    gap: 14px; /* 카드가 작아지므로 간격도 살짝 줄임 */
+    gap: 14px; 
 }

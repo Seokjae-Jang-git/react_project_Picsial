@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import './css/PhotoDetail.css';
 
-// 💡 날짜를 'O분 전', 'O시간 전' 형식으로 변환 (댓글용)
 function formatTimeAgo(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString.replace(/-/g, '/'));
@@ -19,7 +18,6 @@ function formatTimeAgo(dateString) {
     return `${diffDay}일 전`;
 }
 
-// 💡 촬영 일자를 'yyyy-mm-dd hh:mi' 형식으로 변환
 function formatShootDate(dateString) {
     if (!dateString) return '정보 없음';
     let date = new Date(dateString);
@@ -34,7 +32,6 @@ function formatShootDate(dateString) {
     return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }
 
-// 💡 토큰 해독 함수
 const getCurrentUserNo = () => {
     const token = localStorage.getItem('jwtToken'); 
     if (!token) return null; 
@@ -162,7 +159,7 @@ function PhotoDetail() {
         setIsFollowing(!previousStatus);
 
         try {
-            const response = await fetch('http://localhost:3010/photo/toggle', {
+            const response = await fetch('http://localhost:3010/follow/toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ followerNo: currentUserNo, followingNo: targetUserNo })
@@ -258,7 +255,7 @@ function PhotoDetail() {
                                 <p><strong>태그 :</strong> {photo.TAGS || '태그 없음'}</p>
                             </div>
                         </div>
-                        {/* 💡 복구된 프로필 섹션 (팔로우 상태 및 기능 반영) */}
+                        
                         <div className="info-box profile-box">
                             <div className="profile-image-placeholder">
                                 {photo.PROFILE_IMAGE_URL ? (

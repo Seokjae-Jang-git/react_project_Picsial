@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/PostGrid.css';
 
-// 💡 1. 부모(Search.js)가 준 posts를 받아오되, 내부 상태 이름과 겹치지 않게 initialPosts로 별칭을 줍니다.
 function PostGrid({ selectedCategory, sortOption, posts: initialPosts }) {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // 🌟 [핵심 추가] 검색 페이지에서 필터링된 결과(initialPosts)가 넘어왔다면?
         if (initialPosts) {
-            // 💡 백엔드 검색 API의 단일 THUMB_URL을 카드가 요구하는 THUMB_LIST 배열로 안전하게 가공해줍니다.
             const normalizedPosts = initialPosts.map(post => ({
                 ...post,
                 THUMB_LIST: post.THUMB_LIST || (post.THUMB_URL ? [post.THUMB_URL] : [])
@@ -18,7 +15,7 @@ function PostGrid({ selectedCategory, sortOption, posts: initialPosts }) {
             
             setPosts(normalizedPosts);
             setLoading(false);
-            return; // 🚀 자체 fetch가 실행되지 않도록 여기서 차단!
+            return; 
         }
 
         const fetchPosts = async () => {
@@ -43,7 +40,7 @@ function PostGrid({ selectedCategory, sortOption, posts: initialPosts }) {
         };
 
         fetchPosts();
-    }, [selectedCategory, sortOption, initialPosts]); // 💡 initialPosts가 바뀔 때도 감시하도록 추가
+    }, [selectedCategory, sortOption, initialPosts]); 
 
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
@@ -71,7 +68,7 @@ function PostGrid({ selectedCategory, sortOption, posts: initialPosts }) {
 }
 
 /* ==========================================================================
-   💡 개별 게시물 카드 컴포넌트 (기존 코드 100% 보존)
+   개별 게시물 카드 컴포넌트
    ========================================================================== */
 function PostCard({ post, formatTimeAgo }) {
     const navigate = useNavigate(); 
@@ -126,7 +123,6 @@ function PostCard({ post, formatTimeAgo }) {
                 </div>
             </div>
 
-            {/* 미디어 슬라이더 영역 */}
             <div className="post-card-media">
                 {thumbs.length > 1 && (
                     <button className="slide-arrow left" onClick={handlePrev}>&lt;</button>

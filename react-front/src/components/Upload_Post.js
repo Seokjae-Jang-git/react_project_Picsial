@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // 🚀 디코딩 라이브러리 추가
+import { jwtDecode } from 'jwt-decode'; 
 import './css/Upload_Post.css';
 
 function UploadPost() {
     const navigate = useNavigate();
     
-    // 💡 게시물 카테고리 상태
     const [postCategories, setPostCategories] = useState([]);
 
-    // 💡 게시물 폼 데이터 (categoryId -> categoryIds: [''] 로 수정 완료)
     const [postData, setPostData] = useState({
         title: '',
         content: '',
@@ -21,11 +19,9 @@ function UploadPost() {
     const [postMainImages, setPostMainImages] = useState([]); 
     const [postAttachments, setPostAttachments] = useState([{ file: null, name: '' }]); 
 
-    // 카테고리 불러오기 (PS_CATEGORY_POST API)
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                // 백엔드 게시물 카테고리 엔드포인트 호출
                 const response = await fetch('http://localhost:3010/category/post'); 
                 const data = await response.json();
                 if (data.success) setPostCategories(data.categories);
@@ -38,12 +34,10 @@ function UploadPost() {
         setPostData(prev => ({ ...prev, [field]: value }));
     };
 
-    // 이미지 첨부
     const handlePostImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
-        // 💡 게시물 사진 최대 3장 제한 방어 코드
         const LIMIT_COUNT = 3;
         if (postMainImages.length + files.length > LIMIT_COUNT) {
             alert(`게시물 사진은 최대 ${LIMIT_COUNT}장까지만 업로드할 수 있습니다.`);
@@ -58,12 +52,11 @@ function UploadPost() {
         setPostMainImages(prev => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
-    // 첨부파일 제한 (10MB) 로직
     const handleAttachmentChange = (e, index) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+        const MAX_SIZE = 10 * 1024 * 1024; 
         if (file.size > MAX_SIZE) {
             alert("첨부파일은 10MB 이하만 업로드 가능합니다.");
             e.target.value = ''; 
@@ -75,7 +68,6 @@ function UploadPost() {
         ));
     };
 
-    // 첨부파일 제한 (최대 3개) 로직
     const addAttachmentRow = () => {
         if (postAttachments.length >= 3) {
             alert("첨부파일은 최대 3개까지만 추가할 수 있습니다.");
@@ -100,7 +92,6 @@ function UploadPost() {
         }
     };
 
-    // 🚀 카테고리 추가/삭제/변경 함수
     const handleCategoryChange = (index, value) => {
         const newCategoryIds = [...postData.categoryIds];
         newCategoryIds[index] = value;
@@ -124,7 +115,6 @@ function UploadPost() {
         if (!postData.title.trim()) return alert("제목을 입력해주세요.");
         if (!postData.content.trim()) return alert("내용을 입력해주세요.");
         
-        // 🚀 유효한 카테고리만 필터링
         const validCategories = postData.categoryIds.filter(id => id !== '');
         if (validCategories.length === 0) return alert("최소 1개의 카테고리를 선택해주세요.");
 
@@ -151,7 +141,6 @@ function UploadPost() {
         formData.append('content', postData.content);
         formData.append('isPublic', postData.isPublic);
         
-        // 🚀 배열을 문자열로 변환하여 전송 (백엔드가 JSON.parse로 받음)
         formData.append('categories', JSON.stringify(validCategories.map(Number)));
         
         const tagArr = Array.isArray(postData.tags) ? postData.tags : [];
@@ -162,7 +151,6 @@ function UploadPost() {
             if (att.file) formData.append('attachments', att.file);
         });
 
-        // 🚀 누락되었던 전송 및 에러 핸들링 블록 정상 추가 완료
         try {
             const response = await fetch('http://localhost:3010/post/upload', {
                 method: 'POST',
@@ -184,16 +172,14 @@ function UploadPost() {
             console.error("업로드 에러:", error); 
             alert("서버 오류가 발생했습니다.");
         }
-    }; // 🚀 handleSubmit 닫는 괄호 복구
+    }; 
 
     return (
         <div className="post-upload-page-container">
             <main className="upload-main">
                 <div className="upload-content-wrapper">
                     
-                    {/* 왼쪽: 게시물 이미지 및 첨부파일 영역 */}
                     <div className="upload-left">
-                        {/* 1. 이미지 첨부 박스 영역 */}
                         <div className="photo-list-grid">
                             <label className="photo-add-btn">
                                 +
@@ -207,7 +193,6 @@ function UploadPost() {
                             ))}
                         </div>
 
-                        {/* 2. 첨부파일 영역 */}
                         <div className="attachment-section" style={{ marginTop: '20px' }}>
                             <h4 className="attachment-title" style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '10px' }}>첨부파일 (최대 3개, 10MB 이하)</h4>
                             {postAttachments.map((att, idx) => (
@@ -230,11 +215,9 @@ function UploadPost() {
                         </div>
                     </div>
 
-                    {/* 오른쪽: 게시물 정보 입력 폼 */}
                     <div className="upload-right">
                         <form className="upload-form" onSubmit={handleSubmit}>
                             
-                            {/* 1. 공개여부 라벨 및 구조 */}
                             <div className="public-toggle">
                                 <span className="toggle-label">공개여부</span>
                                 <div className="radio-group">
@@ -251,7 +234,6 @@ function UploadPost() {
                                 </div>
                             </div>
 
-                            {/* 2. 제목 입력 영역 */}
                             <div className="input-counter-group">
                                 <label className="toggle-label">제목 (필수)</label>
                                 <div className="input-wrapper">
@@ -267,7 +249,6 @@ function UploadPost() {
                                 </div>
                             </div>
                             
-                            {/* 3. 본문(글쓰기) 입력 영역 */}
                             <div className="input-counter-group">
                                 <label className="toggle-label">글쓰기 (필수)</label>
                                 <div className="input-wrapper">
@@ -282,7 +263,6 @@ function UploadPost() {
                                 </div>
                             </div>
                             
-                            {/* 🚀 4. 카테고리 선택 영역 (다중 선택 UI) */}
                             <div className="category-multi-group">
                                 {postData.categoryIds.map((catId, index) => (
                                     <div key={index} className="category-row">
@@ -313,7 +293,6 @@ function UploadPost() {
                                 ))}
                             </div>
 
-                            {/* 5. 태그 입력 영역 */}
                             <div className="tag-input-container">
                                 <div className="tag-list">
                                     {postData.tags.map(tag => (

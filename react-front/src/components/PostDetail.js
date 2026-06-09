@@ -4,7 +4,6 @@ import Header from '../components/Header';
 import AttachmentSection from './AttachmentSection'; 
 import './css/PostDetail.css';
 
-// 💡 1. 토큰 해독 함수 이식 (로컬 스토리지에서 진짜 로그인 유저 번호 추출)
 const getCurrentUserNo = () => {
     const token = localStorage.getItem('jwtToken'); 
     if (!token) return null; 
@@ -24,13 +23,11 @@ function PostDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
     
-    // 데이터 바인딩 상태 관리
     const [post, setPost] = useState(null);
     const [comments, setComments] = useState([]);
     const [attachments, setAttachments] = useState([]);
     const [loading, setLoading] = useState(true);
     
-    // 비즈니스 기능 상태 관리
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [isScrapped, setIsScrapped] = useState(false);
@@ -39,13 +36,10 @@ function PostDetail() {
     const [isCommentExpanded, setIsCommentExpanded] = useState(false);
     const [currentImgIdx, setCurrentImgIdx] = useState(0);
 
-    // 💡 2. 로그인한 유저 번호 상수에 저장
     const currentUserNo = getCurrentUserNo();
 
-    // 💡 3. 댓글 등록 후에도 재사용할 수 있도록 함수를 useEffect 외부로 추출
     const fetchPostDetail = async () => {
         try {
-            // 하드코딩 ?userNo=1 대신 동적 쿼리스트링 매칭
             const queryParam = currentUserNo ? `?userNo=${currentUserNo}` : '';
             const response = await fetch(`http://localhost:3010/post/${id}${queryParam}`);
             const data = await response.json();
@@ -71,15 +65,14 @@ function PostDetail() {
         fetchPostDetail();
     }, [id]);
 
-    // 좋아요 토글 핸들러
     const handleLikeToggle = async () => {
-        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; } // 로그인 체크 방어막
+        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; } 
         try {
             const nextState = !isLiked;
             const response = await fetch(`http://localhost:3010/post/${id}/like`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isLiked: nextState, userNo: currentUserNo }) // 💡 실제 유저번호 송신
+                body: JSON.stringify({ isLiked: nextState, userNo: currentUserNo }) 
             });
             const data = await response.json();
             if (data.success) {
@@ -89,15 +82,14 @@ function PostDetail() {
         } catch (e) { console.error(e); }
     };
 
-    // 스크랩 토글 핸들러
     const handleScrapToggle = async () => {
-        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; } // 로그인 체크 방어막
+        if (!currentUserNo) { alert("로그인이 필요한 기능입니다."); return; } 
         try {
             const nextState = !isScrapped;
             const response = await fetch(`http://localhost:3010/post/${id}/scrap`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ isScrapped: nextState, userNo: currentUserNo }) // 💡 실제 유저번호 송신
+                body: JSON.stringify({ isScrapped: nextState, userNo: currentUserNo }) 
             });
             const data = await response.json();
             if (data.success) {
@@ -107,22 +99,20 @@ function PostDetail() {
         } catch (e) { console.error(e); }
     };
 
-    // 댓글 제출 핸들러
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
-        if (!currentUserNo) { alert("댓글을 작성하려면 로그인이 필요합니다."); return; } // 로그인 체크 방어막
+        if (!currentUserNo) { alert("댓글을 작성하려면 로그인이 필요합니다."); return; } 
         if (!commentInput.trim()) return;
 
         try {
             const response = await fetch(`http://localhost:3010/post/${id}/comment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: commentInput, userNo: currentUserNo }) // 💡 실제 유저번호 송신
+                body: JSON.stringify({ content: commentInput, userNo: currentUserNo }) 
             });
             const data = await response.json();
             if (data.success) {
                 setCommentInput('');
-                // 💡 가짜 '나' 배열을 넣는 대신, DB에 저장된 진짜 닉네임과 시퀀스 데이터를 새로고침합니다.
                 fetchPostDetail(); 
             } else {
                 alert(data.message || "댓글 등록에 실패했습니다.");
@@ -130,7 +120,6 @@ function PostDetail() {
         } catch (error) { console.error(error); }
     };
 
-    // 시간 포맷 처리 함수
     const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
         const postDate = new Date(dateString);

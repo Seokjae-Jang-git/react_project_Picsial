@@ -1,4 +1,3 @@
-/* 메인과 동일한 5열 배치 */
 .photog-photo-grid-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr); 
@@ -22,7 +21,6 @@
     transition: transform 0.3s ease;
 }
 
-/* 💡 메인 PhotoGrid 스타일 이식: 하단 그라데이션 오버레이 */
 .photog-stats-overlay {
     position: absolute;
     bottom: 0;
@@ -41,7 +39,6 @@
     font-size: 14px;
 }
 
-/* 호버 효과 (오버레이 등장 + 이미지 확대) */
 .photog-photo-card-wrapper:hover .photog-stats-overlay {
     opacity: 1;
 }

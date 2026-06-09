@@ -13,7 +13,6 @@ function Upload() {
         <div className="upload-page-container">
             <Header />
             <main className="upload-main">
-                {/* 🚀 상단 바: 뒤로가기(왼쪽) + 업로드 타입 선택(오른쪽) */}
                 <div className="upload-top-bar">
                     <button onClick={() => navigate(-1)} className="btn-back">&lt; 뒤로가기</button>
                     
@@ -27,7 +26,6 @@ function Upload() {
                     </div>
                 </div>
 
-                {/* 🚀 내용물 영역: 선택된 컴포넌트만 로드 */}
                 <div className="upload-content-area">
                     {uploadType === 'photo' ? <UploadPhoto /> : <UploadPost />}
                 </div>

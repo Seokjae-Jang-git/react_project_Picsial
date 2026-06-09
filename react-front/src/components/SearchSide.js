@@ -1,5 +1,5 @@
 import React from 'react';
-import './css/SearchSide.css'; // 라디오 스타일 CSS 매칭용
+import './css/SearchSide.css'; 
 
 function SearchSide({ activeTab, setActiveTab, results }) {
     const totalCount = results.photos.length + results.posts.length + results.users.length;

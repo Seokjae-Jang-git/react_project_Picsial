@@ -16,7 +16,6 @@ function SignUp() {
     const [nicknameCheckStatus, setNicknameCheckStatus] = useState('');
     const [verifiedNickname, setVerifiedNickname] = useState('');
 
-    // 카테고리 데이터 및 선택 상태 분리
     const [photoCategories, setPhotoCategories] = useState([]);
     const [postCategories, setPostCategories] = useState([]);
     const [selectedPhotoCategories, setSelectedPhotoCategories] = useState([]);
@@ -29,7 +28,6 @@ function SignUp() {
 
     const navigate = useNavigate();
 
-    // 두 API를 병렬로 호출하여 카테고리 데이터 로드
     useEffect(function() {
         async function fetchCategories() {
             try {
@@ -54,7 +52,6 @@ function SignUp() {
         fetchCategories();
     }, []);
 
-    // 사진 카테고리 선택 핸들러
     function handlePhotoCategoryChange(id) {
         if (selectedPhotoCategories.includes(id)) {
             setSelectedPhotoCategories(selectedPhotoCategories.filter(catId => catId !== id));
@@ -63,7 +60,6 @@ function SignUp() {
         }
     }
 
-    // 게시물 카테고리 선택 핸들러
     function handlePostCategoryChange(id) {
         if (selectedPostCategories.includes(id)) {
             setSelectedPostCategories(selectedPostCategories.filter(catId => catId !== id));
@@ -139,7 +135,6 @@ function SignUp() {
         if (!isChecked) { alert('약관에 동의해 주세요.'); return; }
         if (password !== passwordConfirm) { alert('비밀번호가 일치하지 않습니다.'); return; }
 
-        // 비밀번호 유효성 검사
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~!@#$%^*()_+\- =])[A-Za-z\d~!@#$%^*()_+\- =]{8,}$/;
         if (!passwordRegex.test(password)) {
             alert('비밀번호 제약조건을 확인해 주세요.');
@@ -153,8 +148,8 @@ function SignUp() {
                 body: JSON.stringify({
                     userId, email, password, nickname,
                     intro: intro || null,
-                    photoCategories: selectedPhotoCategories, // 분리된 데이터 전송
-                    postCategories: selectedPostCategories    // 분리된 데이터 전송
+                    photoCategories: selectedPhotoCategories, 
+                    postCategories: selectedPostCategories    
                 })
             });
 
@@ -239,7 +234,6 @@ function SignUp() {
                         className="form-control" 
                         required 
                     />
-                    {/* 실시간 일치 여부 판별 안내 (입력창에 값이 있을 때만 표출) */}
                     {passwordConfirm && (
                         password === passwordConfirm 
                             ? <span className="check-msg success">✓ 비밀번호가 일치합니다.</span>
@@ -249,14 +243,13 @@ function SignUp() {
 
                 <div className="form-group">
                     <label>닉네임 (필수)</label>
-                    <div className="id-input-group"> {/* 아이디와 정렬 구조가 같으므로 기존 클래스 재활용 */}
+                    <div className="id-input-group"> 
                         <input 
                             type="text" 
                             ref={nicknameRef} 
                             placeholder="활동할 닉네임을 입력하세요" 
                             className="form-control" 
                             required 
-                            // 글자를 다시 고쳐쓰면 중복 확인 해제
                             onChange={function() { setNicknameCheckStatus(''); }} 
                         />
                         <button 
@@ -277,19 +270,17 @@ function SignUp() {
                     <div className="textarea-wrapper">
                         <textarea 
                             value={introText}
-                            maxLength={MAX_INTRO_LENGTH} // 브라우저 자체에서 최대 글자수 입력 차단
+                            maxLength={MAX_INTRO_LENGTH} 
                             onChange={function(e) { setIntroText(e.target.value); }}
                             placeholder="자신을 한 줄로 소개해 보세요" 
                             className="form-textarea" 
                         />
-                        {/* 실시간 글자수 표시기 */}
                         <div className="char-counter">
                             <span>{introText.length}</span> / {MAX_INTRO_LENGTH}자
                         </div>
                     </div>
                 </div>
                 
-                {/* 사진 카테고리 */}
                 <div className="form-group">
                     <label>관심 카테고리 (사진)</label>
                     <div className="category-checkbox-group">
@@ -308,7 +299,6 @@ function SignUp() {
                     </div>
                 </div>
 
-                {/* 게시물 카테고리 */}
                 <div className="form-group">
                     <label>관심 카테고리 (게시물)</label>
                     <div className="category-checkbox-group">
@@ -342,7 +332,6 @@ function SignUp() {
                 <button 
                     type="submit" 
                     className="signup-submit-btn"
-                    // [수정] 체크박스가 체크되어야 버튼 활성화 (선택 사항)
                     disabled={!isChecked || idCheckStatus !== 'checked' || nicknameCheckStatus !== 'checked'}
                 >
                     가입하기

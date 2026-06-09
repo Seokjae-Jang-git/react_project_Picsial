@@ -11,8 +11,8 @@
 
 .location-input {
     width: 100%;
-    padding-left: 35px !important; /* 돋보기 아이콘 공간 */
-    padding-right: 35px !important; /* X 버튼 공간 */
+    padding-left: 35px !important;
+    padding-right: 35px !important;
 }
 
 .search-icon {

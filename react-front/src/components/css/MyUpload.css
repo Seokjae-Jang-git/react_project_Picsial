@@ -1,49 +1,37 @@
-/* ==========================================================================
-   1. 최상단 레이아웃 및 컨테이너
-   ========================================================================== */
 .my-upload-container {
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
 }
 
-/* ==========================================================================
-   2. [상단 영역] 사진 / 게시물 전환 라디오 버튼 그룹 (동그라미 유지 및 정렬 🛠️)
-   ========================================================================== */
-/* 마이페이지 및 일반 페이지 공통 라디오 정렬 컨테이너 */
 .tab-radio-group,
 .type-radio-group { 
     display: flex; 
-    gap: 20px;            /* 첨부파일의 여유로운 버튼 사이 간격 */
-    align-items: center;  /* 💡 동그라미 구슬과 글자를 수직 중앙으로 칼정렬 */
+    gap: 20px;            
+    align-items: center;  
     margin-bottom: 16px;
 }
 
-/* 라디오 라벨 스타일 (글자 굵기 및 기본 정렬) */
 .tab-label,
 .type-radio-group label {
     display: flex;
-    align-items: center;  /* 내부 요소 수직 정렬 */
-    gap: 8px;             /* 동그라미 구슬과 텍스트(사진/게시물) 사이의 간격 */
+    align-items: center;  
+    gap: 8px;             
     font-size: 15px;
-    font-weight: bold;    /* 유저님 코드의 font-weight: bold 반영 */
+    font-weight: bold;    
     color: #212529;
     cursor: pointer;
     user-select: none;
 }
 
-/* 🚨 동그라미 구슬 크기 및 여백 기본 최적화 */
 .tab-radio-group input[type="radio"],
 .type-radio-group input[type="radio"] {
-    margin: 0;            /* 브라우저 기본 삐뚤어진 마진 제거 */
-    width: 16px;          /* 구슬 크기 최적화 */
+    margin: 0;            
+    width: 16px;          
     height: 16px;
     cursor: pointer;
 }
 
-/* ==========================================================================
-   3. [필터 영역] 카테고리 및 정렬 드롭다운
-   ========================================================================== */
 .filter-select-group {
     display: flex;
     gap: 8px;
@@ -69,9 +57,6 @@
     background-color: #fafafa;
 }
 
-/* ==========================================================================
-   4. [콘텐츠 영역 - 사진] 5열 이미지 격자판
-   ========================================================================== */
 .photo-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -86,9 +71,6 @@
     border-radius: 8px;
 }
 
-/* ==========================================================================
-   5. [콘텐츠 영역 - 게시물] 5열 카드 격자판 및 고정 규격
-   ========================================================================== */
 .post-grid-container {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr)); 
