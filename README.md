@@ -36,39 +36,26 @@
 
 ***
 ## 📌 주요 기능
-### **1.  피드 기록**
+### **1. 고화질 사진 보기**
 ![등록](https://github.com/chchjjj/react_sns_project/blob/main/images/register.JPG)
- - 사용자는 하루의 감사/반성/소망을 얘기하거나, 일상 기록용으로 선택 가능
- - 사진 한 장을 항상 첨부하여 그 날의 하루를 시각적으로도 기록할 수 있도록 함
- - 공개/비공개를 통해 혼자만의 일기장으로도, 다른 사람과 공유할 수 있는 SNS로도 활용 가능
-   
+ - 사용자들이 업로드한 고화질의 사진을 **카테고리 필터와 정렬**을 통해 한눈에 보기 가능 
+ - 사진 상세페이지에서 사진 이미지를 확대하여 **사진만 보기** 가능
+ - **촬영 정보 및 사진의 메타정보** 보기 가능
+***
+### **2. 게시물 보기**
+![피드](https://github.com/chchjjj/react_sns_project/blob/main/images/feed.JPG)
+ - 사용자들이 업로드한 게시물을 **카테고리 필터와 정렬**을 통해 한눈에 보기 가능
+ - 게시물 상세페이지에서 전체 게시글 확인 가능 및 첨부파일 다운 가능 
+ - 사진 관련 콘텐츠를 접할 수 있음 (강의, 장비, 촬영 팁, 출사 등)
+***
+### **3. 팔로잉**
+
+- 활동 중인 작가(사용자)와 대표 사진들을 보고 팔로우/팔로우 취소, 메세지 보내기 가능
+- 메시지 버튼 클릭 시 작가와 1대1 메시지 대화 가능
+- 작가(사용자) 프로필 이미지 클릭 시 작가의 상세페이지로 이동
 
 ***
-### **2.  내 기록 모아보기(목록 불러오기, 수정, 삭제)**
-![피드](https://github.com/chchjjj/react_sns_project/blob/main/images/feed.JPG)
-
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="https://github.com/chchjjj/react_sns_project/blob/main/images/feedDetail.JPG" height="300"/>
-    </td>
-    <td align="center">
-      <img src="https://github.com/chchjjj/react_sns_project/blob/main/images/feedImage.JPG" height="300"/>
-    </td>
-  </tr>
-</table>
-
-
-
-
- - 로그인 시 기본으로 사용자의 피드 목록 화면으로 이동함.
- - 공개여부 상관 없이 사용자의 모든 게시글이 조회되며, 5개씩 페이징 처리
- - 특정 게시글 클릭 시 모달창으로 사진, 내용, 댓글, 좋아요 기록 표시
- - 댓글 단 사용자 아이콘 클릭 시 팔로우/메시지 발송 가능하며 사진 클릭 시 원본 크기로 확인 가능
- - 게시글 수정, 삭제 가능
-
-
+4. 스크랩
 ***
 ### **3.  랜덤피드, 팔로우/언팔로우, 좋아요, 댓글 기능**
 ![랜덤](https://github.com/chchjjj/react_sns_project/blob/main/images/randomFeed.JPG)
