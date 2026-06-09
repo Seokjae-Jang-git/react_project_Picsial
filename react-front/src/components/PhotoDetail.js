@@ -249,18 +249,51 @@ function PhotoDetail() {
                             </form>
                         </div>
 
+                        {/* 💡 메타데이터 박스: 제목 삭제 및 영역 통합 */}
                         <div className="info-box metadata-box">
                             <h3 className="meta-section-title">사진 정보</h3>
                             <div className="meta-basic-info">
-                                <p><strong>제목 :</strong> {photo.TITLE}</p>
-                                <p><strong>설명 :</strong> {photo.DESCRIPTION || '설명이 없습니다.'}</p>
+                                <p><strong>이름 :</strong> {photo.TITLE}</p>
                                 <p><strong>촬영일 :</strong> {formatShootDate(photo.SHOOT_DATE)}</p>
                                 <p><strong>장소 :</strong> {photo.LOCATION || '정보 없음'}</p>
                                 <p><strong>카테고리 :</strong> {photo.CATEGORY_NAME || '미분류'}</p>
-                                <p><strong>태그 :</strong> {photo.TAGS || '태그 없음'}</p>
+                            </div>
+
+                            {/* 💡 제목 삭제 및 grid 구조만 유지 */}
+                            <div className="meta-exif-area">
+                                <div className="exif-grid">
+                                    <div className="exif-item exif-item-model">
+                                        <span className="exif-label">기종</span>
+                                        <span className="exif-value">{photo.CAMERA_MODEL || '-'}</span>
+                                    </div>
+                                    <div className="exif-item exif-item-focal">
+                                        <span className="exif-label">초점거리</span>
+                                        <span className="exif-value">{photo.FOCAL_LENGTH ? `${photo.FOCAL_LENGTH}mm` : '-'}</span>
+                                    </div>
+                                    <div className="exif-item exif-item-lens">
+                                        <span className="exif-label">렌즈</span>
+                                        <span className="exif-value">{photo.LENS || '-'}</span>
+                                    </div>
+                                    <div className="exif-item exif-item-aperture">
+                                        <span className="exif-label">조리개</span>
+                                        <span className="exif-value">{photo.APERTURE ? `f/${photo.APERTURE}` : '-'}</span>
+                                    </div>
+                                    <div className="exif-item exif-item-shutter">
+                                        <span className="exif-label">셔터스피드</span>
+                                        <span className="exif-value">
+                                            {photo.SHUTTER_SPEED 
+                                                ? `${parseFloat(photo.SHUTTER_SPEED).toFixed(4)}s` 
+                                                : '-'}
+                                        </span>
+                                    </div>
+                                    <div className="exif-item exif-item-iso">
+                                        <span className="exif-label">ISO</span>
+                                        <span className="exif-value">{photo.ISO || '-'}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
+
                         <div className="info-box profile-box">
                             <div className="profile-image-placeholder">
                                 {photo.PROFILE_IMAGE_URL ? (

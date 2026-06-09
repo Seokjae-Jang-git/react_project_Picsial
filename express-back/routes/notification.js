@@ -49,15 +49,15 @@ router.get('/list', async (req, res) => {
             let targetTitle = noti.PHOTO_TITLE || noti.POST_TITLE || '게시물';
 
             if (noti.TYPE_CODE === 'LIKE') {
-                messageText = `(좋아요) "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]을(를) 좋아합니다."`;
+                messageText = `[좋아요] "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]을(를) 좋아합니다."`;
             } else if (noti.TYPE_CODE === 'COMMENT') {
-                messageText = `(댓글) "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]에 댓글을 남겼습니다."`;
+                messageText = `[댓글] "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]에 댓글을 남겼습니다."`;
             } else if (noti.TYPE_CODE === 'FOLLOW') {
-                messageText = `(팔로우) "${noti.SENDER_NICKNAME}님이 회원님을 팔로우하기 시작했습니다."`;
+                messageText = `[팔로잉] "${noti.SENDER_NICKNAME}님이 회원님을 팔로우하기 시작했습니다."`;
             } else if (noti.TYPE_CODE === 'MESSAGE') {
-                messageText = `(메세지) "${noti.SENDER_NICKNAME}님이 새로운 메세지를 보냈습니다."`;
+                messageText = `[메세지] "${noti.SENDER_NICKNAME}님이 새로운 메세지를 보냈습니다."`;
             } else if (noti.TYPE_CODE === 'SCRAP') { 
-                messageText = `(스크랩) "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]을(를) 스크랩했습니다."`;
+                messageText = `[스크랩] "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]을(를) 스크랩했습니다."`;
             } else {
                 messageText = `"${noti.SENDER_NICKNAME}님으로부터 새로운 알림이 있습니다."`;
             }
@@ -119,7 +119,7 @@ router.get('/recent', async (req, res) => {
             } else if (noti.TYPE_CODE === 'COMMENT') {
                 messageText = `[댓글] "${noti.SENDER_NICKNAME}님이 회원님의 사진/게시물 [${targetTitle}]에 댓글을 남겼습니다."`;
             } else if (noti.TYPE_CODE === 'FOLLOW') {
-                messageText = `[팔로우] "${noti.SENDER_NICKNAME}님이 회원님을 팔로우하기 시작했습니다."`;
+                messageText = `[팔로잉] "${noti.SENDER_NICKNAME}님이 회원님을 팔로우하기 시작했습니다."`;
             } else if (noti.TYPE_CODE === 'MESSAGE') {
                 messageText = `[메세지] "${noti.SENDER_NICKNAME}님이 새로운 메세지를 보냈습니다."`;
             } else if (noti.TYPE_CODE === 'SCRAP') { 

@@ -135,7 +135,7 @@ function Notification() {
                                     value={filterType} 
                                     onChange={(e) => setFilterType(e.target.value)}
                                 >
-                                    <option value="all">전체(타입)</option>
+                                    <option value="all">전체</option>
                                     <option value="like">좋아요</option>
                                     <option value="comment">댓글</option>
                                     <option value="follow">팔로우</option>
