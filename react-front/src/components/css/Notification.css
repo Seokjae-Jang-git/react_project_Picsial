@@ -96,7 +96,7 @@
 .noti-container .noti-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     padding: 20px;
     border: 1px solid #222; 
     background-color: #fff;
@@ -110,9 +110,10 @@
 
 .noti-container .noti-content-area {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
     flex: 1;
+    min-width: 0;
 }
 
 .noti-container .noti-unread-dot {
@@ -121,6 +122,7 @@
     background-color: #ff4d4f;
     border-radius: 50%;
     flex-shrink: 0;
+    margin-top: 6px;
 }
 
 .noti-container .noti-text {
@@ -128,6 +130,8 @@
     color: #222;
     line-height: 1.5;
     word-break: keep-all;
+    overflow-wrap: break-word;
+    margin: 0;
 }
 
 .noti-container .noti-time {
@@ -135,6 +139,7 @@
     color: #888;
     white-space: nowrap;
     margin-left: 20px;
+    margin-top: 2px;
 }
 
 .noti-container .noti-empty {

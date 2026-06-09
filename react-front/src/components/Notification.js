@@ -96,19 +96,24 @@ function Notification() {
         }
     };
 
-    const timeAgo = (dateString) => {
+    const formatTimeAgo = (dateString) => {
         if (!dateString) return '';
+        const postDate = new Date(dateString);
         const now = new Date();
-        const past = new Date(dateString);
-        const seconds = Math.floor((now - past) / 1000);
+        const diffMs = now - postDate;
         
-        if (seconds < 60) return '방금 전';
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes}분 전`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours}시간 전`;
-        const days = Math.floor(hours / 24);
-        return `${days}일 전`;
+        // 밀리초를 분, 시간, 일 단위로 변환
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        const diffHrs = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHrs / 24);
+        
+        // 조건별로 세밀하게 시간 텍스트 반환
+        if (diffMins < 1) return '방금 전';
+        if (diffMins < 60) return `${diffMins}분 전`;
+        if (diffHrs < 24) return `${diffHrs}시간 전`;
+        if (diffDays < 7) return `${diffDays}일 전`;
+        
+        return postDate.toLocaleDateString('ko-KR');
     };
 
     return (
@@ -169,7 +174,7 @@ function Notification() {
                                             <span className="noti-text">{noti.MESSAGE_TEXT}</span>
                                         </div>
                                         <div className="noti-time">
-                                            {timeAgo(noti.CREATED_AT)}
+                                            {formatTimeAgo(noti.CREATED_AT)}
                                         </div>
                                     </div>
                                 ))

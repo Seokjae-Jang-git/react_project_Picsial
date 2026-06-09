@@ -3,20 +3,25 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import './css/PhotoDetail.css';
 
-function formatTimeAgo(dateString) {
+const formatTimeAgo = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString.replace(/-/g, '/'));
+    const postDate = new Date(dateString);
     const now = new Date();
-    const diffMs = now - date;
-    const diffMin = Math.floor(diffMs / (1000 * 60));
-    const diffHour = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDay = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMin < 1) return '방금 전';
-    if (diffMin < 60) return `${diffMin}분 전`;
-    if (diffHour < 24) return `${diffHour}시간 전`;
-    return `${diffDay}일 전`;
-}
+    const diffMs = now - postDate;
+    
+    // 밀리초를 분, 시간, 일 단위로 변환
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHrs = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHrs / 24);
+    
+    // 조건별로 세밀하게 시간 텍스트 반환
+    if (diffMins < 1) return '방금 전';
+    if (diffMins < 60) return `${diffMins}분 전`;
+    if (diffHrs < 24) return `${diffHrs}시간 전`;
+    if (diffDays < 7) return `${diffDays}일 전`;
+    
+    return postDate.toLocaleDateString('ko-KR');
+};
 
 function formatShootDate(dateString) {
     if (!dateString) return '정보 없음';
