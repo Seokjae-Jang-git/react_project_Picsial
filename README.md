@@ -1,41 +1,37 @@
 # 📷 Picsial (픽셜) 
 > 사진 관련 소셜 미디어 채널 Picsial(픽셜) 입니다. <br>
-고화질 촬영 사진을 공유하고 좋은 영감과 아이디어를 얻는 곳 입니다. <br>
-또한 사진 외 촬영 팁, 출사, 강의 등 정보 공유 및 홍보도 가능합니다. <br>
 많은 정보 공유와 관심 부탁 드립니다.
 
 ***
-![대표사진](https://github.com/chchjjj/react_sns_project/blob/main/images/main.JPG)
-
+![대표사진](https://github.com/Seokjae-Jang-git/react_project_Picsial/blob/3bb1274f8e72f4b30f722572b51b012491900576/logo_picsial.png)
 
 ## 🍀 프로젝트 소개
-모멘티어리는 순간(moment) + 다이어리(diary)의 합성어로,
+픽셜은 사진 (Picture) + 관계(Social)의 합성어로,<br>
+사진을 취미 또는 전문으로 하는 사람들이 **고화질의 사진을 서로 공유하고 좋은 영감과 아이디어를 얻는** 사이트 입니다.<br>
+또한 사진 외 촬영 팁, 출사, 강의 등 정보 공유 및 홍보도 가능합니다.
 
-
-사진 한 장과 함께 **일상의 순간을 기록하고 감사하며, 또 다른 사람들과 나눌 수 있는** 사이트입니다.
-
-
-- 피드 종류를 나누어 1) 감사/반성/소망을 말하거나, 2) 일상 기록용으로 사용 가능
-- 공개 여부에 따라 자신만의 프라이빗한 다이어리로 활용하거나 다른 사람과의 SNS로 사용
-- 랜덤피드를 통해 다른 사용자들의 기록을 보며 응원(댓글)하고, 팔로우하며, 개별 메세지 발송 가능
+- 피드 종류를 **사진/게시물**로 나누었습니다.
+- 사진은 **사진 자체에 집중**하고, 사진 외 촬영 팁, 출사, 강의 등은 게시물에서 다룹니다.
+- **다양한 카테고리 필터와 정렬 기능**을 통해 많은 사진과 게시물을 편하게 조회가 가능합니다.
+- **관심 작가(사용자)를 팔로우** 하여 업로드한 사진과 게시물을 볼 수 있습니다.
 ***
 ## 📆 개발 기간
-- 25.11.25 ~ 25.12.02 (1주일)
+- 26.5.28 ~ 6.8 (8일)
 ***
 ## ✨ 개발 목적
-- 감사 일기의 효과가 여러 매체를 통해 알려지면서, 간단하게 긍정적 하루를 기록할 수 있는 공간을 만들고자 함
-- 바쁜 현대인을 위해 불필요한 요소를 제거하고 핵심 기능만 남긴 조용한 SNS로 설계
-- 일상 기록과 감사 표현을 모두 수용하는 가벼운 형태의 개인 기록 공간
-- 복잡한 사회 속에서 현대인들의 긍정적 루틴 형성과 서로에게 작은 위로가 되었으면 함
+- 다양한 사진을 공유하고 사용자들 간에 소통을 통해, 사진의 아름다움과 매력을 느낄 수 있는 장소를 만들고자 함. 
+- 사진 외 관련 컨텐츠 (촬영 팁, 출사, 강의 등)도 하나의 장소에서 접할 수 있도록 설계
+- 프로 작가와 스튜디오는 홍보 및 프로젝트를 만들 수 있는 기회의 장소 제공
+- 아마추어 작가는 전문 작가의 영향을 받아 촬영 기술 향상 기회의 장소 제공
 ***
 ## 🛠 사용 기술
 
 | 구분 | 기술 스택 |
 | :--- | :--- |
 | **Language** | ![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E) |
-| **Frontend** | ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB) ![MUI](https://img.shields.io/badge/MUI-%230081CB.svg?style=for-the-badge&logo=mui&logoColor=white) |
+| **Frontend** | ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)|
 | **Backend** | ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB) |
-| **Database** | ![MySQL](https://img.shields.io/badge/mysql-%2300f.svg?style=for-the-badge&logo=mysql&logoColor=white) |
+| **Database** | ![Oracle](https://img.shields.io/badge/Oracle-%23F80000.svg?style=for-the-badge&logo=oracle&logoColor=white)|
 | **Auth & Security** | ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Bcrypt](https://img.shields.io/badge/Bcrypt-white?style=for-the-badge&logo=linux-foundation&logoColor=black) |
 
 ***
