@@ -3,7 +3,7 @@
 많은 정보 공유와 관심 부탁 드립니다.
 
 ***
-![대표사진](https://github.com/Seokjae-Jang-git/react_project_Picsial/blob/3bb1274f8e72f4b30f722572b51b012491900576/logo_picsial.png)
+![대표사진](https://github.com/Seokjae-Jang-git/react_project_Picsial/blob/31311da814027d8f66384dee1a45147c9cd9c1ee/readme_images/logo_picsial.png)
 
 ## 🍀 프로젝트 소개
 픽셜은 사진 (Picture) + 관계(Social)의 합성어로,<br>
