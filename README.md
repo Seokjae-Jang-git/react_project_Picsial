@@ -100,11 +100,11 @@
 ***
 ## 참조
 ### **1.설계 자료**
-- ERD
-- 화면 정의서
+- ERD  https://drive.google.com/file/d/1ujnA0RB_OlbIBEC6mi_KOKXnzKo4TNHY/view?usp=sharing
+- 화면 정의서  https://drive.google.com/file/d/1l70aB0mHD2ZWIUAJLD54a1zSe71e2qFG/view?usp=sharing
 
 ### **2.소개 PPT**
-- Picsial 소개 PPT 
+- Picsial 소개 PPT
 
 ### **3.시연 영상**
 
