@@ -18,6 +18,7 @@ function UploadPost() {
     
     const [postMainImages, setPostMainImages] = useState([]); 
     const [postAttachments, setPostAttachments] = useState([{ file: null, name: '' }]); 
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -134,6 +135,8 @@ function UploadPost() {
             return;
         }
 
+        setIsUploading(true);
+
         const formData = new FormData();
         
         formData.append('userNo', loginUserNo);
@@ -171,11 +174,23 @@ function UploadPost() {
         } catch (error) { 
             console.error("업로드 에러:", error); 
             alert("서버 오류가 발생했습니다.");
+        } finally {
+            setIsUploading(false);
         }
     }; 
 
     return (
         <div className="post-upload-page-container">
+            {isUploading && (
+                <div className="upload-loading-overlay">
+                    <div className="upload-loading-box">
+                        <div className="loading-spinner"></div>
+                        <p>게시물을 업로드 중입니다...</p>
+                        <span className="loading-sub-text">잠시만 기다려주세요.</span>
+                    </div>
+                </div>
+            )}
+
             <main className="upload-main">
                 <div className="upload-content-wrapper">
                     
@@ -310,7 +325,9 @@ function UploadPost() {
                                 />
                             </div>
                             
-                            <button type="submit" className="btn-upload-submit">업로드</button>
+                            <button type="submit" className="btn-upload-submit" disabled={isUploading}>
+                                {isUploading ? "업로드 중..." : "업로드"}
+                            </button>
                         </form>
                     </div>
 
