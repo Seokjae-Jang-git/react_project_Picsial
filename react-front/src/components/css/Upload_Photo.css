@@ -147,6 +147,21 @@
 .photo-upload-page-container .upload-right {
     flex: 1;
     max-width: 400px;
+    overflow-y: auto;
+    max-height: calc(100vh - 240px); 
+    padding-right: 15px;
+    padding-bottom: 40px; 
+}
+
+.photo-upload-page-container .upload-right::-webkit-scrollbar {
+    width: 6px;
+}
+.photo-upload-page-container .upload-right::-webkit-scrollbar-thumb {
+    background-color: #ced4da;
+    border-radius: 4px;
+}
+.photo-upload-page-container .upload-right::-webkit-scrollbar-track {
+    background-color: transparent;
 }
 
 .photo-upload-page-container .upload-form {
@@ -322,9 +337,61 @@
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s ease;
-    margin-top: 5px; 
+    margin-top: 15px; 
+    flex-shrink: 0; 
 }
 
 .photo-upload-page-container .btn-upload-submit:hover {
     background: #44a6a8cf;
+}
+
+.upload-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.upload-loading-box {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.upload-loading-box p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222222;
+}
+
+.upload-loading-box .loading-sub-text {
+    font-size: 13px;
+    color: #868e96;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f1f3f5;
+    border-top: 4px solid #0E2352;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

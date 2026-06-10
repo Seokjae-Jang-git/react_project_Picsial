@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'; 
 import exifr from 'exifr';
-import Header from '../components/Header';
 import LocationSearch from './LocationSearch'; 
 import './css/Upload_Photo.css';
 
@@ -13,6 +12,8 @@ function Upload_Photo() {
     
     const [uploadItems, setUploadItems] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0); 
+    
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -152,6 +153,8 @@ function Upload_Photo() {
             return;
         }
 
+        setIsUploading(true);
+
         const formData = new FormData();
         
         uploadItems.forEach(item => {
@@ -185,11 +188,24 @@ function Upload_Photo() {
         } catch (error) {
             console.error("업로드 에러:", error);
             alert("서버 오류가 발생했습니다.");
+        } finally {
+            setIsUploading(false);
         }
     };
 
     return (
         <div className="photo-upload-page-container">
+            
+            {isUploading && (
+                <div className="upload-loading-overlay">
+                    <div className="upload-loading-box">
+                        <div className="loading-spinner"></div>
+                        <p>이미지를 업로드 중입니다...</p>
+                        <span className="loading-sub-text">잠시만 기다려주세요.</span>
+                    </div>
+                </div>
+            )}
+
             <main className="upload-main">
                 <div className="upload-content-wrapper">
                     
@@ -327,7 +343,9 @@ function Upload_Photo() {
                                     <p>ISO: {uploadItems[activeIndex].meta.ISO || '-'}</p>
                                 </div>
 
-                                <button type="submit" className="btn-upload-submit">업로드</button>
+                                <button type="submit" className="btn-upload-submit" disabled={isUploading}>
+                                    {isUploading ? "업로드 중..." : "업로드"}
+                                </button>
                             </form>
                         ) : (
                             <div className="empty-form-state">사진을 선택해주세요.</div>
