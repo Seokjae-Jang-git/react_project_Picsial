@@ -116,7 +116,7 @@ function PostCard({ post, formatTimeAgo }) {
                 <div className="yt-photog-meta">
                     <span className="photog-name">{post.NICKNAME || `회원 ${post.USER_NO}`}</span>
                     <span className="post-time-ago-yt">
-                        {post.CREATED_AT ? post.CREATED_AT.split('T')[0] : ''}
+                        {formatTimeAgo(post.CREATED_AT)}
                     </span>
                 </div>
             </div>

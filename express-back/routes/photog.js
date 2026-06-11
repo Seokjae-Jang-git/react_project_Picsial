@@ -129,7 +129,7 @@ router.get('/posts/:userNo', async (req, res) => {
         let sql = `
             SELECT 
                 P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
+                UI.NICKNAME, UI.PROFILE_IMAGE_URL, NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
                 NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
                 (
                     SELECT LISTAGG(IMG.THUMB_URL, ',') WITHIN GROUP (ORDER BY IMG.SORT_ORDER)
@@ -137,6 +137,7 @@ router.get('/posts/:userNo', async (req, res) => {
                     WHERE IMG.POST_ID = P.POST_ID
                 ) AS ALL_THUMBS
             FROM PS_POST P
+            LEFT JOIN PS_USER_INFO UI ON P.USER_NO = UI.USER_NO
             LEFT JOIN (SELECT POST_ID, COUNT(*) AS SCRAP_COUNT FROM PS_SCRAP_TABLE GROUP BY POST_ID) S ON P.POST_ID = S.POST_ID
             LEFT JOIN (SELECT POST_ID, COUNT(*) AS COMMENT_COUNT FROM PS_COMMENT_TABLE GROUP BY POST_ID) CM ON P.POST_ID = CM.POST_ID
             WHERE P.USER_NO = :userNo
@@ -169,8 +170,17 @@ router.get('/posts/:userNo', async (req, res) => {
                 return `${process.env.NAS_BASE_URL_POS_IMG || process.env.NAS_BASE_URL}/${fileName}`; 
             });
 
+            let finalProfileUrl = post.PROFILE_IMAGE_URL;
+            if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
+                const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
+                if (profileBaseUrl) {
+                    finalProfileUrl = `${profileBaseUrl}/${finalProfileUrl}`;
+                }
+            }
+
             return {
                 ...post,
+                PROFILE_IMAGE_URL: finalProfileUrl,
                 THUMB_LIST: fullThumbUrls 
             };
         });
