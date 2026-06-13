@@ -285,6 +285,11 @@ function Upload_Photo() {
                                     </div>
                                 </div>
 
+                                <LocationSearch 
+                                    value={uploadItems[activeIndex].location}
+                                    onChange={(val) => handleItemChange('location', val)}
+                                />
+
                                 <div className="category-multi-group">
                                     {uploadItems[activeIndex].categoryIds.map((catId, index) => (
                                         <div key={index} className="category-row">
@@ -317,11 +322,6 @@ function Upload_Photo() {
                                     ))}
                                 </div>
 
-                                <LocationSearch 
-                                    value={uploadItems[activeIndex].location}
-                                    onChange={(val) => handleItemChange('location', val)}
-                                />
-
                                 <div className="tag-input-container">
                                     <div className="tag-list">
                                         {uploadItems[activeIndex].tags.map(tag => (
@@ -348,7 +348,7 @@ function Upload_Photo() {
                                 </button>
                             </form>
                         ) : (
-                            <div className="empty-form-state">사진을 선택해주세요.</div>
+                            <div className="empty-form-state">사진을 추가해주세요.</div>
                         )}
                     </div>
                 </div>

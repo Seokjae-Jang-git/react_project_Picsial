@@ -211,7 +211,7 @@ router.get('/posts', async (req, res) => {
         const sql = `
             SELECT 
                 P.POST_ID, P.USER_NO, P.TITLE, P.CONTENT, P.VIEW_COUNT, P.LIKE_COUNT, P.CREATED_AT,
-                UI.NICKNAME,
+                UI.NICKNAME, UI.PROFILE_IMAGE_URL,
                 NVL(S.SCRAP_COUNT, 0) AS SCRAP_COUNT,
                 NVL(CM.COMMENT_COUNT, 0) AS COMMENT_COUNT,
                 (
@@ -244,8 +244,19 @@ router.get('/posts', async (req, res) => {
                 return `${process.env.NAS_BASE_URL_POS_IMG}/${fileName}`; 
             });
 
+            let finalProfileUrl = post.PROFILE_IMAGE_URL;
+            if (finalProfileUrl && !finalProfileUrl.startsWith('http')) {
+                const profileBaseUrl = process.env.NAS_BASE_URL_PROFILE;
+                if (profileBaseUrl) {
+                    finalProfileUrl = `${profileBaseUrl}/${finalProfileUrl}`;
+                }
+            }
+
             return {
                 ...post,
+                PROFILE_IMAGE_URL: finalProfileUrl, 
+                CATEGORIES: post.CATEGORIES ? post.CATEGORIES.split(', ') : [],
+                TAGS: post.TAGS ? post.TAGS.split(', ') : [],
                 THUMB_LIST: fullThumbUrls
             };
         });

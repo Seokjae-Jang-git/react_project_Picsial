@@ -265,7 +265,7 @@ function UploadPost() {
                             </div>
                             
                             <div className="input-counter-group">
-                                <label className="toggle-label">글쓰기 (필수)</label>
+                                <label className="toggle-label">내용 (필수)</label>
                                 <div className="input-wrapper">
                                     <textarea 
                                         className="form-input form-textarea" 

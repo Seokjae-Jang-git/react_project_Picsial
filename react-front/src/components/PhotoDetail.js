@@ -257,6 +257,7 @@ function PhotoDetail() {
                                 <p><strong>촬영일 :</strong> {formatShootDate(photo.SHOOT_DATE)}</p>
                                 <p><strong>장소 :</strong> {photo.LOCATION || '정보 없음'}</p>
                                 <p><strong>카테고리 :</strong> {photo.CATEGORY_NAME || '미분류'}</p>
+                                <p><strong>태그 :</strong> {photo.TAGS || '미분류'}</p>
                             </div>
 
                             {/* 💡 제목 삭제 및 grid 구조만 유지 */}
