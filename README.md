@@ -96,10 +96,18 @@
 - 화면 정의서  https://drive.google.com/file/d/1l70aB0mHD2ZWIUAJLD54a1zSe71e2qFG/view?usp=sharing
 
 ### **2.소개 PPT**
-- Picsial 소개 PPT (https://drive.google.com/file/d/1p98-mHBfA6A2xcxcsdGjZn3xzzFfUDXT/view?usp=sharing)
+- Picsial 소개 PPT https://drive.google.com/file/d/1p98-mHBfA6A2xcxcsdGjZn3xzzFfUDXT/view?usp=sharing
 
 ### **3.시연 영상**
-
+- 회원가입 https://drive.google.com/file/d/1RuSZxU1uL_EwhI-gtq8th60kqRX9m-Pa/view?usp=sharing
+- 로그인, 메인페이지 https://drive.google.com/file/d/1KzRP_r3EIOJWAQRR-U_DK7cnWJ4Ynpa8/view?usp=sharing
+- 사진 https://drive.google.com/file/d/1Milj1TUhtUylWurOLZzqkEmQgdTq1g3_/view?usp=sharing
+- 게시물 https://drive.google.com/file/d/1M8QVlA823VpbWqNc4AdgtcGIdSSs8brA/view?usp=sharing
+- 팔로잉 https://drive.google.com/file/d/1Oai4s2XohqBHSeZ_DgxzYh8OmCk5dh_m/view?usp=sharing
+- 업로드 https://drive.google.com/drive/folders/1iObE4ZwWlAPJAvaTkxjpVgnBivFHcg23?usp=sharing
+- 마이페이지 https://drive.google.com/drive/folders/1xXLllzF2nW0YCeMajCX178V8A2i1MwmW?usp=sharing
+- 메시지 https://drive.google.com/file/d/1mxfr1eq3f6aATASSKRJwEP9ioDqyjehx/view?usp=sharing
+- 알림 https://drive.google.com/file/d/1ZITXr1KRK0ip1Sa_r0OQnMNqQfk37KL2/view?usp=sharing
 
 ***
 ## 💎 프로젝트 후기
