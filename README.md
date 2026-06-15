@@ -96,7 +96,7 @@
 - 화면 정의서  https://drive.google.com/file/d/1l70aB0mHD2ZWIUAJLD54a1zSe71e2qFG/view?usp=sharing
 
 ### **2.소개 PPT**
-- Picsial 소개 PPT https://drive.google.com/file/d/1p98-mHBfA6A2xcxcsdGjZn3xzzFfUDXT/view?usp=sharing
+- Picsial 소개 PPT https://drive.google.com/file/d/1HLjAZxOVSn6Vrcj7yZXiCJbMo0CRDSOk/view?usp=sharing
 
 ### **3.시연 영상**
 - 회원가입 https://drive.google.com/file/d/1RuSZxU1uL_EwhI-gtq8th60kqRX9m-Pa/view?usp=sharing
